@@ -7,8 +7,7 @@ public:
     std::string ScriptReference;
     std::string Description;
 
-    Condition(const std::string& name, const std::string& ref, const std::string& desc = "")
-        : Name(name), ScriptReference(ref), Description(desc) {}
+    Condition(const std::string& name, const std::string& ref, const std::string& desc = "");
 
-    std::string ToString() const { return Name; }
+    std::string ToString() const;
 };

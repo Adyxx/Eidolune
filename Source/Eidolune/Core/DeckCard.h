@@ -12,8 +12,7 @@ public:
     std::shared_ptr<Card> CardRef;
     int Quantity;
 
-    DeckCard(std::shared_ptr<Deck> deck, std::shared_ptr<Card> card, int qty = 1)
-        : ParentDeck(deck), CardRef(card), Quantity(qty) {}
+    DeckCard(std::shared_ptr<Deck> deck, std::shared_ptr<Card> card, int qty = 1);
 
     std::string ToString() const;
 };

@@ -10,5 +10,14 @@ enum class EquipmentSlot {
     LEGS
 };
 
+enum class TargetHint {
+    NONE,            
+    CARD,           
+    PLAYER,       
+    CARD_OR_PLAYER,  
+    SELF,           
+    UNKNOWN         
+};
+
 typedef std::string CardId;
 typedef std::string EffectId;

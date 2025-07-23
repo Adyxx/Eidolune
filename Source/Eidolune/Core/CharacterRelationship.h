@@ -1,4 +1,3 @@
-
 #pragma once
 #include <string>
 #include <memory>
@@ -10,8 +9,8 @@ enum class RelationshipType {
     PARTNER,
     RIVAL,
     LOVER,
-    MENTOR,
-    UNKNOWN
+    MENTOR
+    // etc.
 };
 
 class CharacterRelationship {
@@ -24,11 +23,11 @@ public:
     CharacterRelationship(std::shared_ptr<Character> source,
                           std::shared_ptr<Character> target,
                           RelationshipType type,
-                          const std::string& description = "")
-        : Source(source), Target(target), Type(type), Description(description) {}
+                          const std::string& description = "");
 
-    bool IsMutualPartnerWith(const std::shared_ptr<Character>& other,
-                             const std::vector<std::shared_ptr<CharacterRelationship>>& allRelationships) const;
+    bool IsMutualPartnerWith(
+        const std::shared_ptr<Character>& other,
+        const std::vector<std::shared_ptr<CharacterRelationship>>& allRelationships) const;
 
     std::string ToString() const;
 };

@@ -17,15 +17,13 @@ public:
     std::shared_ptr<Character> MainCharacter;
     std::shared_ptr<Character> PartnerCharacter;
 
-    std::vector<std::shared_ptr<DeckCard>> Cards;
+    std::vector<std::shared_ptr<DeckCard>> DeckCards;
 
     Deck(std::shared_ptr<User> user,
          const std::string& name,
          std::shared_ptr<Character> mainChar,
          std::shared_ptr<Character> partnerChar = nullptr,
-         const std::string& desc = "")
-        : Owner(user), Name(name), MainCharacter(mainChar),
-          PartnerCharacter(partnerChar), Description(desc) {}
+         const std::string& desc = "");
 
     int TotalCardCount() const;
     bool IsPlayable() const;

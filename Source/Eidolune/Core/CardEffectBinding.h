@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 
 enum class TargetSpec {
     ENEMY_BOARD,
@@ -26,21 +27,22 @@ public:
     std::shared_ptr<Trigger> BoundTrigger;
     std::shared_ptr<Effect> BoundEffect;
     std::shared_ptr<Condition> BoundCondition;
-    std::shared_ptr<Restriction> BoundRestriction;
 
     std::optional<int> Value;
     std::optional<TargetSpec> Targeting;
+
+    std::shared_ptr<Card> GetEventCard() const { return ParentCard; }
+    std::shared_ptr<Effect> GetEffect() const { return BoundEffect; }
+    std::optional<int> GetValue() const { return Value; }
+    std::optional<TargetSpec> GetTargetSpec() const { return Targeting; }
+    std::shared_ptr<Card> GetCard() const { return ParentCard; }
 
     CardEffectBinding(std::shared_ptr<Card> card,
                       std::shared_ptr<Trigger> trigger,
                       std::shared_ptr<Effect> effect,
                       std::shared_ptr<Condition> condition = nullptr,
-                      std::shared_ptr<Restriction> restriction = nullptr,
                       std::optional<int> value = std::nullopt,
-                      std::optional<TargetSpec> targetSpec = std::nullopt)
-        : ParentCard(card), BoundTrigger(trigger), BoundEffect(effect),
-          BoundCondition(condition), BoundRestriction(restriction),
-          Value(value), Targeting(targetSpec) {}
+                      std::optional<TargetSpec> targetSpec = std::nullopt);
 
     std::string ToString() const;
     void Validate() const;

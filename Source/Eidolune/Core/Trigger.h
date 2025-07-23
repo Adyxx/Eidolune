@@ -16,8 +16,7 @@ public:
     std::string Description;
     std::optional<Zone> TriggerZone;
 
-    Trigger(const std::string& ref, const std::string& desc = "", std::optional<Zone> zone = std::nullopt)
-        : ScriptReference(ref), Description(desc), TriggerZone(zone) {}
+    Trigger(const std::string& ref, const std::string& desc = "", std::optional<Zone> zone = std::nullopt);
 
     std::string ToString() const { return ScriptReference; }
 };

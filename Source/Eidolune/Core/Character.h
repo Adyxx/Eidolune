@@ -5,19 +5,8 @@
 #include <vector>
 #include <memory>
 #include <optional>
-
-class Subtype {
-public:
-    std::string Name;
-    Subtype(const std::string& name) : Name(name) {}
-};
-
-class Faction {
-public:
-    std::string Name;
-    std::string Color;
-    Faction(const std::string& name, const std::string& color = "") : Name(name), Color(color) {}
-};
+#include "Subtype.h"
+#include "Faction.h"
 
 class Character {
 public:

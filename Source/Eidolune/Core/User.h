@@ -7,7 +7,7 @@ public:
     std::string Username;
     int Rank;
 
-    User(const std::string& name, int rank = 0) : Username(name), Rank(rank) {}
+    User(const std::string& name, int rank = 0);
 
-    std::string ToString() const { return Username; }
+    std::string ToString() const;
 };

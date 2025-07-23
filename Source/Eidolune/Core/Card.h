@@ -1,28 +1,21 @@
-
 #pragma once
 #include <string>
-#include <vector>
 #include <memory>
+#include <vector>
 #include <optional>
 
+class Faction;
+class Character;
+class Subtype;
+class CardEffectBinding;
+
 enum class Rarity {
-    COMMON,
-    RARE,
-    EPIC,
-    LEGENDARY
+    COMMON, RARE, EPIC, LEGENDARY
 };
 
 enum class CardType {
-    UNIT,
-    SPELL,
-    RITUAL,
-    ASSET
+    UNIT, SPELL, RITUAL, ASSET
 };
-
-class Character;
-class Faction;
-class Subtype;
-class CardEffectBinding;
 
 class Card {
 public:
@@ -43,10 +36,10 @@ public:
     std::shared_ptr<Character> CharacterRef;
 
     std::string Text;
-
     std::vector<std::shared_ptr<CardEffectBinding>> EffectBindings;
 
     Card();
+
     void Validate() const;
-    std::string ToString() const { return Name; }
+    std::string ToString() const;
 };
