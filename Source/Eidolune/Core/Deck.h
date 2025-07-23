@@ -1,0 +1,35 @@
+
+#pragma once
+#include <string>
+#include <vector>
+#include <memory>
+
+class User;
+class Character;
+class DeckCard;
+
+class Deck {
+public:
+    std::shared_ptr<User> Owner;
+    std::string Name;
+    std::string Description;
+
+    std::shared_ptr<Character> MainCharacter;
+    std::shared_ptr<Character> PartnerCharacter;
+
+    std::vector<std::shared_ptr<DeckCard>> Cards;
+
+    Deck(std::shared_ptr<User> user,
+         const std::string& name,
+         std::shared_ptr<Character> mainChar,
+         std::shared_ptr<Character> partnerChar = nullptr,
+         const std::string& desc = "")
+        : Owner(user), Name(name), MainCharacter(mainChar),
+          PartnerCharacter(partnerChar), Description(desc) {}
+
+    int TotalCardCount() const;
+    bool IsPlayable() const;
+    std::vector<std::string> GetDeckIssues() const;
+
+    std::string ToString() const;
+};
