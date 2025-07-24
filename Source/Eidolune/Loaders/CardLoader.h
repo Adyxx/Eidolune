@@ -3,7 +3,6 @@
 #include "../Core/Trigger.h"
 #include "../Core/Effect.h"
 #include "../Core/CardEffectBinding.h"
-//#include "../External/json.hpp"
 #include <nlohmann/json.hpp>
 
 #include <memory>

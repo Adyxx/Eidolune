@@ -1,14 +1,12 @@
 
+#include "../Engine/GameEngine.h"
 #include "../Loaders/CardLoader.h"
-
 #include "../Core/Effect.h"
-
 #include "../Core/Trigger.h"
 #include <iostream>
 
 int main() {
-    std::cout << "OK \n";
-    
+    /*
     auto cards = CardLoader::LoadAll("Content/Cards/cards.json");
     
     for (const auto& [id, card] : cards) {
@@ -21,6 +19,9 @@ int main() {
             std::cout << "\n";
         }
     }
-    
+    */
+
+    GameEngine engine;
+    engine.Run();
     return 0;
 }

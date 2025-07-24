@@ -5,7 +5,7 @@
 
 class GameEngine {
 public:
-    GameEngine(std::shared_ptr<Player> p1, std::shared_ptr<Player> p2);
+    GameEngine();
     void Run();
 
 private:

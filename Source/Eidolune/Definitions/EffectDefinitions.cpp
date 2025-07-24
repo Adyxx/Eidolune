@@ -5,10 +5,9 @@
 #include "../Core/Player.h"
 #include "../Core/GameCard.h"
 #include <iostream>
-
+#include "TriggerObserver.h"
 
 void DrawCard(void* source, void* target, std::optional<int> value) {
-    std::cout << "START Checkpoint draw \n";
 
     int drawAmount = value.value_or(1);
     auto* player = static_cast<Player*>(target);
@@ -40,9 +39,8 @@ void DrawCard(void* source, void* target, std::optional<int> value) {
 
         std::cout << "🃏 Drew card: " << card->GetName() << "\n";
 
-        // trigger_observer->Emit("card_drawn", player, card);
+        //trigger_observer->Emit("card_drawn", player, card);
     }
-    std::cout << "END Checkpoint draw \n";
 }
 
 void ApplyHaste(void* source, void* target, std::optional<int> value) {

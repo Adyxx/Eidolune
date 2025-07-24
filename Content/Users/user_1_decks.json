@@ -1,0 +1,11 @@
+
+[
+  {
+    "name": "Aggro Deck",
+    "cards": ["fireball", "wolf_rider", "fireball", "wolf_rider"]
+  },
+  {
+    "name": "Control Deck",
+    "cards": ["fireball", "fireball"]
+  }
+]

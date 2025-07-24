@@ -116,7 +116,6 @@ namespace GameActions {
     }
 
     void ResolveCombat(std::shared_ptr<GameCard> attackerCard, std::shared_ptr<GameCard> targetCard, Player* attacker, Player* defender) {
-        std::cout << "START Checkpoint resolve combat \n";
 
         if (targetCard) {
             std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << targetCard->GetName() << "\n";
@@ -128,11 +127,9 @@ namespace GameActions {
         }
 
         attackerCard->Tapped = true;
-        std::cout << "END Checkpoint resolve combat \n";
     }
 
     void ResolveDamage(std::shared_ptr<GameCard> source, GameCard* targetCard, int amount, const std::string& type) {
-        std::cout << "START Checkpoint resolve damage \n";
         if (!targetCard) return;
 
         targetCard->DamageTaken += amount;
@@ -153,18 +150,15 @@ namespace GameActions {
                 }
             }
         }
-         std::cout << "END Checkpoint resolve damage \n";
     }
 
     void ResolveDamage(std::shared_ptr<GameCard> source, Player* playerTarget, int amount, const std::string& type) {
-        std::cout << "START Checkpoint resolve combat \n";
         if (!playerTarget) return;
 
         playerTarget->Health -= amount;
         if (playerTarget->Health <= 0) {
             std::cout << "☠️ " << playerTarget->GetName() << " has died!\n";
         }
-        std::cout << "END Checkpoint resolve combat \n";
     }
 
 
