@@ -39,7 +39,6 @@ public:
     std::vector<std::shared_ptr<CardEffectBinding>> EffectBindings;
 
     Card();
-
     void Validate() const;
     std::string ToString() const;
 };

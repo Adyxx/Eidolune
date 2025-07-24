@@ -4,12 +4,7 @@
 #include <unordered_map>
 #include <functional>
 #include <optional>
-
-enum class TargetHint {
-    CARD,
-    PLAYER,
-    NONE
-};
+#include "Types.h"
 
 struct EffectEntry {
     std::function<void(void* source, void* target, std::optional<int> value)> Func;

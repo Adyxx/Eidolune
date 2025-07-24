@@ -43,5 +43,5 @@ public:
     std::string DeckRestrictionRef;
     std::string DeckRestrictionDescription;
 
-    std::string ToString() const { return Name; }
+    std::string ToString() const;
 };

@@ -2,7 +2,7 @@
 
 #include "Condition.h"
 
-Condition::Condition(const std::string& name, const std::string& ref, const std::string& desc = "")
+Condition::Condition(const std::string& name, const std::string& ref, const std::string& desc)
         : Name(name), ScriptReference(ref), Description(desc) {}
 
 

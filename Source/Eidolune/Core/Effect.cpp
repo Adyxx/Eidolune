@@ -3,6 +3,12 @@
 #include "Effect.h"
 #include "EffectRegistry.h"
 
+Effect::Effect(const std::string& name) : Name(name) {}
+
+Effect::Effect(const json& j) {
+    Name = j.get<std::string>();
+}
+
 Effect::Effect(const std::string& name,
                const std::string& ref,
                bool requiresValue,

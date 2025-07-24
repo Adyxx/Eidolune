@@ -1,0 +1,36 @@
+
+[
+  {
+    "id": "fireball",
+    "name": "Fireball",
+    "cost": 2,
+    "rarity": "RARE",
+    "type": "SPELL",
+    "text": "Deal 3 damage to enemy hero.",
+    "effectBindings": [
+      {
+        "trigger": "on_play",
+        "effect": "deal_damage",
+        "value": 3,
+        "targeting": "ENEMY_HERO"
+      }
+    ]
+  },
+  {
+    "id": "wolf_rider",
+    "name": "Wolf Rider",
+    "cost": 3,
+    "power": 4,
+    "health": 2,
+    "rarity": "COMMON",
+    "type": "UNIT",
+    "text": "Fast-moving beast.",
+    "effectBindings": [
+      {
+        "trigger": "on_enter",
+        "effect": "gain_haste"
+      }
+    ]
+  }
+]
+

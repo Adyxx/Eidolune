@@ -10,8 +10,8 @@
 Deck::Deck(std::shared_ptr<User> user,
          const std::string& name,
          std::shared_ptr<Character> mainChar,
-         std::shared_ptr<Character> partnerChar = nullptr,
-         const std::string& desc = "")
+         std::shared_ptr<Character> partnerChar,
+         const std::string& desc)
         : Owner(user), Name(name), MainCharacter(mainChar),
           PartnerCharacter(partnerChar), Description(desc) {}
 
