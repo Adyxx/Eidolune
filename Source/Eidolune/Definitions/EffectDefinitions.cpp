@@ -1,13 +1,52 @@
 
+#include "EffectDefinitions.h"
 #include "EffectRegistry.h"
+#include "../Core/DeckCard.h"
+#include "../Core/Player.h"
+#include "../Core/GameCard.h"
 #include <iostream>
+
+
+void DrawCard(void* source, void* target, std::optional<int> value) {
+    std::cout << "START Checkpoint draw \n";
+
+    int drawAmount = value.value_or(1);
+    auto* player = static_cast<Player*>(target);
+
+    if (!player) {
+        std::cout << "[Effect] DrawCard: Invalid player target\n";
+        return;
+    }
+
+    std::cout << "[Effect] Drawing " << drawAmount << " card(s) for " << player->GetName() << "\n";
+
+    for (int i = 0; i < drawAmount; ++i) {
+        if (player->DeckRef->DeckCards.empty()) {
+            std::cout << "❌ Deck is empty. Cannot draw.\n";
+            break;
+        }
+
+        if (player->Hand.size() >= player->MaxHandSize) {
+            std::cout << "⚠️ Hand full. Skipping draw.\n";
+            break;
+        }
+
+        auto deckCard = player->DeckRef->DeckCards.back();
+        player->DeckRef->DeckCards.pop_back();
+
+        auto card = std::make_shared<GameCard>(deckCard->CardRef);
+        card->Owner = player;
+        player->Hand.push_back(card);
+
+        std::cout << "🃏 Drew card: " << card->GetName() << "\n";
+
+        // trigger_observer->Emit("card_drawn", player, card);
+    }
+    std::cout << "END Checkpoint draw \n";
+}
 
 void ApplyHaste(void* source, void* target, std::optional<int> value) {
     std::cout << "[Effect] ApplyHaste triggered\n";
-}
-
-void DrawCard(void* source, void* target, std::optional<int> value) {
-    std::cout << "[Effect] DrawCard triggered, drawing " << (value.value_or(1)) << " cards\n";
 }
 
 void OverrideDeckLimit(void* source, void* target, std::optional<int> value) {

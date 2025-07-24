@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <optional>
+#include "Player.h"
 
 class Faction;
 class Character;

@@ -32,7 +32,10 @@ static TargetSpec ParseTargetSpec(const std::string& s) {
 }
 
 std::unordered_map<std::string, std::shared_ptr<Card>> CardLoader::LoadAll(const std::string& filename) {
+    std::cout << "Working dir: " << std::filesystem::current_path() << "\n";
     std::ifstream file(filename);
+    
+
     if (!file.is_open()) throw std::runtime_error("Could not open card JSON file.");
 
     json cardArray;

@@ -28,7 +28,7 @@
     "effectBindings": [
       {
         "trigger": "on_enter",
-        "effect": "gain_haste"
+        "effect": "apply_haste"
       }
     ]
   }

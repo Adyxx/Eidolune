@@ -9,3 +9,7 @@ DeckCard::DeckCard(std::shared_ptr<Deck> deck, std::shared_ptr<Card> card, int q
 std::string DeckCard::ToString() const {
     return CardRef->ToString() + " x" + std::to_string(Quantity);
 }
+
+std::shared_ptr<Card> DeckCard::CreateCardInstance() const {
+    return std::make_shared<Card>(*CardRef);
+}
