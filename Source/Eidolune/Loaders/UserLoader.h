@@ -25,11 +25,15 @@ class UserLoader {
 public:
     static std::vector<UserInfo> LoadUsers(const std::string& userDir, const std::unordered_map<std::string, std::shared_ptr<Card>>& allCards) {
         std::vector<UserInfo> users;
+        
+        std::cout << "🔍 Loading users from: " << userDir << "\n";
 
-        // For each user directory or file, load their decks
-        // This is a simplified example assuming one user JSON file:
-        std::ifstream file(userDir + "/user_1_decks.json");
-        if (!file.is_open()) throw std::runtime_error("Could not open user decks file");
+        std::string filePath = userDir + "user_1_decks.json";
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            std::cerr << "❌ Could not open file: " << filePath << "\n";
+            throw std::runtime_error("Could not open user decks file");
+        }
 
         nlohmann::json j;
         file >> j;

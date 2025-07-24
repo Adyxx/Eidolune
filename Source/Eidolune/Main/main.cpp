@@ -6,6 +6,14 @@
 #include <iostream>
 
 int main() {
+    // chcp 65001
+    GameEngine engine;
+    engine.Run();
+    return 0;
+}
+
+
+
     /*
     auto cards = CardLoader::LoadAll("Content/Cards/cards.json");
     
@@ -20,8 +28,4 @@ int main() {
         }
     }
     */
-
-    GameEngine engine;
-    engine.Run();
-    return 0;
-}
+   

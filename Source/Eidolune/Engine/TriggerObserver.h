@@ -7,10 +7,10 @@
 
 class TriggerObserver {
 public:
-    using TriggerCallback = std::function<void(const std::unordered_map<std::string, std::string>&)>;
+    using TriggerCallback = std::function<void(const std::unordered_map<std::string, void*>&)>;
 
     void Subscribe(const std::string& eventName, TriggerCallback callback);
-    void Emit(const std::string& eventName, const std::unordered_map<std::string, std::string>& data = {});
+    void Emit(const std::string& eventName, const std::unordered_map<std::string, void*>& data = {});
     void Unsubscribe(const std::string& eventName, TriggerCallback callback);
     void Clear();
     void PrintListeners(const std::string& eventName) const;

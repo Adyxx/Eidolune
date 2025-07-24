@@ -8,6 +8,12 @@
 #include "../Loaders/CardLoader.h"  
 #include "../Core/Card.h"   
 #include "../Core/DeckCard.h"
+#include "TriggerObserver.h"
+#include "../Registry/TriggerRegistry.h"
+#include "ConditionEvaluator.h"
+#include "Trigger.h"
+#include "TriggerBuilder.h"
+#include "Condition.h"
 
 std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
     std::cout << "\n🔍 " << prompt << "\n";
@@ -49,16 +55,51 @@ std::shared_ptr<Player> CreatePlayerFromDeck(const DeckInfo& deckInfo, const std
     return player;
 }
 
+void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
+    for (auto& binding : card->Model->EffectBindings) {
+        auto triggerPtr = binding->GetTrigger();
+        if (!triggerPtr) continue;
+
+        std::string triggerCode = binding->GetTrigger()->ScriptReference;
+        auto* triggerMeta = TriggerRegistry::Get(triggerCode);
+        if (!triggerMeta) continue;
+
+        auto eventName = triggerMeta->Event;
+        auto builder = TriggerBuilder::Build(binding);
+
+        std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
+
+        auto conditionPtr = binding->GetCondition();
+        if (conditionPtr) {
+            std::string conditionCode = conditionPtr->ToString();
+
+            effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
+                if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetValue().value_or(0))) {
+                    builder(ctx);
+                }
+            };
+        } else {
+            effectToRegister = builder;
+        }
+
+
+        observer->Subscribe(eventName, effectToRegister);
+        std::cout << "🧠 Subscribed " << card->GetName() << " to trigger '" << eventName << "'\n";
+    }
+}
 
 
 void GameEngine::Run() {
     std::cout << "🎮 Starting Test Game\n";
 
     GameState game;
-    CardLoader::LoadAll("Content/Cards/cards.json");
-
+    
     auto allCards = CardLoader::LoadAll("Content/Cards/cards.json");
+    std::cout << "🎮 Starting Test Game\n";
+
     auto users = UserLoader::LoadUsers("Content/Users/", allCards);
+
+    std::cout << "🎮 Starting Test Game\n";
 
     auto [deck1, user1] = SelectDeckForUser(users, "Select Player 1");
     auto [deck2, user2] = SelectDeckForUser(users, "Select Player 2");
@@ -73,6 +114,24 @@ void GameEngine::Run() {
             DrawCard(nullptr, player.get(), 1);
         }
     }
+
+    ////////////////////////
+
+    for (auto& player : game.Players) {
+        for (auto& card : player->Hand) {
+            SubscribeCardTriggers(card, game.Observer);
+        }
+        for (auto& card : player->Board) {
+            SubscribeCardTriggers(card, game.Observer);
+        }
+        for (auto& deckCard : player->DeckRef->DeckCards) {
+            auto card = std::make_shared<GameCard>(deckCard->CardRef);
+            SubscribeCardTriggers(card, game.Observer);
+        }
+    }
+
+    ////////////////////////
+    auto observer = game.GetTriggerObserver();
     while (!game.GameOver) {
         auto current = game.GetCurrentPlayer();
         std::cout << "\n=== 🕒 " << current->GetName() << "'s Turn ===\n";
@@ -87,7 +146,7 @@ void GameEngine::Run() {
 
             if (input.substr(0, 4) == "play") {
                 int index = std::stoi(input.substr(5));
-                GameActions::PlayCard(current.get(), index);
+                 GameActions::PlayCard(current.get(), index, observer);
             } else if (input == "attack") {
                 GameActions::Attack(current.get(), game.GetOpponent().get());
             } else if (input == "end") {

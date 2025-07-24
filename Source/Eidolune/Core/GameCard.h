@@ -21,7 +21,7 @@ public:
     std::vector<std::string> TempBuffs;
 
     GameCard(std::shared_ptr<Card> model);
-
+    
     std::string GetName() const;
     int GetCost() const;
     std::optional<int> GetPower() const;

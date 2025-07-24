@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "Player.h"
+#include "../Engine/TriggerObserver.h"
 
 class GameState {
 public:
@@ -10,9 +11,14 @@ public:
     int CurrentPlayer = 0;
     bool GameOver = false;
 
+    std::shared_ptr<TriggerObserver> Observer = std::make_shared<TriggerObserver>();
+
     std::shared_ptr<Player> GetCurrentPlayer();
-
     std::shared_ptr<Player> GetOpponent();
-
     void NextTurn();
+
+    std::shared_ptr<TriggerObserver> GetTriggerObserver() {
+        return Observer;
+    }
 };
+

@@ -3,10 +3,12 @@
 #include <memory>
 #include "Player.h"
 #include "GameCard.h"
+#include "TriggerObserver.h"
+#include <memory>
 
 namespace GameActions {
 
-    void PlayCard(Player* player, int index);
+    void PlayCard(Player* player, int index, std::shared_ptr<TriggerObserver> observer);
     void Attack(Player* attacker, Player* defender);
     void UseAbility(Player* player, Player* opponent);
     void StartTurn(Player* player);

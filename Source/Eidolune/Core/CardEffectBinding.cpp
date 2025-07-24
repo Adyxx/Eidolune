@@ -24,3 +24,10 @@ void CardEffectBinding::Validate() const {
     if (!BoundEffect) throw std::runtime_error("Missing effect in binding");
     if (!BoundTrigger) throw std::runtime_error("Missing trigger in binding");
 }
+
+std::shared_ptr<GameCard> CardEffectBinding::GetEventGameCard() {
+    if (auto ptr = EventGameCard.lock()) {
+        return ptr;
+    }
+    throw std::runtime_error("EventGameCard not set");
+}

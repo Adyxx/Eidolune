@@ -24,7 +24,7 @@ namespace GameActions {
         std::cout << "\n";
     }
 
-    void PlayCard(Player* player, int index) {
+    void PlayCard(Player* player, int index, std::shared_ptr<TriggerObserver> observer) {
         if (index < 0 || index >= static_cast<int>(player->Hand.size())) {
             std::cout << "🚫 Invalid card index.\n";
             return;
@@ -53,7 +53,7 @@ namespace GameActions {
         player->Energy -= card->GetCost();
         std::cout << "🔋 Energy left: " << player->Energy << "\n";
 
-        // triggerObserver->Emit("card_played", card, player);
+        observer->Emit("card_played", { {"source", card.get()},{"owner", player} });
     }
 
     void Attack(Player* attacker, Player* defender) {
