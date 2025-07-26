@@ -5,16 +5,7 @@
 #include <optional>
 #include <stdexcept>
 #include "GameCard.h"
-
-enum class TargetSpec {
-    ENEMY_BOARD,
-    ENEMY_HERO,
-    ENEMY_BOARD_OR_HERO,
-    FRIENDLY_BOARD,
-    SELF,
-    ANY,
-    UNKNOWN
-};
+#include "Types.h"
 
 class Card;
 class Trigger;
@@ -32,6 +23,9 @@ public:
     std::optional<int> Value;
     std::optional<TargetSpec> Targeting;
 
+    ListeningZone Zone = ListeningZone::ANY;
+    TriggerScope Scope = TriggerScope::SELF;
+
     std::shared_ptr<Trigger> GetTrigger() const { return BoundTrigger; }
     std::shared_ptr<Card> GetEventCard() const { return ParentCard; }
     std::shared_ptr<Effect> GetEffect() const { return BoundEffect; }
@@ -39,7 +33,25 @@ public:
     std::optional<TargetSpec> GetTargetSpec() const { return Targeting; }
     std::shared_ptr<Condition> GetCondition() const { return BoundCondition; }
     std::shared_ptr<Card> GetCard() const { return ParentCard; }
+    TriggerScope GetScope() const { return Scope; }
 
+
+    bool HasZone() const { return Zone != ListeningZone::ANY; }
+    CardZone GetZoneAsCardZone() const {
+        switch (Zone) {
+            case ListeningZone::BOARD: return CardZone::BOARD;
+            case ListeningZone::HAND: return CardZone::HAND;
+            case ListeningZone::DECK: return CardZone::DECK;
+            case ListeningZone::GRAVEYARD: return CardZone::GRAVEYARD;
+            case ListeningZone::ANY: return CardZone::UNKNOWN;
+            default: throw std::runtime_error("Unhandled ListeningZone in GetZoneAsCardZone()");
+        }
+    }
+
+    ListeningZone GetZone() const { return Zone; } 
+
+    void SetZone(ListeningZone z) { Zone = z; }
+    void SetScope(TriggerScope s) { Scope = s; }
 
     CardEffectBinding(std::shared_ptr<Card> card,
                       std::shared_ptr<Trigger> trigger,
@@ -55,4 +67,5 @@ public:
     std::shared_ptr<GameCard> GetEventGameCard(); 
 
     void Validate() const;
+
 };

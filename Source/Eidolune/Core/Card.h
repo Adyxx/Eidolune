@@ -4,19 +4,13 @@
 #include <vector>
 #include <optional>
 #include "Player.h"
+#include "Types.h"
 
 class Faction;
 class Character;
 class Subtype;
 class CardEffectBinding;
 
-enum class Rarity {
-    COMMON, RARE, EPIC, LEGENDARY
-};
-
-enum class CardType {
-    UNIT, SPELL, RITUAL, ASSET
-};
 
 class Card {
 public:

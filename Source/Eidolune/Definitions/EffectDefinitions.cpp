@@ -9,7 +9,6 @@
 
 void DrawCard(void* source, void* target, std::optional<int> value) {
 
-    int drawAmount = value.value_or(1);
     auto* player = static_cast<Player*>(target);
 
     if (!player) {
@@ -17,6 +16,7 @@ void DrawCard(void* source, void* target, std::optional<int> value) {
         return;
     }
 
+    int drawAmount = value.value_or(1);
     std::cout << "[Effect] Drawing " << drawAmount << " card(s) for " << player->GetName() << "\n";
 
     for (int i = 0; i < drawAmount; ++i) {
@@ -25,6 +25,7 @@ void DrawCard(void* source, void* target, std::optional<int> value) {
             break;
         }
 
+        std::cout << player->Hand.size() << "  /  " << player->MaxHandSize <<"\n";
         if (player->Hand.size() >= player->MaxHandSize) {
             std::cout << "⚠️ Hand full. Skipping draw.\n";
             break;
@@ -33,8 +34,16 @@ void DrawCard(void* source, void* target, std::optional<int> value) {
         auto deckCard = player->DeckRef->DeckCards.back();
         player->DeckRef->DeckCards.pop_back();
 
-        auto card = std::make_shared<GameCard>(deckCard->CardRef);
+        //auto card = std::make_shared<GameCard>(deckCard->CardRef);
+        if (deckCard->GameCardCopies.empty()) {
+            std::cout << "❌ No copies left for card: " << deckCard->CardRef->Name << "\n";
+            continue;
+        }
+        auto card = deckCard->GameCardCopies.back();
+        deckCard->GameCardCopies.pop_back();
+
         card->Owner = player;
+        card->Zone = CardZone::HAND;
         player->Hand.push_back(card);
 
         std::cout << "🃏 Drew card: " << card->GetName() << "\n";

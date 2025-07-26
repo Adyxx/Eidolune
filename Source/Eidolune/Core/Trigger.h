@@ -1,22 +1,16 @@
 #pragma once
 #include <string>
 #include <optional>
-
-enum class Zone {
-    BOARD,
-    HAND,
-    DECK,
-    GRAVEYARD,
-    UNKNOWN
-};
+#include "Types.h"
 
 class Trigger {
 public:
     std::string ScriptReference;
     std::string Description;
-    std::optional<Zone> TriggerZone;
+    //std::optional<Zone> TriggerZone;
 
-    Trigger(const std::string& ref, const std::string& desc = "", std::optional<Zone> zone = std::nullopt);
+    //Trigger(const std::string& ref, const std::string& desc = "", std::optional<Zone> zone = std::nullopt);
+    Trigger(const std::string& ref, const std::string& desc = "");
 
     std::string ToString() const;
 };

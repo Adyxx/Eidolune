@@ -1,3 +1,1 @@
-
-
 #include "EquipmentSet.h"

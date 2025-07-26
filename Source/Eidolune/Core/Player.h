@@ -27,4 +27,7 @@ public:
 
     void StartTurn();
     void EndTurn();
+
+    Player* Opponent = nullptr;
+    Player* GetOpponent() const { return Opponent; } 
 };

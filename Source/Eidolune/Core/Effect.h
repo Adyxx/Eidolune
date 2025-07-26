@@ -26,6 +26,4 @@ public:
 
     std::function<void(void*, void*, std::optional<int>)> GetExecutable() const;
 
- 
-
 };

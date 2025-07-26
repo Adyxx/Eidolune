@@ -2,6 +2,7 @@
 #include "GameEngine.h"
 #include "GameActions.h"
 #include "../Definitions/EffectDefinitions.h"
+#include "../Definitions/TriggerDefinitions.h"
 #include <iostream>
 #include "../Core/Player.h"
 #include "../Loaders/UserLoader.h"
@@ -14,6 +15,7 @@
 #include "Trigger.h"
 #include "TriggerBuilder.h"
 #include "Condition.h"
+
 
 std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
     std::cout << "\n🔍 " << prompt << "\n";
@@ -56,23 +58,25 @@ std::shared_ptr<Player> CreatePlayerFromDeck(const DeckInfo& deckInfo, const std
 }
 
 void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-    for (auto& binding : card->Model->EffectBindings) {
+    for (auto& originalBinding : card->Model->EffectBindings) {
+        auto binding = std::make_shared<CardEffectBinding>(*originalBinding);
         auto triggerPtr = binding->GetTrigger();
         if (!triggerPtr) continue;
 
-        std::string triggerCode = binding->GetTrigger()->ScriptReference;
+        std::string triggerCode = triggerPtr->ScriptReference;
         auto* triggerMeta = TriggerRegistry::Get(triggerCode);
         if (!triggerMeta) continue;
 
         auto eventName = triggerMeta->Event;
+
+        binding->EventGameCard = card; 
+
         auto builder = TriggerBuilder::Build(binding);
 
         std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
-
         auto conditionPtr = binding->GetCondition();
         if (conditionPtr) {
             std::string conditionCode = conditionPtr->ToString();
-
             effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
                 if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetValue().value_or(0))) {
                     builder(ctx);
@@ -82,7 +86,6 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
             effectToRegister = builder;
         }
 
-
         observer->Subscribe(eventName, effectToRegister);
         std::cout << "🧠 Subscribed " << card->GetName() << " to trigger '" << eventName << "'\n";
     }
@@ -90,16 +93,15 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
 
 
 void GameEngine::Run() {
-    std::cout << "🎮 Starting Test Game\n";
+    
+    RegisterTriggerDefinitions();
+    InitEffectRegistry();
 
+    std::cout << "🎮 Starting Test Game\n";
     GameState game;
     
     auto allCards = CardLoader::LoadAll("Content/Cards/cards.json");
-    std::cout << "🎮 Starting Test Game\n";
-
     auto users = UserLoader::LoadUsers("Content/Users/", allCards);
-
-    std::cout << "🎮 Starting Test Game\n";
 
     auto [deck1, user1] = SelectDeckForUser(users, "Select Player 1");
     auto [deck2, user2] = SelectDeckForUser(users, "Select Player 2");
@@ -109,6 +111,23 @@ void GameEngine::Run() {
 
     game.Players = { player1, player2 };
 
+    player1->Opponent = player2.get();
+    player2->Opponent = player1.get();
+
+    ////////////////
+    for (auto& player : game.Players) {
+        for (auto& deckCard : player->DeckRef->DeckCards) {
+            for (int i = 0; i < deckCard->Quantity; ++i) {
+                auto card = std::make_shared<GameCard>(deckCard->CardRef);
+                card->Owner = player.get();
+                card->Zone = CardZone::DECK;
+                SubscribeCardTriggers(card, game.Observer);
+                deckCard->GameCardCopies.push_back(card); // <== store them
+            }
+        }
+    }
+    ////////////////
+
     for (auto& player : game.Players) {
         for (int i = 0; i < 3; ++i) {
             DrawCard(nullptr, player.get(), 1);
@@ -116,7 +135,7 @@ void GameEngine::Run() {
     }
 
     ////////////////////////
-
+    /*
     for (auto& player : game.Players) {
         for (auto& card : player->Hand) {
             SubscribeCardTriggers(card, game.Observer);
@@ -129,15 +148,16 @@ void GameEngine::Run() {
             SubscribeCardTriggers(card, game.Observer);
         }
     }
-
+    */
     ////////////////////////
     auto observer = game.GetTriggerObserver();
     while (!game.GameOver) {
         auto current = game.GetCurrentPlayer();
         std::cout << "\n=== 🕒 " << current->GetName() << "'s Turn ===\n";
-
+        
         GameActions::StartTurn(current.get());
-
+        GameActions::ShowPlayerState(current.get());
+        
         bool turnEnded = false;
         while (!turnEnded) {
             std::cout << "\n>> Command (play <i> / attack / end): ";

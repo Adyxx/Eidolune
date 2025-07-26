@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
+
+set(VCPKG_APPLOCAL_DEPS OFF)
+
 project(Eidolune LANGUAGES CXX)
+
+# Optional: Vcpkg toolchain file should be passed via CLI, not hardcoded here:
+# -DCMAKE_TOOLCHAIN_FILE=C:/Users/Doma/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 include(FetchContent)
 
@@ -11,11 +17,11 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(nlohmann_json)
 
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Collect all source files
+set(CMAKE_BUILD_TYPE Debug)
+
 file(GLOB_RECURSE EIDOLUNE_SOURCES
     CONFIGURE_DEPENDS
     "Source/Eidolune/Core/*.cpp"
@@ -26,12 +32,21 @@ file(GLOB_RECURSE EIDOLUNE_SOURCES
     "Source/Eidolune/Main/main.cpp"
 )
 
-# Add executable
+
+find_package(libpqxx CONFIG REQUIRED)
+
+message(STATUS "Found libpqxx targets:")
+get_target_property(_pqxx_inc_dirs libpqxx::pqxx INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "Include dirs for libpqxx::pqxx = ${_pqxx_inc_dirs}")
+
 add_executable(MainExe ${EIDOLUNE_SOURCES})
 
-target_link_libraries(MainExe PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(MainExe
+    PRIVATE
+        nlohmann_json::nlohmann_json
+        libpqxx::pqxx
+)
 
-# Include directories
 target_include_directories(MainExe PRIVATE
     Source/Eidolune/Core
     Source/Eidolune/Definitions
@@ -40,7 +55,5 @@ target_include_directories(MainExe PRIVATE
     Source/Eidolune/Loaders
     Source/Eidolune/Main
     Source/Eidolune/Registry
+    C:/Users/Doma/vcpkg/installed/x64-windows/include
 )
-
-# Enable debug symbols
-set(CMAKE_BUILD_TYPE Debug)

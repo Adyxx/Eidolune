@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <iostream>
 #include "../Definitions/EffectDefinitions.h"
+#include "GameCard.h"
 
 Player::Player(std::shared_ptr<Deck> deck, int index)
     : DeckRef(deck), PlayerIndex(index) {}
@@ -20,6 +21,13 @@ void Player::EndTurn() {
     std::cout << "⏹ " << GetName() << "'s turn ends.\n";
     if ((int)Hand.size() > MaxHandSize) {
         std::cout << "🗑️ You have too many cards. (not implemented: discard)\n";
+    }
+
+    for (auto& card : Board) {
+        if (card) {
+            card->Tapped = false;
+            card->SummoningSickness = false;
+        }
     }
 }
 

@@ -27,11 +27,46 @@
     "text": "Fast-moving beast.",
     "effectBindings": [
       {
-        "trigger": "on_enter",
+        "trigger": "on_play",
         "effect": "apply_haste"
       }
     ]
+  },
+  {
+    "id": "slime",
+    "name": "Slime",
+    "cost": 1,
+    "power": 1,
+    "health": 2,
+    "rarity": "COMMON",
+    "type": "UNIT",
+    "text": "Cute jelly.",
+    "effectBindings": [
+      {
+        "trigger": "on_death",
+        "effect": "draw_card"
+      }
+    ]
+  },
+  {
+    "id": "charlotte",
+    "name": "Charlotte, the holy servant",
+    "cost": 1,
+    "power": 1,
+    "health": 1,
+    "rarity": "LEGENDARY",
+    "type": "UNIT",
+    "text": "Charlotte.",
+    "effectBindings": [
+      {
+        "trigger": "on_play",
+        "effect": "draw_card",
+        "value": 2
+      }
+    ]
   }
+  
+  
   
 
 ]

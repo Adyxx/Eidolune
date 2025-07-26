@@ -2,10 +2,10 @@
 [
   {
     "name": "Aggro Deck",
-    "cards": ["fireball", "wolf_rider", "fireball", "wolf_rider"]
+    "cards": ["fireball", "wolf_rider", "fireball", "wolf_rider", "charlotte", "charlotte"]
   },
   {
     "name": "Control Deck",
-    "cards": ["fireball", "fireball"]
+    "cards": ["fireball", "fireball", "fireball", "slime", "slime", "slime", "slime", "slime", "slime"]
   }
 ]

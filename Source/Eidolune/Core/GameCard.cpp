@@ -2,8 +2,13 @@
 #include "Player.h"
 #include <iostream>
 
+static int GlobalGameCardId = 0;
+
 GameCard::GameCard(std::shared_ptr<Card> model)
-    : Model(std::move(model)) {}
+    : Model(model) {
+        Id = GlobalGameCardId++;
+         std::cout << "Created GameCard with ID: " << Id << " and model name: " << model->Name << "\n";
+    }
 
 std::string GameCard::GetName() const {
     return Model ? Model->Name : "";

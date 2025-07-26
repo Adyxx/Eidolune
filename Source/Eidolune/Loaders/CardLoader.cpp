@@ -31,6 +31,13 @@ static TargetSpec ParseTargetSpec(const std::string& s) {
     return TargetSpec::UNKNOWN;
 }
 
+ListeningZone ParseListeningZone(const std::string& str) {
+    if (str == "HAND") return ListeningZone::HAND;
+    if (str == "DECK") return ListeningZone::DECK;
+    if (str == "ANY") return ListeningZone::ANY;
+    return ListeningZone::BOARD;
+}
+
 std::unordered_map<std::string, std::shared_ptr<Card>> CardLoader::LoadAll(const std::string& filename) {
     std::ifstream file(filename);
     
@@ -60,6 +67,10 @@ std::unordered_map<std::string, std::shared_ptr<Card>> CardLoader::LoadAll(const
             std::optional<TargetSpec> target = e.contains("targeting") ? std::make_optional(ParseTargetSpec(e["targeting"])) : std::nullopt;
 
             auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, nullptr, value, target);
+            
+            std::string zoneStr = e.value("zone", "BOARD");
+            binding->SetZone(ParseListeningZone(zoneStr));
+            
             card->EffectBindings.push_back(binding);
         }
 

@@ -2,16 +2,9 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include "Types.h"
 
 class Character;
-
-enum class RelationshipType {
-    PARTNER,
-    RIVAL,
-    LOVER,
-    MENTOR
-    // etc.
-};
 
 class CharacterRelationship {
 public:

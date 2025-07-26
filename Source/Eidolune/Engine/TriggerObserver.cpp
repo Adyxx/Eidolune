@@ -14,7 +14,6 @@ void TriggerObserver::Emit(const std::string& eventName, const std::unordered_ma
     }
 }
 
-
 void TriggerObserver::Unsubscribe(const std::string& eventName, TriggerCallback callback) {
     // maybe later...
 }
