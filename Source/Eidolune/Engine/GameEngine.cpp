@@ -4,6 +4,7 @@
 #include "../Definitions/EffectDefinitions.h"
 #include "../Definitions/TriggerDefinitions.h"
 #include "../Definitions/ConditionDefinitions.h"
+#include "../Registry/CharacterClassRegistry.h"
 #include <iostream>
 #include "../Core/Player.h"
 #include "../Loaders/UserLoader.h"

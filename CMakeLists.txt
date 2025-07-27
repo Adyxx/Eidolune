@@ -29,6 +29,7 @@ file(GLOB_RECURSE EIDOLUNE_SOURCES
     "Source/Eidolune/Engine/*.cpp"
     "Source/Eidolune/Loaders/*.cpp"
     "Source/Eidolune/Registry/*.cpp"
+    "Source/Eidolune/Classes/*.cpp"
     "Source/Eidolune/Main/main.cpp"
 )
 
@@ -57,5 +58,6 @@ target_include_directories(MainExe PRIVATE
     Source/Eidolune/Loaders
     Source/Eidolune/Main
     Source/Eidolune/Registry
+    Source/Eidolune/Classes
     C:/Users/Doma/vcpkg/installed/x64-windows/include
 )

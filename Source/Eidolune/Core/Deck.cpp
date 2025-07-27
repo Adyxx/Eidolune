@@ -4,8 +4,6 @@
 #include "DeckCard.h"
 #include "User.h"
 #include "EffectRegistry.h"
-#include "DeckRestrictionRegistry.h"
-
 
 Deck::Deck(std::shared_ptr<User> user,
          const std::string& name,
