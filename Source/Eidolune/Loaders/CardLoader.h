@@ -2,6 +2,7 @@
 #include "../Core/Card.h"
 #include "../Core/Trigger.h"
 #include "../Core/Effect.h"
+#include "../Core/Condition.h"
 #include "../Core/CardEffectBinding.h"
 #include <nlohmann/json.hpp>
 

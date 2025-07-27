@@ -66,13 +66,23 @@ std::unordered_map<std::string, std::shared_ptr<Card>> CardLoader::LoadAll(const
             std::optional<int> value = e.contains("value") ? std::make_optional(e["value"].get<int>()) : std::nullopt;
             std::optional<TargetSpec> target = e.contains("targeting") ? std::make_optional(ParseTargetSpec(e["targeting"])) : std::nullopt;
 
-            auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, nullptr, value, target);
-            
+            std::shared_ptr<Condition> condition = nullptr;
+            if (e.contains("condition") && e["condition"].is_object()) {
+                const auto& condJson = e["condition"];
+                std::string name = condJson.value("name", "unnamed_condition");
+                std::string scriptRef = condJson.value("ref", "");
+                std::string desc = condJson.value("description", "");
+                condition = std::make_shared<Condition>(name, scriptRef, desc);
+            }
+
+            auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, condition, value, target);
+
             std::string zoneStr = e.value("zone", "ANY");
             binding->SetZone(ParseListeningZone(zoneStr));
-            
+
             card->EffectBindings.push_back(binding);
         }
+
 
         result[c["id"]] = card;
     }

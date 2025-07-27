@@ -52,6 +52,11 @@ public:
 
     void SetZone(ListeningZone z) { Zone = z; }
     void SetScope(TriggerScope s) { Scope = s; }
+    void SetCondition(std::shared_ptr<Condition> condition) {
+        BoundCondition = condition;
+    }
+
+
 
     CardEffectBinding(std::shared_ptr<Card> card,
                       std::shared_ptr<Trigger> trigger,

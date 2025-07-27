@@ -28,7 +28,12 @@
     "effectBindings": [
       {
         "trigger": "on_play",
-        "effect": "apply_haste"
+        "effect": "apply_haste",
+        "condition": {
+            "name": "owner_below_10_health",
+            "ref": "owner_below_10_health",
+            "description": "Only trigger if owner is below 10 health."
+          }
       }
     ]
   },

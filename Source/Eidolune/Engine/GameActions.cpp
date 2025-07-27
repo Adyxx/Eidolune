@@ -213,78 +213,19 @@ namespace GameActions {
         }
     }
 
-/*
-    void ResolveCombat(std::shared_ptr<GameCard> attackerCard, GameCard* targetCard, Player* attacker, Player* defender) {
-
+   void ResolveCombat(std::shared_ptr<GameCard> attackerCard, GameCard* targetCard, Player* attacker, Player* defender) {
         if (targetCard) {
             std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << targetCard->GetName() << "\n";
-            ResolveDamage(attackerCard.get(), targetCard, attackerCard->GetPower().value_or(0), "combat");
-            ResolveDamage(targetCard, attackerCard.get(), targetCard->GetPower().value_or(0), "combat");
+            GameActions::ResolveDamage(attackerCard.get(), Target::FromCard(targetCard), attackerCard->GetPower().value_or(0), "combat");
+            GameActions::ResolveDamage(targetCard, Target::FromCard(attackerCard.get()), targetCard->GetPower().value_or(0), "combat");
         } else {
             std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << defender->GetName() << "\n";
-            ResolveDamage(attackerCard.get(), defender, attackerCard->GetPower().value_or(0), "combat");
+            GameActions::ResolveDamage(attackerCard.get(), Target::FromPlayer(defender), attackerCard->GetPower().value_or(0), "combat");
         }
 
         attackerCard->Tapped = true;
     }
-    */
-   void ResolveCombat(std::shared_ptr<GameCard> attackerCard, GameCard* targetCard, Player* attacker, Player* defender) {
-    if (targetCard) {
-        std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << targetCard->GetName() << "\n";
-        GameActions::ResolveDamage(attackerCard.get(), Target::FromCard(targetCard), attackerCard->GetPower().value_or(0), "combat");
-        GameActions::ResolveDamage(targetCard, Target::FromCard(attackerCard.get()), targetCard->GetPower().value_or(0), "combat");
-    } else {
-        std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << defender->GetName() << "\n";
-        GameActions::ResolveDamage(attackerCard.get(), Target::FromPlayer(defender), attackerCard->GetPower().value_or(0), "combat");
-    }
 
-    attackerCard->Tapped = true;
-}
-
-/*
-    void ResolveDamage(void* source, void* target, int amount, const std::string& type) {
-        if (!target) return;
-
-        if (auto* targetCard = static_cast<GameCard*>(target)) {
-            std::cout << "BBBBBBBBB\n";
-            targetCard->DamageTaken += amount;
-            if (targetCard->DamageTaken >= targetCard->GetHealth().value_or(0)) {
-                std::cout << "💀 " << targetCard->GetName() << " is destroyed!\n";
-                Player* owner = targetCard->Owner;
-                if (owner) {
-                    auto& board = owner->Board;
-                    auto it = std::find_if(board.begin(), board.end(),
-                        [&](const std::shared_ptr<GameCard>& c) { return c.get() == targetCard; });
-                    if (it != board.end()) {
-                        owner->Graveyard.push_back(*it);
-                        board.erase(it);
-                    } else {
-                        std::cout << "❌ Could not find targetCard on board\n";
-                    }
-                }
-            }
-        }
-        else if (auto* targetPlayer = static_cast<Player*>(target)) {
-            std::cout << "AAAAAAAAAA\n";
-            targetPlayer->Health -= amount;
-            if (targetPlayer->Health <= 0) {
-                std::cout << "☠️ " << targetPlayer->GetName() << " has died!\n";
-            }
-        }
-        else {
-            std::cout << "❌ ResolveDamage: Unknown target type\n";
-        }
-
-        if (source) {
-            if (auto* sourceCard = static_cast<GameCard*>(source)) {
-                std::cout << "[Damage source] " << sourceCard->GetName() << "\n";
-            } else {
-                std::cout << "[Damage source] Unknown or non-card\n";
-            }
-        }
-    }
-*/
-    
     void ResolveDamage(void* source, Target target, int amount, const std::string& type) {
         if (!target.ptr) return;
 

@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
-#include "../Core/GameCard.h"
+#include <memory>
+#include "GameCard.h"
+#include "ConditionRegistry.h"
 
 class ConditionEvaluator {
 public:
-    static bool Evaluate(const std::string& conditionCode, std::shared_ptr<GameCard> card, int value);
+    static bool Evaluate(const std::string& code, std::shared_ptr<GameCard> card, int value);
 };

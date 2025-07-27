@@ -3,6 +3,7 @@
 #include "GameActions.h"
 #include "../Definitions/EffectDefinitions.h"
 #include "../Definitions/TriggerDefinitions.h"
+#include "../Definitions/ConditionDefinitions.h"
 #include <iostream>
 #include "../Core/Player.h"
 #include "../Loaders/UserLoader.h"
@@ -15,7 +16,7 @@
 #include "Trigger.h"
 #include "TriggerBuilder.h"
 #include "Condition.h"
-//#include "Target.h"
+
 
 std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
     std::cout << "\n🔍 " << prompt << "\n";
@@ -96,6 +97,7 @@ void GameEngine::Run() {
     
     RegisterTriggerDefinitions();
     InitEffectRegistry();
+    RegisterConditionDefinitions();
 
     std::cout << "🎮 Starting Test Game\n";
     GameState game;
@@ -114,7 +116,6 @@ void GameEngine::Run() {
     player1->Opponent = player2.get();
     player2->Opponent = player1.get();
 
-    ////////////////
     for (auto& player : game.Players) {
         for (auto& deckCard : player->DeckRef->DeckCards) {
             for (int i = 0; i < deckCard->Quantity; ++i) {
@@ -126,7 +127,6 @@ void GameEngine::Run() {
             }
         }
     }
-    ////////////////
 
     for (auto& player : game.Players) {
         for (int i = 0; i < 3; ++i) {
@@ -136,22 +136,6 @@ void GameEngine::Run() {
         }
     }
 
-    ////////////////////////
-    /*
-    for (auto& player : game.Players) {
-        for (auto& card : player->Hand) {
-            SubscribeCardTriggers(card, game.Observer);
-        }
-        for (auto& card : player->Board) {
-            SubscribeCardTriggers(card, game.Observer);
-        }
-        for (auto& deckCard : player->DeckRef->DeckCards) {
-            auto card = std::make_shared<GameCard>(deckCard->CardRef);
-            SubscribeCardTriggers(card, game.Observer);
-        }
-    }
-    */
-    ////////////////////////
     auto observer = game.GetTriggerObserver();
     while (!game.GameOver) {
         auto current = game.GetCurrentPlayer();
