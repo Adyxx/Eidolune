@@ -15,7 +15,7 @@
 #include "Trigger.h"
 #include "TriggerBuilder.h"
 #include "Condition.h"
-
+//#include "Target.h"
 
 std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
     std::cout << "\n🔍 " << prompt << "\n";
@@ -122,7 +122,7 @@ void GameEngine::Run() {
                 card->Owner = player.get();
                 card->Zone = CardZone::DECK;
                 SubscribeCardTriggers(card, game.Observer);
-                deckCard->GameCardCopies.push_back(card); // <== store them
+                deckCard->GameCardCopies.push_back(card);
             }
         }
     }
@@ -130,7 +130,9 @@ void GameEngine::Run() {
 
     for (auto& player : game.Players) {
         for (int i = 0; i < 3; ++i) {
-            DrawCard(nullptr, player.get(), 1);
+            //DrawCard(nullptr, player.get(), 1);
+            DrawCard(nullptr, Target::FromPlayer(player.get()), 1);
+
         }
     }
 

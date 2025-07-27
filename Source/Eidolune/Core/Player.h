@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "Deck.h"
+//#include "GameCard.h"
 
 class GameCard;
 
@@ -30,4 +31,6 @@ public:
 
     Player* Opponent = nullptr;
     Player* GetOpponent() const { return Opponent; } 
+
+    virtual ~Player() = default; 
 };

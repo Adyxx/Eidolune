@@ -12,7 +12,7 @@
         "trigger": "on_play",
         "effect": "deal_damage",
         "value": 3,
-        "targeting": "ENEMY_HERO"
+        "targeting": "ENEMY_BOARD_OR_HERO"
       }
     ]
   },

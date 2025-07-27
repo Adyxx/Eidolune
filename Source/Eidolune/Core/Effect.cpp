@@ -26,9 +26,17 @@ Effect::Effect(const std::string& name,
 std::string Effect::ToString() const {
     return Name;
 }
-
-
+/*
 std::function<void(void*, void*, std::optional<int>)> Effect::GetExecutable() const {
+    const EffectEntry* entry = EffectRegistry::Get(this->ScriptReference);
+    if (!entry) {
+        std::cout << "Effect script_reference not found: " << ScriptReference << "\n";
+        throw std::runtime_error("Effect script_reference not found: " + ScriptReference);
+    }
+    return entry->Func;
+}
+*/
+std::function<void(void*, Target, std::optional<int>)> Effect::GetExecutable() const {
     const EffectEntry* entry = EffectRegistry::Get(this->ScriptReference);
     if (!entry) {
         std::cout << "Effect script_reference not found: " << ScriptReference << "\n";

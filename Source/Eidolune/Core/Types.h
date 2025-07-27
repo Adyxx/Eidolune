@@ -7,7 +7,7 @@ enum class Rarity { COMMON, RARE, EPIC, LEGENDARY };
 enum class CardType { SPELL, UNIT, EQUIPMENT, ASSET, EVENT, TRAP, RITUAL, OTHER };
 enum class RelationshipType { PARTNER, RIVAL, FRIENDLY, LOVE, RESPECT };
 enum class EquipmentSlot { HEAD, BODY, HANDS, LEGS };
-enum class TargetHint { NONE, CARD, PLAYER, CARD_OR_PLAYER, SELF, UNKNOWN };
+enum class TargetHint { NONE, CARD, PLAYER, CARD_OR_PLAYER, SELF, UNKNOWN, ANY };
 enum class TargetSpec { ENEMY_BOARD, ENEMY_HERO, ENEMY_BOARD_OR_HERO, FRIENDLY_BOARD, FRIENDLY_HERO, SELF, ANY, UNKNOWN };
 enum class ListeningZone { BOARD, HAND, DECK, GRAVEYARD, ANY };
 enum class CardZone { DECK, HAND, BOARD, GRAVEYARD, UNKNOWN };

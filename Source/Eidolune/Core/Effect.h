@@ -4,6 +4,7 @@
 #include "Types.h"
 #include <optional>
 #include <functional>
+#include "Target.h"
 
 //#include "../External/json.hpp"
 #include <nlohmann/json.hpp>
@@ -24,6 +25,6 @@ public:
     std::string ToString() const;
     TargetHint GetTargetHint() const;
 
-    std::function<void(void*, void*, std::optional<int>)> GetExecutable() const;
-
+    //std::function<void(void*, void*, std::optional<int>)> GetExecutable() const;
+    std::function<void(void*, Target, std::optional<int>)> GetExecutable() const;
 };

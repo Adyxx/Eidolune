@@ -68,7 +68,7 @@ std::unordered_map<std::string, std::shared_ptr<Card>> CardLoader::LoadAll(const
 
             auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, nullptr, value, target);
             
-            std::string zoneStr = e.value("zone", "BOARD");
+            std::string zoneStr = e.value("zone", "ANY");
             binding->SetZone(ParseListeningZone(zoneStr));
             
             card->EffectBindings.push_back(binding);

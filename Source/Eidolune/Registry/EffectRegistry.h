@@ -6,8 +6,12 @@
 #include <optional>
 #include "Types.h"
 
+//#include "GameActions.h"
+#include "Target.h"
+
 struct EffectEntry {
-    std::function<void(void* source, void* target, std::optional<int> value)> Func;
+    //std::function<void(void* source, void* target, std::optional<int> value)> Func;
+    std::function<void(void* source, Target target, std::optional<int> value)> Func;
     TargetHint Target;
 };
 

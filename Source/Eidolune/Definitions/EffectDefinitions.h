@@ -10,8 +10,17 @@
 #include "TriggerObserver.h"
 #include "GameActions.h"
 
+/*
 void DrawCard(void* source, void* target, std::optional<int> value);
 void ApplyHaste(void* source, void* target, std::optional<int> value);
 void OverrideDeckLimit(void* source, void* target, std::optional<int> value);
 void DealDamage(void* source, void* target, std::optional<int> value);
+*/
+
+void DrawCard(void* source, Target target, std::optional<int> value);
+void ApplyHaste(void* source, Target  target, std::optional<int> value);
+void OverrideDeckLimit(void* source, Target  target, std::optional<int> value);
+void DealDamage(void* source, Target  target, std::optional<int> value);
+
+
 void InitEffectRegistry();

@@ -1,7 +1,7 @@
 #include "Player.h"
 #include <iostream>
 #include "../Definitions/EffectDefinitions.h"
-#include "GameCard.h"
+#include "Target.h"
 
 Player::Player(std::shared_ptr<Deck> deck, int index)
     : DeckRef(deck), PlayerIndex(index) {}
@@ -14,7 +14,9 @@ void Player::StartTurn() {
     std::cout << "▶️ " << GetName() << "'s turn begins.\n";
     if (MaxEnergy < 10) MaxEnergy++;
     Energy = MaxEnergy;
-    DrawCard(nullptr, this, 1);
+    //DrawCard(nullptr, this, 1);
+    DrawCard(nullptr, Target::FromPlayer(this), 1);
+
 }
 
 void Player::EndTurn() {

@@ -5,6 +5,7 @@
 #include <vector>
 #include <optional>
 #include "Card.h"
+#include "Types.h"
 
 class Player;
 
@@ -30,4 +31,6 @@ public:
 
     int CurrentHealth() const;
     std::string ToString() const;
+
+    virtual ~GameCard() = default; 
 };

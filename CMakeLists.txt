@@ -41,6 +41,8 @@ message(STATUS "Include dirs for libpqxx::pqxx = ${_pqxx_inc_dirs}")
 
 add_executable(MainExe ${EIDOLUNE_SOURCES})
 
+target_compile_options(MainExe PRIVATE /GR)
+
 target_link_libraries(MainExe
     PRIVATE
         nlohmann_json::nlohmann_json
