@@ -30,4 +30,5 @@ public:
     std::vector<std::string> GetDeckIssues() const;
 
     std::string ToString() const;
+
 };

@@ -93,7 +93,6 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
     }
 }
 
-
 void GameEngine::Run() {
     
     RegisterTriggerDefinitions();
@@ -105,6 +104,7 @@ void GameEngine::Run() {
     
     auto allCards = CardLoader::LoadAll("Content/Cards/cards.json");
     auto users = UserLoader::LoadUsers("Content/Users/", allCards);
+
 
     auto [deck1, user1] = SelectDeckForUser(users, "Select Player 1");
     auto [deck2, user2] = SelectDeckForUser(users, "Select Player 2");

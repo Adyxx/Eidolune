@@ -9,7 +9,7 @@
 #include "Faction.h"
 #include "Types.h"
 #include "CharacterClassRegistry.h"
-
+#include "../Registry/CharacterAbilityRegistry.h"
 
 class Character {
 public:
@@ -54,5 +54,24 @@ public:
     void ResolveClass() {
         ClassLogic = CharacterClassRegistry::Instance().Resolve(Class);
     }
+
+    CharacterAbility PassiveAbilityLogic;
+    CharacterAbility ActiveAbilityLogic;
+
+    void InitAbilities() {
+        PassiveAbilityLogic = CharacterAbilityRegistry::Instance().Get(PassiveAbilityRef);
+        ActiveAbilityLogic = CharacterAbilityRegistry::Instance().Get(ActiveAbilityRef);
+    }
+
+    void UsePassive(GameState& state) {
+    if (PassiveAbilityLogic.Logic)
+        PassiveAbilityLogic.Logic(*this, state);
+    }
+
+    void UseActive(GameState& state) {
+    if (ActiveAbilityLogic.Logic)
+        ActiveAbilityLogic.Logic(*this, state);
+    }
+
 
 };

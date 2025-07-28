@@ -14,7 +14,6 @@ public:
     std::shared_ptr<Card> CardRef;
     int Quantity;
 
-    //std::shared_ptr<GameCard> GameCardInstance;
     std::vector<std::shared_ptr<GameCard>> GameCardCopies;
 
     DeckCard(std::shared_ptr<Deck> deck, std::shared_ptr<Card> card, int qty = 1);
