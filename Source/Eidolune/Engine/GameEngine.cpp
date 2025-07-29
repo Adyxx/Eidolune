@@ -9,6 +9,8 @@
 #include "../Core/Player.h"
 #include "../Loaders/UserLoader.h"
 #include "../Loaders/CardLoader.h"  
+#include "../Loaders/DeckLoader.h"
+#include "../Loaders/CharacterLoader.h"
 #include "../Core/Card.h"   
 #include "../Core/DeckCard.h"
 #include "TriggerObserver.h"
@@ -17,6 +19,21 @@
 #include "Trigger.h"
 #include "TriggerBuilder.h"
 #include "Condition.h"
+#include "../Core/CardEffectBinding.h"
+#include "../Registry/UserRegistry.h"
+#include "../Registry/DeckRegistry.h"
+#include "../Loaders/DeckCardLoader.h"
+#include <random>
+
+struct DeckInfo {
+    std::string Name;
+    std::vector<std::shared_ptr<DeckCard>> DeckCards;
+};
+
+struct UserInfo {
+    std::string Username;
+    std::vector<DeckInfo> Decks;
+};
 
 
 std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
@@ -49,9 +66,12 @@ std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& 
 std::shared_ptr<Player> CreatePlayerFromDeck(const DeckInfo& deckInfo, const std::string& username) {
     auto deck = std::make_shared<Deck>(nullptr, deckInfo.Name, nullptr);
 
-    for (const auto& card : deckInfo.Cards) {
-        auto deckCard = std::make_shared<DeckCard>(deck, card, 1);
-        deck->DeckCards.push_back(deckCard);
+    std::cout << "Creating deck: " << deck->Name << " for user: " << username << "\n";
+    std::cout << "Deck contains " << deckInfo.DeckCards.size() << " cards.\n";
+
+    for (const auto& deckCard : deckInfo.DeckCards) {
+        auto newDeckCard = std::make_shared<DeckCard>(deck, deckCard->CardRef, deckCard->Quantity);
+        deck->DeckCards.push_back(newDeckCard);
     }
 
     auto player = std::make_shared<Player>(deck, 0);
@@ -93,33 +113,97 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
     }
 }
 
+std::vector<UserInfo> BuildUserDeckInfoList() {
+    std::vector<UserInfo> users;
+
+    std::cout << "[Debug] Building user deck info list...\n";
+    auto allUsers = UserRegistry::Instance().GetAll();
+    auto allDecks = DeckRegistry::Instance().GetAll();
+
+    std::cout << "[Debug] Total users in registry: " << allUsers.size() << "\n";
+    std::cout << "[Debug] Total decks in registry: " << allDecks.size() << "\n";
+
+    for (const auto& [_, user] : allUsers) {
+        std::cout << "[Debug] Processing user: " << user->Username << " (Id: " << user->Id << ")\n";
+
+        UserInfo userInfo;
+        userInfo.Username = user->Username;
+
+        for (const auto& [_, deck] : allDecks) {
+            if (deck->Owner && deck->Owner->Id == user->Id) {
+                std::cout << "  [Debug] Found deck for user: " << deck->Name << "\n";
+
+                DeckInfo deckInfo;
+                deckInfo.Name = deck->Name;
+                for (const auto& deckCard : deck->DeckCards) {
+                    deckInfo.DeckCards.push_back(deckCard);
+                }
+                userInfo.Decks.push_back(deckInfo);
+            }
+        }
+
+        if (userInfo.Decks.empty()) {
+            std::cout << "  [Debug] No decks found for user " << user->Username << "\n";
+        }
+
+        users.push_back(userInfo);
+    }
+    std::cout << "[Debug] Finished building user deck info list.\n";
+    return users;
+}
+
 void GameEngine::Run() {
-    
     RegisterTriggerDefinitions();
     InitEffectRegistry();
     RegisterConditionDefinitions();
 
     std::cout << "🎮 Starting Test Game\n";
     GameState game;
-    
-    auto allCards = CardLoader::LoadAll("Content/Cards/cards.json");
-    auto users = UserLoader::LoadUsers("Content/Users/", allCards);
 
+    CharacterLoader::LoadAll(); 
+    CardLoader::LoadAll();     
+    UserLoader::LoadAll(); 
+    DeckLoader::LoadAll();
+    DeckCardLoader::LoadAll();  
+
+    auto usersFromRegistry = UserRegistry::Instance().GetAll();
+    std::cout << "[Debug] Users loaded from registry:\n";
+    for (const auto& [_, user] : usersFromRegistry) {
+        std::cout << " - " << user->Username << " (Id: " << user->Id << ")\n";
+    }
+
+    auto decksFromRegistry = DeckRegistry::Instance().GetAll();
+    std::cout << "[Debug] Decks loaded from registry:\n";
+    for (const auto& [_, deck] : decksFromRegistry) {
+        std::cout << " - " << deck->Name << ", owner Id: " << (deck->Owner ? std::to_string(deck->Owner->Id) : "null") << "\n";
+    }
+
+
+    std::vector<UserInfo> users = BuildUserDeckInfoList();
 
     auto [deck1, user1] = SelectDeckForUser(users, "Select Player 1");
     auto [deck2, user2] = SelectDeckForUser(users, "Select Player 2");
 
+    std::cout << "Selected Deck 1: " << deck1.Name << " for User: " << user1 << "\n";
+    std::cout << "Selected Deck 2: " << deck2.Name << " for User: " << user2 << "\n";
+
     auto player1 = CreatePlayerFromDeck(deck1, user1);
     auto player2 = CreatePlayerFromDeck(deck2, user2);
 
-    game.Players = { player1, player2 };
+    std::cout << "Created Player 1: " << player1->GetName() << "\n";
+    std::cout << "Created Player 2: " << player2->GetName() << "\n";
 
+    game.Players = { player1, player2 };
     player1->Opponent = player2.get();
     player2->Opponent = player1.get();
 
+    std::cout << " *********************** " << "\n";
     for (auto& player : game.Players) {
+        // Create GameCard instances per DeckCard
         for (auto& deckCard : player->DeckRef->DeckCards) {
+            std::cout << " 🃏 Card: " << deckCard->CardRef->Name << ", Quantity: " << deckCard->Quantity << "\n";
             for (int i = 0; i < deckCard->Quantity; ++i) {
+                std::cout << "🃏 Adding card to deck: " << deckCard->CardRef->Name << "\n";
                 auto card = std::make_shared<GameCard>(deckCard->CardRef);
                 card->Owner = player.get();
                 card->Zone = CardZone::DECK;
@@ -127,13 +211,26 @@ void GameEngine::Run() {
                 deckCard->GameCardCopies.push_back(card);
             }
         }
+
+        // Now flatten all the GameCardCopies into player's DrawPile
+        player->DrawPile.clear();
+        for (auto& deckCard : player->DeckRef->DeckCards) {
+            for (auto& gameCard : deckCard->GameCardCopies) {
+                player->DrawPile.push_back(gameCard);
+            }
+        }
+
+        // Then shuffle player's DrawPile here
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(player->DrawPile.begin(), player->DrawPile.end(), g);
     }
+
+
 
     for (auto& player : game.Players) {
         for (int i = 0; i < 3; ++i) {
-            //DrawCard(nullptr, player.get(), 1);
             DrawCard(nullptr, Target::FromPlayer(player.get()), 1);
-
         }
     }
 

@@ -1,24 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
-
-set(VCPKG_APPLOCAL_DEPS OFF)
-
 project(Eidolune LANGUAGES CXX)
-
-# Optional: Vcpkg toolchain file should be passed via CLI, not hardcoded here:
-# -DCMAKE_TOOLCHAIN_FILE=C:/Users/Doma/vcpkg/scripts/buildsystems/vcpkg.cmake
-
-include(FetchContent)
-
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.12.0
-)
-
-FetchContent_MakeAvailable(nlohmann_json)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -34,23 +19,19 @@ file(GLOB_RECURSE EIDOLUNE_SOURCES
     "Source/Eidolune/Abilities/ClassAbilities/*.cpp"
     "Source/Eidolune/Abilities/Other/*.cpp"
     "Source/Eidolune/Main/main.cpp"
+    "Source/Eidolune/Http/ApiClient.cpp"
 )
-
-
-find_package(libpqxx CONFIG REQUIRED)
-
-message(STATUS "Found libpqxx targets:")
-get_target_property(_pqxx_inc_dirs libpqxx::pqxx INTERFACE_INCLUDE_DIRECTORIES)
-message(STATUS "Include dirs for libpqxx::pqxx = ${_pqxx_inc_dirs}")
 
 add_executable(MainExe ${EIDOLUNE_SOURCES})
 
-target_compile_options(MainExe PRIVATE /GR)
+# Link to vcpkg-installed libraries
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 target_link_libraries(MainExe
     PRIVATE
+        cpr::cpr
         nlohmann_json::nlohmann_json
-        libpqxx::pqxx
 )
 
 target_include_directories(MainExe PRIVATE
@@ -66,5 +47,7 @@ target_include_directories(MainExe PRIVATE
     Source/Eidolune/Gacha
     Source/Eidolune/Abilities/ClassAbilities
     Source/Eidolune/Abilities/Other
-    C:/Users/Doma/vcpkg/installed/x64-windows/include
+    Source/Eidolune/Http
 )
+
+# cmake -S . -B build -G "Visual Studio 17 2022" -T ClangCL,host=x86 -A win32 -DCMAKE_TOOLCHAIN_FILE=C:/Users/Doma/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows

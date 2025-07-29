@@ -2,8 +2,12 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-
-using json = nlohmann::json;
+#include "../Http/ApiClient.h" 
+#include "../Core/Trigger.h"
+#include "../Core/Effect.h"
+#include "../Core/Condition.h"
+#include "../Core/CardEffectBinding.h"
+#include "../Registry/CardRegistry.h"
 
 static Rarity ParseRarity(const std::string& s) {
     if (s == "COMMON") return Rarity::COMMON;
@@ -38,53 +42,69 @@ ListeningZone ParseListeningZone(const std::string& str) {
     return ListeningZone::BOARD;
 }
 
-std::unordered_map<std::string, std::shared_ptr<Card>> CardLoader::LoadAll(const std::string& filename) {
-    std::ifstream file(filename);
-    
+std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
+    std::cout << "🔄 Loading Cards from API...\n";
 
-    if (!file.is_open()) throw std::runtime_error("Could not open card JSON file.");
+    auto jsonArray = ApiClient::Get("cards/");
+    std::unordered_map<int, std::shared_ptr<Card>> result;
 
-    json cardArray;
-    file >> cardArray;
+    for (const auto& c : jsonArray) {
+        if (!c.contains("id") || !c.contains("name") || !c.contains("cost") || !c.contains("rarity") || !c.contains("type")) {
+            std::cerr << "❌ Skipping card — missing required fields: " << c.dump() << "\n";
+            continue;
+        }
 
-    std::unordered_map<std::string, std::shared_ptr<Card>> result;
-
-    for (const auto& c : cardArray) {
         auto card = std::make_shared<Card>();
         card->Name = c["name"];
         card->Cost = c["cost"];
-        card->CardRarity = ParseRarity(c["rarity"]);
-        card->Type = ParseCardType(c["type"]);
+
+        try {
+            card->CardRarity = ParseRarity(c["rarity"]);
+            card->Type = ParseCardType(c["type"]);
+        } catch (const std::exception& e) {
+            std::cerr << "❌ Parse error: " << e.what() << " in card: " << c.dump() << "\n";
+            continue;
+        }
+
         card->Text = c.value("text", "");
 
         if (c.contains("power")) card->Power = c["power"];
         if (c.contains("health")) card->Health = c["health"];
 
-        for (const auto& e : c["effectBindings"]) {
-            auto trigger = std::make_shared<Trigger>(e["trigger"]);
-            auto effect = std::make_shared<Effect>(e["effect"]);
-            std::optional<int> value = e.contains("value") ? std::make_optional(e["value"].get<int>()) : std::nullopt;
-            std::optional<TargetSpec> target = e.contains("targeting") ? std::make_optional(ParseTargetSpec(e["targeting"])) : std::nullopt;
+        if (c.contains("effectBindings") && c["effectBindings"].is_array()) {
+            for (const auto& e : c["effectBindings"]) {
+                if (!e.contains("trigger") || !e.contains("effect")) {
+                    std::cerr << "⚠️ Skipping effectBinding — missing trigger/effect: " << e.dump() << "\n";
+                    continue;
+                }
 
-            std::shared_ptr<Condition> condition = nullptr;
-            if (e.contains("condition") && e["condition"].is_object()) {
-                const auto& condJson = e["condition"];
-                std::string name = condJson.value("name", "unnamed_condition");
-                std::string scriptRef = condJson.value("ref", "");
-                std::string desc = condJson.value("description", "");
-                condition = std::make_shared<Condition>(name, scriptRef, desc);
+                auto trigger = std::make_shared<Trigger>(e["trigger"]);
+                auto effect = std::make_shared<Effect>(e["effect"]);
+
+                std::optional<int> value = e.contains("value") ? std::make_optional(e["value"].get<int>()) : std::nullopt;
+                std::optional<TargetSpec> target = e.contains("targeting") ? std::make_optional(ParseTargetSpec(e["targeting"])) : std::nullopt;
+
+                std::shared_ptr<Condition> condition = nullptr;
+                if (e.contains("condition") && e["condition"].is_object()) {
+                    const auto& condJson = e["condition"];
+                    condition = std::make_shared<Condition>(
+                        condJson.value("name", "unnamed_condition"),
+                        condJson.value("ref", ""),
+                        condJson.value("description", "")
+                    );
+                }
+
+                auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, condition, value, target);
+                std::string zoneStr = e.value("zone", "ANY");
+                binding->SetZone(ParseListeningZone(zoneStr));
+
+                card->EffectBindings.push_back(binding);
             }
-
-            auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, condition, value, target);
-
-            std::string zoneStr = e.value("zone", "ANY");
-            binding->SetZone(ParseListeningZone(zoneStr));
-
-            card->EffectBindings.push_back(binding);
         }
 
-
-        result[c["id"]] = card;
+        int cardId = c["id"].get<int>();
+        result[cardId] = card;
+        CardRegistry::Instance().Register(cardId, card);
     }
 
     return result;

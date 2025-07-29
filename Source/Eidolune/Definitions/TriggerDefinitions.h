@@ -1,5 +1,5 @@
 #pragma once
 
-class TriggerInfo;
+struct TriggerInfo;
 
 void RegisterTriggerDefinitions();

@@ -9,3 +9,34 @@
 /cmake_install.cmake
 /Makefile
 /compile_commands.json
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# SQLite database
+db.sqlite3
+
+# Django/Migrations cache
+*.log
+*.pot
+*.pyc
+*.pyd
+
+# VS Code settings
+.vscode/
+
+# Environment files
+.env
+*.env
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Python virtualenv
+venv/
+ENV/
+env/

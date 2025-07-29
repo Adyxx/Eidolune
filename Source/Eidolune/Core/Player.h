@@ -14,6 +14,7 @@ public:
     std::vector<std::shared_ptr<GameCard>> Hand;
     std::vector<std::shared_ptr<GameCard>> Board;
     std::vector<std::shared_ptr<GameCard>> Graveyard;
+    std::vector<std::shared_ptr<GameCard>> DrawPile;
 
     int Health = 20;
     int MaxHealth = 20;

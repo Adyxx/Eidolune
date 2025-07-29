@@ -4,7 +4,7 @@
 #include "GearEffectBinding.h"
 #include <vector>
 
-struct Gear {
+class Gear {
     std::string id;
     std::string name;
     EquipmentSlot slot;

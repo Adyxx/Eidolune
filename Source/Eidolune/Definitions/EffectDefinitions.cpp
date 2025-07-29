@@ -25,7 +25,7 @@ void DrawCard(void* source, Target target, std::optional<int> value) {
     std::cout << "[Effect] Drawing " << drawAmount << " card(s) for " << player->GetName() << "\n";
 
     for (int i = 0; i < drawAmount; ++i) {
-        if (player->DeckRef->DeckCards.empty()) {
+        if (player->DrawPile.empty()) {
             std::cout << "❌ Deck is empty. Cannot draw.\n";
             break;
         }
@@ -36,17 +36,8 @@ void DrawCard(void* source, Target target, std::optional<int> value) {
             break;
         }
 
-        auto deckCard = player->DeckRef->DeckCards.back();
-        player->DeckRef->DeckCards.pop_back();
-
-        //auto card = std::make_shared<GameCard>(deckCard->CardRef);
-        if (deckCard->GameCardCopies.empty()) {
-            std::cout << "❌ No copies left for card: " << deckCard->CardRef->Name << "\n";
-            continue;
-        }
-        auto card = deckCard->GameCardCopies.back();
-        deckCard->GameCardCopies.pop_back();
-
+        auto card = player->DrawPile.back();
+        player->DrawPile.pop_back();
         card->Owner = player;
         card->Zone = CardZone::HAND;
         player->Hand.push_back(card);

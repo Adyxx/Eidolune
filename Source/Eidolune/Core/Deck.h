@@ -12,11 +12,11 @@ class Deck {
 public:
     std::shared_ptr<User> Owner;
     std::string Name;
-    std::string Description;
-
+    
     std::shared_ptr<Character> MainCharacter;
     std::shared_ptr<Character> PartnerCharacter;
 
+    std::string Description;
     std::vector<std::shared_ptr<DeckCard>> DeckCards;
 
     Deck(std::shared_ptr<User> user,

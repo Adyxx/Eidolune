@@ -59,8 +59,18 @@ public:
     CharacterAbility ActiveAbilityLogic;
 
     void InitAbilities() {
-        PassiveAbilityLogic = CharacterAbilityRegistry::Instance().Get(PassiveAbilityRef);
-        ActiveAbilityLogic = CharacterAbilityRegistry::Instance().Get(ActiveAbilityRef);
+        if (!PassiveAbilityRef.empty()) {
+            PassiveAbilityLogic = CharacterAbilityRegistry::Instance().Get(PassiveAbilityRef);
+        } else {
+            PassiveAbilityLogic = CharacterAbility{};
+        }
+
+        if (!ActiveAbilityRef.empty()) {
+            ActiveAbilityLogic = CharacterAbilityRegistry::Instance().Get(ActiveAbilityRef);
+        } else {
+            ActiveAbilityLogic = CharacterAbility{};
+        }
+
     }
 
     void UsePassive(GameState& state) {

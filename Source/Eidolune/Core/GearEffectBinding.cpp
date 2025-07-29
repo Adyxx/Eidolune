@@ -18,10 +18,5 @@ GearEffectBinding::GearEffectBinding(std::shared_ptr<Gear> gear,
 
 
 std::string GearEffectBinding::ToString() const {
-  return "GearEffectBinding: " + (OwnerGear ? OwnerGear->ToString() : "Unknown Gear") +
-         ", Trigger: " + (BoundTrigger ? BoundTrigger->ToString() : "None") +
-         ", Effect: " + (BoundEffect ? BoundEffect->ToString() : "None") +
-         ", Condition: " + (BoundCondition ? BoundCondition->ToString() : "None") +
-         ", Value: " + (Value.has_value() ? std::to_string(Value.value()) : "None") +
-         ", TargetSpec: " + TargetSpec;
+  return "ToString() not implemented for GearEffectBinding";
 }
