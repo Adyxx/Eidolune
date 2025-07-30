@@ -23,6 +23,11 @@
 #include "../Registry/UserRegistry.h"
 #include "../Registry/DeckRegistry.h"
 #include "../Loaders/DeckCardLoader.h"
+#include "../Loaders/CardEffectBindingLoader.h"
+#include "../Loaders/ConditionLoader.h"
+#include "../Loaders/EffectLoader.h"
+#include "../Loaders/TriggerLoader.h"
+
 #include <random>
 
 struct DeckInfo {
@@ -80,37 +85,71 @@ std::shared_ptr<Player> CreatePlayerFromDeck(const DeckInfo& deckInfo, const std
 }
 
 void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-    for (auto& originalBinding : card->Model->EffectBindings) {
+    std::cout << "\n🔔 SubscribeCardTriggers ENTERED for card: " << card->GetName() << "\n";
+
+    if (card->Model->EffectBindings.empty()) {
+        std::cout << "⚠️ No effect bindings found on card model: " << card->Model->Name << "\n";
+        return;
+    }
+
+    for (const auto& originalBinding : card->Model->EffectBindings) {
+        std::cout << "🔍 Found EffectBinding. Attempting to clone and subscribe...\n";
+
         auto binding = std::make_shared<CardEffectBinding>(*originalBinding);
+
+        if (!binding) {
+            std::cout << "❌ Failed to copy original binding.\n";
+            continue;
+        }
+
         auto triggerPtr = binding->GetTrigger();
-        if (!triggerPtr) continue;
+        if (!triggerPtr) {
+            std::cout << "⚠️ Skipping binding: no trigger found.\n";
+            continue;
+        }
 
         std::string triggerCode = triggerPtr->ScriptReference;
-        auto* triggerMeta = TriggerRegistry::Get(triggerCode);
-        if (!triggerMeta) continue;
+        std::cout << "📛 Trigger code: " << triggerCode << "\n";
 
-        auto eventName = triggerMeta->Event;
+        auto* triggerMeta = TriggerRegistry::Instance().GetInfo(triggerCode);
+        if (!triggerMeta) {
+            std::cout << "❌ No trigger metadata found for code: " << triggerCode << "\n";
+            continue;
+        }
 
-        binding->EventGameCard = card; 
+        std::string eventName = triggerMeta->Event;
+        std::cout << "📡 Subscribing to event: " << eventName << "\n";
 
+        binding->EventGameCard = card;
+
+        std::cout << "🧱 Building trigger handler from binding...\n";
+        std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
         auto builder = TriggerBuilder::Build(binding);
 
-        std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
         auto conditionPtr = binding->GetCondition();
         if (conditionPtr) {
             std::string conditionCode = conditionPtr->ToString();
+            std::cout << "🧪 Binding has condition: " << conditionCode << "\n";
+
             effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
                 if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetValue().value_or(0))) {
+                    std::cout << "✅ Condition met. Executing effect.\n";
                     builder(ctx);
+                } else {
+                    std::cout << "🚫 Condition not met. Skipping effect.\n";
                 }
             };
         } else {
+            std::cout << "☑️ No condition found. Effect will always trigger.\n";
             effectToRegister = builder;
         }
 
         observer->Subscribe(eventName, effectToRegister);
-        std::cout << "🧠 Subscribed " << card->GetName() << " to trigger '" << eventName << "'\n";
+        std::cout << "✅ Subscribed " << card->GetName()
+                  << " to trigger '" << eventName << "' successfully.\n";
     }
+
+    std::cout << "🔚 Finished subscribing triggers for card: " << card->GetName() << "\n\n";
 }
 
 std::vector<UserInfo> BuildUserDeckInfoList() {
@@ -153,18 +192,30 @@ std::vector<UserInfo> BuildUserDeckInfoList() {
 }
 
 void GameEngine::Run() {
-    RegisterTriggerDefinitions();
-    InitEffectRegistry();
-    RegisterConditionDefinitions();
-
     std::cout << "🎮 Starting Test Game\n";
     GameState game;
 
-    CharacterLoader::LoadAll(); 
-    CardLoader::LoadAll();     
-    UserLoader::LoadAll(); 
+    RegisterConditionFunctions();
+    RegisterEffectFunctions();
+
+    // 🔹 1. Load metadata-based types
+    TriggerLoader::LoadAll();
+    EffectLoader::LoadAll();
+    ConditionLoader::LoadAll();
+
+    // 🔹 2. Load static content
+    CharacterLoader::LoadAll();
+    CardLoader::LoadAll();
+    CardEffectBindingLoader::LoadAll();
+
+    // 🔹 3. Load dynamic/player-specific content
+    UserLoader::LoadAll();
     DeckLoader::LoadAll();
-    DeckCardLoader::LoadAll();  
+
+    // 🔹 4. DeckCards reference both Decks and Cards
+    DeckCardLoader::LoadAll();
+    
+
 
     auto usersFromRegistry = UserRegistry::Instance().GetAll();
     std::cout << "[Debug] Users loaded from registry:\n";

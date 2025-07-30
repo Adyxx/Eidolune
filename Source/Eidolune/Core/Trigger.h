@@ -3,12 +3,15 @@
 #include <optional>
 #include "Types.h"
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 class Trigger {
 public:
     std::string ScriptReference;
     std::string Description;
-
-    Trigger(const std::string& ref, const std::string& desc = "");
+    std::string Event;
 
     std::string ToString() const;
+    Trigger(const json& j);
 };

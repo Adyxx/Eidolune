@@ -16,4 +16,4 @@ void OverrideDeckLimit(void* source, Target  target, std::optional<int> value);
 void DealDamage(void* source, Target  target, std::optional<int> value);
 
 
-void InitEffectRegistry();
+void RegisterEffectFunctions();

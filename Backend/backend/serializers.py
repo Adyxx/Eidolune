@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from core.models import Card, Deck, Character, DeckCard, User
+from core.models import Card, Deck, Character, DeckCard, User, Effect, Condition, Trigger, CardEffectBinding
 
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,4 +26,24 @@ class UserSerializer(serializers.ModelSerializer):
 class DeckCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeckCard
+        fields = '__all__'
+
+class TriggerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trigger
+        fields = '__all__'
+
+class EffectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Effect
+        fields = '__all__'
+
+class ConditionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Condition
+        fields = '__all__'
+
+class CardEffectBindingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CardEffectBinding
         fields = '__all__'

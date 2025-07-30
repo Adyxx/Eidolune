@@ -25,6 +25,6 @@ std::unordered_map<int, std::shared_ptr<User>> UserLoader::LoadAll() {
         result[id] = user;
         UserRegistry::Instance().Register(id, user);
     }
-
+    std::cout << "✅ Loaded " << result.size() << " users.\n";
     return result;
 }

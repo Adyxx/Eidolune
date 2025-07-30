@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from backend.api_views import CardViewSet, DeckViewSet, CharacterViewSet, UserViewSet, DeckCardViewSet
+from backend.api_views import CardViewSet, DeckViewSet, CharacterViewSet, UserViewSet, DeckCardViewSet, TriggerViewSet, EffectViewSet, ConditionViewSet, CardEffectBindingViewSet
 
 router = DefaultRouter()
 router.register(r'cards', CardViewSet)
@@ -25,6 +25,10 @@ router.register(r'decks', DeckViewSet)
 router.register(r'characters', CharacterViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'deckcards', DeckCardViewSet)
+router.register(r'triggers', TriggerViewSet)
+router.register(r'effects', EffectViewSet)
+router.register(r'conditions', ConditionViewSet)
+router.register(r'effectbindings', CardEffectBindingViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -17,8 +17,14 @@ public:
     std::string ScriptReference;
     bool RequiresValue = false;
     bool RequiresTarget = false;
+    TargetHint targetInfo;
+    std::function<void(void*, Target, std::optional<int>)> Executable;
 
     Effect(const std::string& name, const std::string& ref, bool requiresValue, bool requiresTarget, const std::string& desc = "");
+    
+    Effect(const std::string& name, std::function<void(void*, Target, std::optional<int>)> func)
+        : ScriptReference(name), Executable(std::move(func)) {}
+
     Effect(const std::string& name); 
     Effect(const json& j);
 

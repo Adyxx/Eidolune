@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include "GameCard.h"
 #include "Types.h"
+#include "../Registry/EffectRegistry.h"
+#include "../Registry/TriggerRegistry.h"
+
 
 class Card;
 class Trigger;
@@ -57,13 +60,13 @@ public:
     }
 
 
-
     CardEffectBinding(std::shared_ptr<Card> card,
                       std::shared_ptr<Trigger> trigger,
                       std::shared_ptr<Effect> effect,
                       std::shared_ptr<Condition> condition = nullptr,
                       std::optional<int> value = std::nullopt,
                       std::optional<TargetSpec> targetSpec = std::nullopt);
+    
 
     std::string ToString() const;
 

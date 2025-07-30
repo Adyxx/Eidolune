@@ -64,10 +64,11 @@ void DealDamage(void* source, Target target, std::optional<int> value) {
 }
 
 
-
-void InitEffectRegistry() {
-    EffectRegistry::Register("apply_haste", { ApplyHaste, TargetHint::CARD });
-    EffectRegistry::Register("draw_card", { DrawCard, TargetHint::PLAYER });
-    EffectRegistry::Register("override_deck_limit", { OverrideDeckLimit, TargetHint::CARD });
-    EffectRegistry::Register("deal_damage", { DealDamage, TargetHint::NONE });
+void RegisterEffectFunctions() {
+    std::cout << "📦 Registering core effect functions...\n";
+    EffectRegistry::Instance().Register("draw_card", DrawCard);
+    EffectRegistry::Instance().Register("ApplyHaste", ApplyHaste);
+    EffectRegistry::Instance().Register("OverrideDeckLimit", OverrideDeckLimit);
+    EffectRegistry::Instance().Register("DealDamage", DealDamage);
+    std::cout << "✅ Core effect functions registered.\n";
 }

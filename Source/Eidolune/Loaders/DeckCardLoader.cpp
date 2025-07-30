@@ -27,6 +27,6 @@ std::unordered_map<int, std::shared_ptr<DeckCard>> DeckCardLoader::LoadAll() {
         auto deckCard = std::make_shared<DeckCard>(deck, card, qty);
         deck->DeckCards.push_back(deckCard);
     }
-
+    std::cout << "✅ Loaded " << result.size() << " deckCards.\n";
     return result;
 }

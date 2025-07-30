@@ -24,7 +24,7 @@ static CardType ParseCardType(const std::string& s) {
     if (s == "ASSET") return CardType::ASSET;
     throw std::runtime_error("Unknown card type: " + s);
 }
-
+/*
 static TargetSpec ParseTargetSpec(const std::string& s) {
     if (s == "ENEMY_BOARD") return TargetSpec::ENEMY_BOARD;
     if (s == "ENEMY_HERO") return TargetSpec::ENEMY_HERO;
@@ -34,7 +34,7 @@ static TargetSpec ParseTargetSpec(const std::string& s) {
     if (s == "ANY") return TargetSpec::ANY;
     return TargetSpec::UNKNOWN;
 }
-
+*/
 ListeningZone ParseListeningZone(const std::string& str) {
     if (str == "HAND") return ListeningZone::HAND;
     if (str == "DECK") return ListeningZone::DECK;
@@ -70,7 +70,7 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
 
         if (c.contains("power")) card->Power = c["power"];
         if (c.contains("health")) card->Health = c["health"];
-
+        /*
         if (c.contains("effectBindings") && c["effectBindings"].is_array()) {
             for (const auto& e : c["effectBindings"]) {
                 if (!e.contains("trigger") || !e.contains("effect")) {
@@ -101,11 +101,13 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
                 card->EffectBindings.push_back(binding);
             }
         }
+        */
 
+        
         int cardId = c["id"].get<int>();
         result[cardId] = card;
         CardRegistry::Instance().Register(cardId, card);
     }
-
+    std::cout << "✅ Loaded " << result.size() << " cards.\n";
     return result;
 }

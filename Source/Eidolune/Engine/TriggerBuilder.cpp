@@ -17,27 +17,19 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
         auto* triggerCard = static_cast<GameCard*>(ctx.at("source"));
         auto* triggerOwner = static_cast<Player*>(ctx.at("owner"));
 
-        //std::cout << "🧪 Trigger fired: " << binding->GetTrigger()->ScriptReference << "\n";
-
+        std::cout << "TriggerBuilder ENTERED\n";
         if (!eventCardPtr || !triggerCard) {
             std::cout << "❌ Missing card references in context\n";
             return;
         }
-
+        std::cout << "AAAAAA\n";
         auto* eventCard = eventCardPtr.get();
-        //std::cout << "🔗 Binding ptr: " << binding.get() << "\n";
 
         switch (binding->GetScope()) {
             case TriggerScope::SELF:
-                //std::cout << "SELF\n";
-                //std::cout << "  eventCard:  ID = " << eventCard->Id << ", Name = " << eventCard->Model->Name << "\n";
-                //std::cout << "  triggerCard: ID = " << triggerCard->Id << ", Name = " << triggerCard->Model->Name << "\n";
-                
                 if (eventCard->Id != triggerCard->Id) {
-                    // std::cout << "  ❌ Skipping: ID mismatch\n";
                     return;
                 }
-
                 break;
 
             case TriggerScope::OTHER_FRIENDLY:
@@ -61,18 +53,19 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
             default:
                 std::cout << "❌ Unhandled TriggerScope: " << "\n";
         }
+        std::cout << "BBBBBB\n";
 
         if (binding->HasZone()) {
             if (eventCard->Zone != binding->GetZoneAsCardZone()) return;
         }
-
+        std::cout << "CCCCCC\n";
         auto effect = binding->GetEffect();
         auto effectFunc = effect->GetExecutable();
         if (!effectFunc) {
             std::cout << "❌ Effect function is null.\n";
             return;
         }
-
+        std::cout << "DDDDDDD\n";
         TargetSpec targetingSpec = binding->GetTargetSpec().value_or(TargetSpec::SELF);
 
         bool targetRequired = effect->RequiresTarget;
@@ -80,7 +73,7 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
         std::vector<Target> possibleTargets = GameActions::GetTargets(triggerOwner, triggerOwner->GetOpponent(), targetingSpec);
 
         Target resolvedTarget = { Target::Type::NONE, nullptr };
-
+        std::cout << "EEEEEEE\n";
         if (possibleTargets.empty()) {
             if (!targetRequired) {
                 resolvedTarget = Target::FromPlayer(triggerOwner);
@@ -98,14 +91,10 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
             }
             resolvedTarget = chosen;
         }
-
+        std::cout << "FFFFFFF\n";
         std::cout << "✨ Trigger fired: " << binding->GetTrigger()->ScriptReference << "\n";
-        //std::cout << "   → Trigger: " << triggerCard->ToString() << "\n";
-        //std::cout << "   → EventCard: " << eventCard->ToString() << "\n";
 
         effectFunc(eventCard, resolvedTarget, binding->GetValue());
-
-
     };
 }
 

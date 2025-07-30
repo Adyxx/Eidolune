@@ -51,7 +51,6 @@ std::unordered_map<int, std::shared_ptr<Character>> CharacterLoader::LoadAll() {
             character->ImagePath = c.value("image_path", "");
             character->ModelFilePath = c.value("model_file_path", "");
 
-            // ✅ Faction by int ID
             if (c.contains("faction_id") && c["faction_id"].is_number_integer()) {
                 character->BelongsToFaction = FactionRegistry::Instance().Get(c["faction_id"]);
             }
@@ -92,6 +91,6 @@ std::unordered_map<int, std::shared_ptr<Character>> CharacterLoader::LoadAll() {
             std::cerr << "❌ Error loading character: " << e.what() << " in entry: " << c.dump() << "\n";
         }
     }
-
+    std::cout << "✅ Loaded " << result.size() << " characters.\n";
     return result;
 }

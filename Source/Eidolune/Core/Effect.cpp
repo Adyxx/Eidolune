@@ -1,14 +1,17 @@
 
 
 #include "Effect.h"
-#include "EffectRegistry.h"
+#include "../Registry/EffectRegistry.h"
 #include <iostream>
 
 Effect::Effect(const std::string& name) : Name(name) {}
 
 Effect::Effect(const json& j) {
-    Name = j.get<std::string>();
-    ScriptReference = Name;
+    Name = j.value("name", "Unnamed Effect");
+    ScriptReference = j.value("script_reference", Name);
+    Description = j.value("description", "");
+    RequiresValue = j.value("requires_value", false);
+    RequiresTarget = j.value("requires_target", false);
 }
 
 Effect::Effect(const std::string& name,
@@ -26,26 +29,25 @@ Effect::Effect(const std::string& name,
 std::string Effect::ToString() const {
     return Name;
 }
-/*
-std::function<void(void*, void*, std::optional<int>)> Effect::GetExecutable() const {
-    const EffectEntry* entry = EffectRegistry::Get(this->ScriptReference);
-    if (!entry) {
-        std::cout << "Effect script_reference not found: " << ScriptReference << "\n";
-        throw std::runtime_error("Effect script_reference not found: " + ScriptReference);
-    }
-    return entry->Func;
-}
-*/
+
 std::function<void(void*, Target, std::optional<int>)> Effect::GetExecutable() const {
-    const EffectEntry* entry = EffectRegistry::Get(this->ScriptReference);
-    if (!entry) {
-        std::cout << "Effect script_reference not found: " << ScriptReference << "\n";
-        throw std::runtime_error("Effect script_reference not found: " + ScriptReference);
+    /*
+    auto effectPtr = EffectRegistry::Instance().Get(this->ScriptReference);
+    if (!effectPtr) {
+        std::cout << "Effect not found: " << ScriptReference << "\n";
+        throw std::runtime_error("Effect not found: " + ScriptReference);
     }
-    return entry->Func;
+    return effectPtr->GetExecutable();
+    */
+
+    if (!Executable) {
+        std::cout << "⚠️ [Effect::GetExecutable] Executable is NULL for: " << ScriptReference << "\n";
+    }
+    return Executable;
+
 }
 
 TargetHint Effect::GetTargetHint() const {
-    const EffectEntry* entry = EffectRegistry::Get(ScriptReference);
-    return entry ? entry->Target : TargetHint::NONE;
+    auto effectPtr = EffectRegistry::Instance().Get(ScriptReference);
+    return effectPtr ? effectPtr->GetTargetHint() : TargetHint::NONE;
 }

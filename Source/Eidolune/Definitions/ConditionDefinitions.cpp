@@ -1,17 +1,15 @@
-#include "ConditionRegistry.h"
 #include "ConditionDefinitions.h"
-#include "../Core/GameCard.h"
-#include "../Core/Player.h"
 
-void RegisterConditionDefinitions() {
-    ConditionRegistry::Register("owner_below_10_health", [](std::shared_ptr<GameCard> card, int value) {
-        if (!card || !card->Owner) return false;
-        return card->Owner->Health < 10;
-    });
+bool owner_below_10_health(std::shared_ptr<GameCard> card, int value) {
+    if (!card || !card->Owner) return false;
+    return card->Owner->Health < 10;
+}
 
-    ConditionRegistry::Register("card_damaged", [](std::shared_ptr<GameCard> card, int value) {
-        return card && card->DamageTaken > 0;
-    });
+bool card_damaged(std::shared_ptr<GameCard> card, int value) {
+    return card && card->DamageTaken > 0;
+}
 
-
+void RegisterConditionFunctions() {
+    ConditionRegistry::Instance().RegisterFunction("owner_below_10_health", owner_below_10_health);
+    ConditionRegistry::Instance().RegisterFunction("card_damaged", card_damaged);
 }

@@ -21,3 +21,5 @@ class Card(models.Model):
 
     text = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.name
