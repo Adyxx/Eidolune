@@ -2,7 +2,8 @@ from django.db import models
 from .enums import Rarity, CardType
 from .faction import Faction
 from .subtype import Subtype
-
+from .character import Character
+from django.core.exceptions import ValidationError
 
 class Card(models.Model):
     name = models.CharField(max_length=100)
@@ -20,6 +21,18 @@ class Card(models.Model):
     is_character_exclusive = models.BooleanField(default=False)
 
     text = models.TextField(blank=True)
+    
+    character = models.ForeignKey(Character, null=True, blank=True, on_delete=models.SET_NULL, related_name='cards')
+
+    def clean(self):
+        if self.is_character_card and not self.character:
+            raise ValidationError("Character card must have a character assigned.")
+
+        if not self.is_character_card and self.is_character_exclusive and not self.character:
+            raise ValidationError("Character-exclusive cards must have a character assigned.")
+
+        if not self.is_character_card and self.character and not self.is_character_exclusive:
+            raise ValidationError("Non-character cards should not have a character unless marked exclusive.")
 
     def __str__(self):
         return self.name

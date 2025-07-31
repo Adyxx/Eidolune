@@ -67,8 +67,8 @@ void DealDamage(void* source, Target target, std::optional<int> value) {
 void RegisterEffectFunctions() {
     std::cout << "📦 Registering core effect functions...\n";
     EffectRegistry::Instance().Register("draw_card", DrawCard);
-    EffectRegistry::Instance().Register("ApplyHaste", ApplyHaste);
-    EffectRegistry::Instance().Register("OverrideDeckLimit", OverrideDeckLimit);
-    EffectRegistry::Instance().Register("DealDamage", DealDamage);
+    EffectRegistry::Instance().Register("apply_haste", ApplyHaste);
+    EffectRegistry::Instance().Register("override_deck_limit", OverrideDeckLimit);
+    EffectRegistry::Instance().Register("deal_damage", DealDamage);
     std::cout << "✅ Core effect functions registered.\n";
 }

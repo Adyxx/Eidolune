@@ -13,6 +13,7 @@
 
 class Character {
 public:
+    int ID = -1;
     std::string Name;
     int Age = 0;
     float HeightCm = 0.0f;

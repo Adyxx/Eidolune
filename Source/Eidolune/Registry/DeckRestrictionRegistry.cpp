@@ -1,19 +1,12 @@
 #include "DeckRestrictionRegistry.h"
-#include <stdexcept>
 
-DeckRestrictionRegistry& DeckRestrictionRegistry::Instance() {
-    static DeckRestrictionRegistry instance;
-    return instance;
+static std::unordered_map<std::string, DeckRestrictionFunction> registry;
+
+void DeckRestrictionRegistry::Register(const std::string& ref, DeckRestrictionFunction func) {
+    registry[ref] = func;
 }
 
-void DeckRestrictionRegistry::Register(const std::string& id, const DeckRestriction& logic) {
-    Restrictions[id] = logic;
-}
-
-DeckRestriction DeckRestrictionRegistry::Get(const std::string& id) const {
-    auto it = Restrictions.find(id);
-    if (it != Restrictions.end()) {
-        return it->second;
-    }
-    throw std::runtime_error("DeckRestriction not found: " + id);
+DeckRestrictionFunction DeckRestrictionRegistry::Get(const std::string& ref) {
+    auto it = registry.find(ref);
+    return (it != registry.end()) ? it->second : nullptr;
 }

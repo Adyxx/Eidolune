@@ -14,6 +14,7 @@ class CardEffectBinding;
 
 class Card {
 public:
+    int ID = -1;
     std::string Name;
     std::string ImagePath;
     int Cost;
@@ -36,4 +37,5 @@ public:
     Card();
     void Validate() const;
     std::string ToString() const;
+    bool HasSubtype(const std::string& targetSubtype) const;
 };

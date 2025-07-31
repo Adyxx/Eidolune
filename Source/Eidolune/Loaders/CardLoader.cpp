@@ -8,6 +8,8 @@
 #include "../Core/Condition.h"
 #include "../Core/CardEffectBinding.h"
 #include "../Registry/CardRegistry.h"
+#include "../Registry/CharacterRegistry.h"
+#include "../Registry/SubtypeRegistry.h"
 
 static Rarity ParseRarity(const std::string& s) {
     if (s == "COMMON") return Rarity::COMMON;
@@ -68,44 +70,47 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
 
         card->Text = c.value("text", "");
 
-        if (c.contains("power")) card->Power = c["power"];
-        if (c.contains("health")) card->Health = c["health"];
-        /*
-        if (c.contains("effectBindings") && c["effectBindings"].is_array()) {
-            for (const auto& e : c["effectBindings"]) {
-                if (!e.contains("trigger") || !e.contains("effect")) {
-                    std::cerr << "⚠️ Skipping effectBinding — missing trigger/effect: " << e.dump() << "\n";
-                    continue;
-                }
+        if (c.contains("power") && !c["power"].is_null()) {
+            card->Power = c["power"];
+        } else {
+            card->Power = 0; 
+        }
 
-                auto trigger = std::make_shared<Trigger>(e["trigger"]);
-                auto effect = std::make_shared<Effect>(e["effect"]);
+        if (c.contains("health") && !c["health"].is_null()) {
+            card->Health = c["health"];
+        } else {
+            card->Health = 0;
+        }
 
-                std::optional<int> value = e.contains("value") ? std::make_optional(e["value"].get<int>()) : std::nullopt;
-                std::optional<TargetSpec> target = e.contains("targeting") ? std::make_optional(ParseTargetSpec(e["targeting"])) : std::nullopt;
+        if (c.contains("is_character_card")) {
+            card->IsCharacterCard = c["is_character_card"];
+        }
+        if (c.contains("is_character_exclusive")) {
+            card->IsCharacterExclusive = c["is_character_exclusive"];
+        }
 
-                std::shared_ptr<Condition> condition = nullptr;
-                if (e.contains("condition") && e["condition"].is_object()) {
-                    const auto& condJson = e["condition"];
-                    condition = std::make_shared<Condition>(
-                        condJson.value("name", "unnamed_condition"),
-                        condJson.value("ref", ""),
-                        condJson.value("description", "")
-                    );
-                }
-
-                auto binding = std::make_shared<CardEffectBinding>(card, trigger, effect, condition, value, target);
-                std::string zoneStr = e.value("zone", "ANY");
-                binding->SetZone(ParseListeningZone(zoneStr));
-
-                card->EffectBindings.push_back(binding);
+        if (c.contains("character") && !c["character"].is_null()) {
+            int charId = c["character"].get<int>();
+            auto character = CharacterRegistry::Instance().Get(charId);
+            if (character) {
+                card->CharacterRef = character;
+            } else {
+                std::cerr << "⚠️ Warning: Card '" << card->Name << "' refers to unknown character ID " << charId << "\n";
             }
         }
-        */
-
+        
+        if (c.contains("subtypes") && c["subtypes"].is_array()) {
+            for (const auto& subtypeId : c["subtypes"]) {
+                if (!subtypeId.is_number_integer()) continue;
+                    auto subtype = SubtypeRegistry::Instance().Get(subtypeId);
+                    if (subtype) card->Subtypes.push_back(subtype);
+            }
+        }
         
         int cardId = c["id"].get<int>();
         result[cardId] = card;
+
+        card->ID = cardId;
         CardRegistry::Instance().Register(cardId, card);
     }
     std::cout << "✅ Loaded " << result.size() << " cards.\n";

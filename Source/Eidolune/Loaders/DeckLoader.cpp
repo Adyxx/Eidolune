@@ -35,6 +35,7 @@ std::unordered_map<int, std::shared_ptr<Deck>> DeckLoader::LoadAll() {
             }
 
             auto mainChar = CharacterRegistry::Instance().Get(mainCharId);
+
             std::shared_ptr<Character> partner = nullptr;
 
             if (d.contains("partner_character") && !d["partner_character"].is_null()) {
@@ -49,7 +50,7 @@ std::unordered_map<int, std::shared_ptr<Deck>> DeckLoader::LoadAll() {
                 d.value("description", "")
             );
 
-            // Handle embedded cards if present
+            /*
             if (d.contains("deck_cards") && d["deck_cards"].is_array()) {
                 for (const auto& dc : d["deck_cards"]) {
                     if (!dc.contains("card")) continue;
@@ -60,7 +61,7 @@ std::unordered_map<int, std::shared_ptr<Deck>> DeckLoader::LoadAll() {
                     deck->DeckCards.push_back(deckCard);
                 }
             }
-
+            */
             result[deckId] = deck;
             DeckRegistry::Instance().Register(deckId, deck);
 

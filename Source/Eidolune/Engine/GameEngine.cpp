@@ -27,21 +27,19 @@
 #include "../Loaders/ConditionLoader.h"
 #include "../Loaders/EffectLoader.h"
 #include "../Loaders/TriggerLoader.h"
+#include "DeckValidator.h"
+#include "../Definitions/DeckRestrictionDefinitions.h"
+#include "../Loaders/SubtypeLoader.h"
 
 #include <random>
 
-struct DeckInfo {
-    std::string Name;
-    std::vector<std::shared_ptr<DeckCard>> DeckCards;
-};
-
 struct UserInfo {
     std::string Username;
-    std::vector<DeckInfo> Decks;
+    std::vector<std::shared_ptr<Deck>> ValidDecks;
 };
 
 
-std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
+std::pair<std::shared_ptr<Deck>, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
     std::cout << "\n🔍 " << prompt << "\n";
     for (size_t i = 0; i < users.size(); ++i) {
         std::cout << i << ": 👤 " << users[i].Username << "\n";
@@ -53,9 +51,9 @@ std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& 
 
     const auto& user = users.at(userIndex);
 
-    std::cout << "\n🎴 Decks for " << user.Username << ":\n";
-    for (size_t i = 0; i < user.Decks.size(); ++i) {
-        std::cout << i << ": " << user.Decks[i].Name << "\n";
+    std::cout << "\n🎴 Valid Decks for " << user.Username << ":\n";
+    for (size_t i = 0; i < user.ValidDecks.size(); ++i) {
+        std::cout << i << ": " << user.ValidDecks[i]->Name << "\n";
     }
 
     int deckIndex;
@@ -63,37 +61,16 @@ std::pair<DeckInfo, std::string> SelectDeckForUser(const std::vector<UserInfo>& 
     std::cin >> deckIndex;
     std::cin.ignore();
 
-    return { user.Decks.at(deckIndex), user.Username };
-}
-
-
-
-std::shared_ptr<Player> CreatePlayerFromDeck(const DeckInfo& deckInfo, const std::string& username) {
-    auto deck = std::make_shared<Deck>(nullptr, deckInfo.Name, nullptr);
-
-    std::cout << "Creating deck: " << deck->Name << " for user: " << username << "\n";
-    std::cout << "Deck contains " << deckInfo.DeckCards.size() << " cards.\n";
-
-    for (const auto& deckCard : deckInfo.DeckCards) {
-        auto newDeckCard = std::make_shared<DeckCard>(deck, deckCard->CardRef, deckCard->Quantity);
-        deck->DeckCards.push_back(newDeckCard);
-    }
-
-    auto player = std::make_shared<Player>(deck, 0);
-
-    return player;
+    return { user.ValidDecks.at(deckIndex), user.Username };
 }
 
 void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-    std::cout << "\n🔔 SubscribeCardTriggers ENTERED for card: " << card->GetName() << "\n";
 
     if (card->Model->EffectBindings.empty()) {
-        std::cout << "⚠️ No effect bindings found on card model: " << card->Model->Name << "\n";
         return;
     }
 
     for (const auto& originalBinding : card->Model->EffectBindings) {
-        std::cout << "🔍 Found EffectBinding. Attempting to clone and subscribe...\n";
 
         auto binding = std::make_shared<CardEffectBinding>(*originalBinding);
 
@@ -109,7 +86,6 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
         }
 
         std::string triggerCode = triggerPtr->ScriptReference;
-        std::cout << "📛 Trigger code: " << triggerCode << "\n";
 
         auto* triggerMeta = TriggerRegistry::Instance().GetInfo(triggerCode);
         if (!triggerMeta) {
@@ -118,152 +94,81 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
         }
 
         std::string eventName = triggerMeta->Event;
-        std::cout << "📡 Subscribing to event: " << eventName << "\n";
 
         binding->EventGameCard = card;
 
-        std::cout << "🧱 Building trigger handler from binding...\n";
         std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
         auto builder = TriggerBuilder::Build(binding);
 
         auto conditionPtr = binding->GetCondition();
         if (conditionPtr) {
             std::string conditionCode = conditionPtr->ToString();
-            std::cout << "🧪 Binding has condition: " << conditionCode << "\n";
 
             effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
                 if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetValue().value_or(0))) {
-                    std::cout << "✅ Condition met. Executing effect.\n";
+
                     builder(ctx);
-                } else {
-                    std::cout << "🚫 Condition not met. Skipping effect.\n";
-                }
+                } 
             };
         } else {
-            std::cout << "☑️ No condition found. Effect will always trigger.\n";
             effectToRegister = builder;
         }
 
         observer->Subscribe(eventName, effectToRegister);
-        std::cout << "✅ Subscribed " << card->GetName()
-                  << " to trigger '" << eventName << "' successfully.\n";
     }
 
-    std::cout << "🔚 Finished subscribing triggers for card: " << card->GetName() << "\n\n";
 }
 
 std::vector<UserInfo> BuildUserDeckInfoList() {
     std::vector<UserInfo> users;
 
-    std::cout << "[Debug] Building user deck info list...\n";
     auto allUsers = UserRegistry::Instance().GetAll();
     auto allDecks = DeckRegistry::Instance().GetAll();
 
-    std::cout << "[Debug] Total users in registry: " << allUsers.size() << "\n";
-    std::cout << "[Debug] Total decks in registry: " << allDecks.size() << "\n";
-
     for (const auto& [_, user] : allUsers) {
-        std::cout << "[Debug] Processing user: " << user->Username << " (Id: " << user->Id << ")\n";
-
         UserInfo userInfo;
         userInfo.Username = user->Username;
 
         for (const auto& [_, deck] : allDecks) {
             if (deck->Owner && deck->Owner->Id == user->Id) {
-                std::cout << "  [Debug] Found deck for user: " << deck->Name << "\n";
-
-                DeckInfo deckInfo;
-                deckInfo.Name = deck->Name;
-                for (const auto& deckCard : deck->DeckCards) {
-                    deckInfo.DeckCards.push_back(deckCard);
+                auto result = DeckValidator::Validate(deck);
+                if (result.IsPlayable) {
+                    userInfo.ValidDecks.push_back(deck);
+                } else {
+                    std::cout << "❌ Deck '" << deck->Name << "' is invalid:\n";
+                    for (const auto& issue : result.Issues) {
+                        std::cout << " - " << issue << "\n";
+                    }
                 }
-                userInfo.Decks.push_back(deckInfo);
             }
         }
 
-        if (userInfo.Decks.empty()) {
-            std::cout << "  [Debug] No decks found for user " << user->Username << "\n";
+        if (!userInfo.ValidDecks.empty()) {
+            users.push_back(userInfo);
         }
-
-        users.push_back(userInfo);
     }
-    std::cout << "[Debug] Finished building user deck info list.\n";
+
     return users;
 }
 
-void GameEngine::Run() {
-    std::cout << "🎮 Starting Test Game\n";
-    GameState game;
+void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr<Player> p2) {
+    game.Players = { p1, p2 };
+    p1->Opponent = p2.get();
+    p2->Opponent = p1.get();
 
-    RegisterConditionFunctions();
-    RegisterEffectFunctions();
+    auto observer = game.GetTriggerObserver();
 
-    // 🔹 1. Load metadata-based types
-    TriggerLoader::LoadAll();
-    EffectLoader::LoadAll();
-    ConditionLoader::LoadAll();
-
-    // 🔹 2. Load static content
-    CharacterLoader::LoadAll();
-    CardLoader::LoadAll();
-    CardEffectBindingLoader::LoadAll();
-
-    // 🔹 3. Load dynamic/player-specific content
-    UserLoader::LoadAll();
-    DeckLoader::LoadAll();
-
-    // 🔹 4. DeckCards reference both Decks and Cards
-    DeckCardLoader::LoadAll();
-    
-
-
-    auto usersFromRegistry = UserRegistry::Instance().GetAll();
-    std::cout << "[Debug] Users loaded from registry:\n";
-    for (const auto& [_, user] : usersFromRegistry) {
-        std::cout << " - " << user->Username << " (Id: " << user->Id << ")\n";
-    }
-
-    auto decksFromRegistry = DeckRegistry::Instance().GetAll();
-    std::cout << "[Debug] Decks loaded from registry:\n";
-    for (const auto& [_, deck] : decksFromRegistry) {
-        std::cout << " - " << deck->Name << ", owner Id: " << (deck->Owner ? std::to_string(deck->Owner->Id) : "null") << "\n";
-    }
-
-
-    std::vector<UserInfo> users = BuildUserDeckInfoList();
-
-    auto [deck1, user1] = SelectDeckForUser(users, "Select Player 1");
-    auto [deck2, user2] = SelectDeckForUser(users, "Select Player 2");
-
-    std::cout << "Selected Deck 1: " << deck1.Name << " for User: " << user1 << "\n";
-    std::cout << "Selected Deck 2: " << deck2.Name << " for User: " << user2 << "\n";
-
-    auto player1 = CreatePlayerFromDeck(deck1, user1);
-    auto player2 = CreatePlayerFromDeck(deck2, user2);
-
-    std::cout << "Created Player 1: " << player1->GetName() << "\n";
-    std::cout << "Created Player 2: " << player2->GetName() << "\n";
-
-    game.Players = { player1, player2 };
-    player1->Opponent = player2.get();
-    player2->Opponent = player1.get();
-
-    std::cout << " *********************** " << "\n";
     for (auto& player : game.Players) {
-        // Create GameCard instances per DeckCard
         for (auto& deckCard : player->DeckRef->DeckCards) {
-            std::cout << " 🃏 Card: " << deckCard->CardRef->Name << ", Quantity: " << deckCard->Quantity << "\n";
             for (int i = 0; i < deckCard->Quantity; ++i) {
-                std::cout << "🃏 Adding card to deck: " << deckCard->CardRef->Name << "\n";
                 auto card = std::make_shared<GameCard>(deckCard->CardRef);
                 card->Owner = player.get();
                 card->Zone = CardZone::DECK;
-                SubscribeCardTriggers(card, game.Observer);
+                SubscribeCardTriggers(card, observer);
                 deckCard->GameCardCopies.push_back(card);
             }
         }
 
-        // Now flatten all the GameCardCopies into player's DrawPile
         player->DrawPile.clear();
         for (auto& deckCard : player->DeckRef->DeckCards) {
             for (auto& gameCard : deckCard->GameCardCopies) {
@@ -271,28 +176,57 @@ void GameEngine::Run() {
             }
         }
 
-        // Then shuffle player's DrawPile here
-        std::random_device rd;
-        std::mt19937 g(rd());
-        std::shuffle(player->DrawPile.begin(), player->DrawPile.end(), g);
-    }
+        std::shuffle(player->DrawPile.begin(), player->DrawPile.end(), std::mt19937{ std::random_device{}() });
 
-
-
-    for (auto& player : game.Players) {
         for (int i = 0; i < 3; ++i) {
             DrawCard(nullptr, Target::FromPlayer(player.get()), 1);
         }
     }
+}
 
-    auto observer = game.GetTriggerObserver();
+void GameEngine::Run() {
+    std::cout << "🎮 Starting Test Game\n";
+
+    RegisterConditionFunctions();
+    RegisterEffectFunctions();
+    RegisterDeckRestrictions();
+
+    TriggerLoader::LoadAll();
+    EffectLoader::LoadAll();
+    ConditionLoader::LoadAll();
+    SubtypeLoader::LoadAll();
+    CharacterLoader::LoadAll();
+    CardLoader::LoadAll();
+    CardEffectBindingLoader::LoadAll();
+    UserLoader::LoadAll();
+    DeckLoader::LoadAll();
+    DeckCardLoader::LoadAll();
+
+    auto users = BuildUserDeckInfoList();
+    if (users.empty()) {
+        std::cout << "❌ No users with valid decks found.\n";
+        return;
+    }
+
+    auto [deck1, user1] = SelectDeckForUser(users, "Select Player 1");
+    auto [deck2, user2] = SelectDeckForUser(users, "Select Player 2");
+
+    std::cout << "Selected Deck 1: " << deck1->Name << " by " << user1 << "\n";
+    std::cout << "Selected Deck 2: " << deck2->Name << " by " << user2 << "\n";
+
+    auto player1 = std::make_shared<Player>(deck1, 0);
+    auto player2 = std::make_shared<Player>(deck2, 0);
+
+    GameState game;
+    SetupGameState(game, player1, player2);
+
     while (!game.GameOver) {
         auto current = game.GetCurrentPlayer();
         std::cout << "\n=== 🕒 " << current->GetName() << "'s Turn ===\n";
-        
+
         GameActions::StartTurn(current.get());
         GameActions::ShowPlayerState(current.get());
-        
+
         bool turnEnded = false;
         while (!turnEnded) {
             std::cout << "\n>> Command (play <i> / attack / end): ";
@@ -301,7 +235,7 @@ void GameEngine::Run() {
 
             if (input.substr(0, 4) == "play") {
                 int index = std::stoi(input.substr(5));
-                 GameActions::PlayCard(current.get(), index, observer);
+                GameActions::PlayCard(current.get(), index, game.GetTriggerObserver());
             } else if (input == "attack") {
                 GameActions::Attack(current.get(), game.GetOpponent().get());
             } else if (input == "end") {

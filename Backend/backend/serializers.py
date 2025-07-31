@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from core.models import Card, Deck, Character, DeckCard, User, Effect, Condition, Trigger, CardEffectBinding
+from core.models import Card, Deck, Character, DeckCard, User, Effect, Condition, Trigger, CardEffectBinding, Subtype
 
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,4 +46,9 @@ class ConditionSerializer(serializers.ModelSerializer):
 class CardEffectBindingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CardEffectBinding
+        fields = '__all__'
+
+class SubtypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subtype
         fields = '__all__'

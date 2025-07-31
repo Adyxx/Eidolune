@@ -1,25 +1,67 @@
 
-from ..models.deck import Deck
-from typing import List
 
-def total_card_count(deck: Deck) -> int:
-    return sum(dc.quantity for dc in deck.deck_cards.all())
-
-def get_deck_issues(deck: Deck) -> List[str]:
+def get_deck_issues(deck) -> list[str]:
     issues = []
-    count = total_card_count(deck)
-    if count < 30:
-        issues.append(f"Too few cards ({count}). Minimum is 30.")
-    elif count > 60:
-        issues.append(f"Too many cards ({count}). Maximum is 60.")
+    '''
+    if deck.total_card_count() < 40:
+        issues.append("Deck has fewer than 40 cards.")
 
-    if deck.main_character == deck.partner_character:
-        issues.append("Main and partner characters are the same.")
+    card_counts = {}
+    character_card_tracker = {}
+    character_card_found = set()
 
-    if deck.main_character and not deck.main_character.class_type:
-        issues.append("Main character has no class.")
+    for deck_card in deck.deck_cards.select_related("card__character", "card__effect_bindings__effect", "card__effect_bindings__trigger"):
+        card = deck_card.card
+        count = deck_card.quantity
 
+        limit = 1 if card.is_character_card else 3
+
+        for binding in card.effect_bindings.filter(trigger__script_reference="on_deck_build"):
+            if binding.effect.script_reference == "override_deck_limit":
+                try:
+                    new_limit = int(binding.value)
+                    limit = new_limit
+                except (ValueError, TypeError):
+                    issues.append(f"Invalid override_deck_limit value on card '{card.name}'")
+
+        card_counts[card.id] = card_counts.get(card.id, 0) + count
+        if card_counts[card.id] > limit:
+            issues.append(f"{card.name} exceeds allowed limit of {limit} copies.")
+
+        if card.is_character_card and card.character:
+            cid = card.character.id
+            if cid in character_card_tracker:
+                issues.append(f"Multiple character cards for '{card.character.name}' in deck.")
+            else:
+                character_card_tracker[cid] = True
+                character_card_found.add(cid)
+
+        if card.is_character_exclusive and card.character:
+            allowed = {deck.main_character.id if deck.main_character else None}
+            if deck.partner_character:
+                allowed.add(deck.partner_character.id)
+            if card.character.id not in allowed:
+                issues.append(f"{card.name} is exclusive to '{card.character.name}', who is not part of this deck.")
+
+    if deck.main_character and deck.main_character.id not in character_card_found:
+        issues.append(f"Deck is missing character card for '{deck.main_character.name}'.")
+
+    if deck.partner_character and deck.partner_character.id not in character_card_found:
+        issues.append(f"Deck is missing character card for partner '{deck.partner_character.name}'.")
+
+    if deck.main_character and deck.main_character.deck_restriction_ref:
+        from backend.registry.deck_restrictions import DECK_RESTRICTION_REGISTRY
+        func = DECK_RESTRICTION_REGISTRY.get(deck.main_character.deck_restriction_ref)
+        if func:
+            is_valid, reason = func(deck)
+            if not is_valid:
+                issues.append(f"Main character deck restriction: {reason}")
+
+    if deck.partner_character and deck.partner_character.deck_restriction_ref:
+        func = DECK_RESTRICTION_REGISTRY.get(deck.partner_character.deck_restriction_ref)
+        if func:
+            is_valid, reason = func(deck)
+            if not is_valid:
+                issues.append(f"Partner deck restriction: {reason}")
+    '''
     return issues
-
-def is_deck_playable(deck: Deck) -> bool:
-    return len(get_deck_issues(deck)) == 0

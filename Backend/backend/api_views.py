@@ -1,7 +1,7 @@
 
 from rest_framework import viewsets
-from core.models import Card, Deck, Character, DeckCard, Effect, Condition, Trigger, CardEffectBinding
-from .serializers import CardSerializer, DeckSerializer, CharacterSerializer, UserSerializer, DeckCardSerializer, TriggerSerializer, EffectSerializer, ConditionSerializer, CardEffectBindingSerializer
+from core.models import Card, Deck, Character, DeckCard, Effect, Condition, Trigger, CardEffectBinding, Subtype
+from .serializers import CardSerializer, DeckSerializer, CharacterSerializer, SubtypeSerializer, UserSerializer, DeckCardSerializer, TriggerSerializer, EffectSerializer, ConditionSerializer, CardEffectBindingSerializer
 from core.models import User
 
 class CardViewSet(viewsets.ReadOnlyModelViewSet):
@@ -39,3 +39,8 @@ class ConditionViewSet(viewsets.ReadOnlyModelViewSet):
 class CardEffectBindingViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CardEffectBinding.objects.all()
     serializer_class = CardEffectBindingSerializer
+
+class SubtypeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Subtype.objects.all()
+    serializer_class = SubtypeSerializer
+
