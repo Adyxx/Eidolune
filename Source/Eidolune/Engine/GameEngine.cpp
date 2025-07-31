@@ -33,6 +33,9 @@
 
 #include <random>
 
+#include "Init.h"
+
+
 struct UserInfo {
     std::string Username;
     std::vector<std::shared_ptr<Deck>> ValidDecks;
@@ -187,6 +190,9 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
 void GameEngine::Run() {
     std::cout << "🎮 Starting Test Game\n";
 
+    EidoluneInit::RegisterAll();
+    EidoluneInit::LoadAll();
+    /*
     RegisterConditionFunctions();
     RegisterEffectFunctions();
     RegisterDeckRestrictions();
@@ -201,6 +207,7 @@ void GameEngine::Run() {
     UserLoader::LoadAll();
     DeckLoader::LoadAll();
     DeckCardLoader::LoadAll();
+    */
 
     auto users = BuildUserDeckInfoList();
     if (users.empty()) {
