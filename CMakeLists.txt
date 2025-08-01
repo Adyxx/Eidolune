@@ -21,6 +21,9 @@ file(GLOB_RECURSE EIDOLUNE_SOURCES
     "Source/Eidolune/Main/main.cpp"
     "Source/Eidolune/Http/ApiClient.cpp"
     "Source/Eidolune/Init/*.cpp"
+    "Source/Eidolune/Data/*.cpp"
+    "Source/Eidolune/Customization/*.cpp"
+    "Source/Eidolune/Deckbuilding/*.cpp"
 )
 
 add_executable(MainExe ${EIDOLUNE_SOURCES})
@@ -50,6 +53,9 @@ target_include_directories(MainExe PRIVATE
     Source/Eidolune/Abilities/Other
     Source/Eidolune/Http
     Source/Eidolune/Init
+    Source/Eidolune/Data
+    Source/Eidolune/Customization
+    Source/Eidolune/Deckbuilding
 )
 
 # cmake -S . -B build -G "Visual Studio 17 2022" -T ClangCL,host=x86 -A win32 -DCMAKE_TOOLCHAIN_FILE=C:/Users/Doma/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows

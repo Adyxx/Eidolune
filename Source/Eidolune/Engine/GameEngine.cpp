@@ -1,40 +1,26 @@
+#include <iostream>
+#include <random>
 
+#include "Init.h"
 #include "GameEngine.h"
 #include "GameActions.h"
-#include "../Definitions/EffectDefinitions.h"
-#include "../Definitions/TriggerDefinitions.h"
-#include "../Definitions/ConditionDefinitions.h"
-#include "../Registry/CharacterClassRegistry.h"
-#include <iostream>
-#include "../Core/Player.h"
-#include "../Loaders/UserLoader.h"
-#include "../Loaders/CardLoader.h"  
-#include "../Loaders/DeckLoader.h"
-#include "../Loaders/CharacterLoader.h"
-#include "../Core/Card.h"   
-#include "../Core/DeckCard.h"
 #include "TriggerObserver.h"
-#include "../Registry/TriggerRegistry.h"
 #include "ConditionEvaluator.h"
 #include "Trigger.h"
 #include "TriggerBuilder.h"
 #include "Condition.h"
+#include "DeckValidator.h"
+
+#include "../Definitions/EffectDefinitions.h"
+#include "../Core/Player.h"
+#include "../Core/GameCard.h"   
+#include "../Core/DeckCard.h"
 #include "../Core/CardEffectBinding.h"
+
 #include "../Registry/UserRegistry.h"
 #include "../Registry/DeckRegistry.h"
-#include "../Loaders/DeckCardLoader.h"
-#include "../Loaders/CardEffectBindingLoader.h"
-#include "../Loaders/ConditionLoader.h"
-#include "../Loaders/EffectLoader.h"
-#include "../Loaders/TriggerLoader.h"
-#include "DeckValidator.h"
-#include "../Definitions/DeckRestrictionDefinitions.h"
-#include "../Loaders/SubtypeLoader.h"
 
-#include <random>
-
-#include "Init.h"
-
+#include "../Customization/CharacterCustomization.h"
 
 struct UserInfo {
     std::string Username;
@@ -187,28 +173,7 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
     }
 }
 
-void GameEngine::Run() {
-    std::cout << "🎮 Starting Test Game\n";
-
-    EidoluneInit::RegisterAll();
-    EidoluneInit::LoadAll();
-    /*
-    RegisterConditionFunctions();
-    RegisterEffectFunctions();
-    RegisterDeckRestrictions();
-
-    TriggerLoader::LoadAll();
-    EffectLoader::LoadAll();
-    ConditionLoader::LoadAll();
-    SubtypeLoader::LoadAll();
-    CharacterLoader::LoadAll();
-    CardLoader::LoadAll();
-    CardEffectBindingLoader::LoadAll();
-    UserLoader::LoadAll();
-    DeckLoader::LoadAll();
-    DeckCardLoader::LoadAll();
-    */
-
+void GameEngine::RunCombatLoop() {
     auto users = BuildUserDeckInfoList();
     if (users.empty()) {
         std::cout << "❌ No users with valid decks found.\n";
@@ -259,7 +224,58 @@ void GameEngine::Run() {
     std::cout << "\n🏁 Game Over!\n";
 }
 
+void GameEngine::Run() {
+    EidoluneInit::RegisterAll();
+    EidoluneInit::LoadAll();
 
-GameEngine::GameEngine() {
-    
+    while (true) {
+        std::cout << "\n=== 🧭 Main Menu ===\n";
+        std::cout << "0: Start Combat\n";
+        std::cout << "1: Browse / Edit Decks\n";
+        std::cout << "2: Character Customization\n";
+        std::cout << "3: Gacha / Card Unlock\n";
+        std::cout << "4: Save / Load\n";
+        std::cout << "5: Exit\n";
+        std::cout << ">> Choose option: ";
+
+        int choice;
+        std::cin >> choice;
+        std::cin.ignore();
+
+        switch (choice) {
+            case 0: RunCombatLoop(); break;
+            case 1: RunDeckEditor(); break;
+            case 2: RunCharacterCustomization(); break;
+            case 3: RunGacha(); break;
+            case 4: RunSaveLoad(); break;
+            case 5: std::cout << "👋 Goodbye!\n"; return;
+            default: std::cout << "❓ Invalid option\n";
+        }
+    }
 }
+
+
+void GameEngine::RunDeckEditor() {
+    std::cout << "\n📚 Deck Editor (WIP)\n";
+    // TODO: list decks, allow modifications
+}
+
+void GameEngine::RunCharacterCustomization() {
+    std::cout << "\n🎨 Character Customization (WIP)\n";
+    CharacterCustomization::Run();
+    // TODO: edit class, name, cosmetics, etc.
+}
+
+void GameEngine::RunGacha() {
+    std::cout << "\n🎁 Gacha System (WIP)\n";
+    // TODO: simulate card pull, show results
+}
+
+void GameEngine::RunSaveLoad() {
+    std::cout << "\n💾 Save/Load Menu (WIP)\n";
+    // TODO: serialization, cloud sync, load/save slot
+}
+
+
+
+GameEngine::GameEngine() {}

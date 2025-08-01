@@ -2,9 +2,10 @@
 #pragma once
 #include <string>
 #include <memory>
+#include "../Core/Player.h"
 
 class GameState;
-class Player;
+
 
 class CharacterClass {
 public:

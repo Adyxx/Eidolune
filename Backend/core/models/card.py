@@ -1,5 +1,5 @@
 from django.db import models
-from .enums import Rarity, CardType
+from .enums import Rarity, CardType, CharacterClassType, AuxiliaryCardType
 from .faction import Faction
 from .subtype import Subtype
 from .character import Character
@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 class Card(models.Model):
     name = models.CharField(max_length=100)
-    image_path = models.CharField(max_length=200)
+    image_path = models.CharField(null=True, max_length=200)
     cost = models.IntegerField()
     rarity = models.CharField(max_length=20, choices=Rarity.choices)
     type = models.CharField(max_length=20, choices=CardType.choices)
@@ -24,6 +24,17 @@ class Card(models.Model):
     
     character = models.ForeignKey(Character, null=True, blank=True, on_delete=models.SET_NULL, related_name='cards')
 
+    classlock = models.CharField(
+        max_length=20,
+        choices=CharacterClassType.choices,
+        default=CharacterClassType.UNKNOWN
+    )
+    auxilarytype = models.CharField(
+        max_length=20,
+        choices=AuxiliaryCardType.choices,
+        default=AuxiliaryCardType.NONE
+    )
+    
     def clean(self):
         if self.is_character_card and not self.character:
             raise ValidationError("Character card must have a character assigned.")

@@ -10,6 +10,7 @@ class GameCard;
 
 class Player {
 public:
+    int ID = -1; // note for the future.. this is not being set anywhere (yet)
     std::shared_ptr<Deck> DeckRef;
     std::vector<std::shared_ptr<GameCard>> Hand;
     std::vector<std::shared_ptr<GameCard>> Board;
@@ -34,4 +35,5 @@ public:
     Player* GetOpponent() const { return Opponent; } 
 
     virtual ~Player() = default; 
+    Player() = default;
 };

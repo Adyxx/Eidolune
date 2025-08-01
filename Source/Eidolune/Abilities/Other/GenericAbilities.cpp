@@ -31,3 +31,7 @@ void RegisterGenericAbilities() {
         "Gain 2 energy."
     });
 }
+
+
+
+// Whenever you play a card of a *new* type this turn, gain +1 energy (max once per type per turn).

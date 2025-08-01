@@ -10,9 +10,17 @@ enum class EquipmentSlot { HEAD, BODY, HANDS, LEGS };
 enum class TargetHint { NONE, CARD, PLAYER, CARD_OR_PLAYER, SELF, UNKNOWN, ANY };
 enum class TargetSpec { ENEMY_BOARD, ENEMY_HERO, ENEMY_BOARD_OR_HERO, FRIENDLY_BOARD, RANDOM_ENEMY, RANDOM_ALLY, FRIENDLY_HERO, SELF, ANY, UNKNOWN };
 enum class ListeningZone { BOARD, HAND, DECK, GRAVEYARD, ANY };
-enum class CardZone { DECK, HAND, BOARD, GRAVEYARD, UNKNOWN };
+enum class CardZone { DECK, HAND, BOARD, GRAVEYARD, CONSUMABLE_BAG, UNKNOWN };
 enum class Gender { MALE, FEMALE, NONBINARY, UNKNOWN };
 enum class CharacterClassType { SPECIALIST, SPELLWEAVER, BLOODBOUND, SHADE, MACHINIST, SOULFORGED, GAMBLER, OATHBOUND, UNKNOWN };
+
+enum class AuxiliaryCardType {
+    NONE,
+    REAGENT,
+    QUEST,
+    CONSUMABLE,
+    FRAGMENT
+};
 
 enum class TriggerScope {
     SELF,               // Only if this card triggered the event

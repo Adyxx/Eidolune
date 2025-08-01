@@ -21,6 +21,11 @@ static CharacterClassType ParseCharacterClassType(const std::string& s) {
     if (s == "BLOODBOUND") return CharacterClassType::BLOODBOUND;
     if (s == "GAMBLER") return CharacterClassType::GAMBLER;
     if (s == "OATHBOUND") return CharacterClassType::OATHBOUND;
+    if (s == "SPECIALIST") return CharacterClassType::SPECIALIST;
+    if (s == "MACHINIST") return CharacterClassType::MACHINIST;
+    if (s == "SHADE") return CharacterClassType::SHADE;
+    if (s == "SPELLWEAVER") return CharacterClassType::SPELLWEAVER;
+    if (s == "SOULFORGED") return CharacterClassType::SOULFORGED;
     return CharacterClassType::UNKNOWN;
 }
 

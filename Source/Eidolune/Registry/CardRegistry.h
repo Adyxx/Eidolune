@@ -16,6 +16,10 @@ public:
     void Register(int id, std::shared_ptr<Card> card);
     std::shared_ptr<Card> Get(int id) const; 
 
+    const std::unordered_map<int, std::shared_ptr<Card>>& GetAll() const {
+        return Cards;
+    }
+    
 private:
     std::unordered_map<int, std::shared_ptr<Card>> Cards;
 

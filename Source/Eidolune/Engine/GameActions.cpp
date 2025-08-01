@@ -160,6 +160,35 @@ namespace GameActions {
 
     }
 
+    void PlayCardDirect(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
+        Player* player = card->Owner;
+
+        if (!player) {
+            std::cerr << "❌ Cannot play card — no owner assigned.\n";
+            return;
+        }
+
+        if (player->Energy < card->GetCost()) {
+            std::cout << "🚫 Not enough energy to play " << card->GetName() << "\n";
+            return;
+        }
+
+        if (card->Model->Type == CardType::SPELL) {
+            std::cout << "✨ " << player->GetName() << " casts " << card->GetName() << "\n";
+            card->Zone = CardZone::GRAVEYARD;
+            player->Graveyard.push_back(card);
+        } else {
+            card->Zone = CardZone::BOARD;
+            player->Board.push_back(card);
+            std::cout << "▶️ " << player->GetName() << " plays " << card->GetName() << " to the board\n";
+        }
+
+        player->Energy -= card->GetCost();
+        std::cout << "🔋 Energy left: " << player->Energy << "\n";
+
+        observer->Emit("card_played", { {"source", card.get()}, {"owner", player} });
+    }
+
     void Attack(Player* attacker, Player* defender) {
         std::vector<std::shared_ptr<GameCard>> validAttackers;
 

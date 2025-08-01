@@ -44,6 +44,26 @@ ListeningZone ParseListeningZone(const std::string& str) {
     return ListeningZone::BOARD;
 }
 
+CharacterClassType ParseClassLock(const std::string& s) {
+    if (s == "SPECIALIST") return CharacterClassType::SPECIALIST;
+    if (s == "SPELLWEAVER") return CharacterClassType::SPELLWEAVER;
+    if (s == "BLOODBOUND") return CharacterClassType::BLOODBOUND;
+    if (s == "SHADE") return CharacterClassType::SHADE;
+    if (s == "MACHINIST") return CharacterClassType::MACHINIST;
+    if (s == "SOULFORGED") return CharacterClassType::SOULFORGED;
+    if (s == "GAMBLER") return CharacterClassType::GAMBLER;
+    if (s == "OATHBOUND") return CharacterClassType::OATHBOUND;
+    return CharacterClassType::UNKNOWN;
+}
+
+AuxiliaryCardType ParseAuxiliaryType(const std::string& s) {
+    if (s == "REAGENT") return AuxiliaryCardType::REAGENT;
+    if (s == "QUEST") return AuxiliaryCardType::QUEST;
+    if (s == "FRAGMENT") return AuxiliaryCardType::FRAGMENT;
+    if (s == "CONSUMABLE") return AuxiliaryCardType::CONSUMABLE;
+    return AuxiliaryCardType::NONE;
+}
+
 std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
     std::cout << "🔄 Loading Cards from API...\n";
 
@@ -105,6 +125,14 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
                     auto subtype = SubtypeRegistry::Instance().Get(subtypeId);
                     if (subtype) card->Subtypes.push_back(subtype);
             }
+        }
+
+        if (c.contains("classlock") && !c["classlock"].is_null()) {
+            card->ClassLock = ParseClassLock(c["classlock"]);
+        }
+
+        if (c.contains("auxilarytype") && !c["auxilarytype"].is_null()) {
+            card->AuxilaryType = ParseAuxiliaryType(c["auxilarytype"]);
         }
         
         int cardId = c["id"].get<int>();

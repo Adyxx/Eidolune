@@ -34,8 +34,16 @@ public:
     std::string Text;
     std::vector<std::shared_ptr<CardEffectBinding>> EffectBindings;
 
+    CharacterClassType ClassLock = CharacterClassType::UNKNOWN;
+    AuxiliaryCardType AuxilaryType = AuxiliaryCardType::NONE;
+
     Card();
     void Validate() const;
     std::string ToString() const;
     bool HasSubtype(const std::string& targetSubtype) const;
+    
+    inline bool IsConsumable() const {
+        return AuxilaryType == AuxiliaryCardType::CONSUMABLE || AuxilaryType == AuxiliaryCardType::REAGENT;
+    }
+
 };

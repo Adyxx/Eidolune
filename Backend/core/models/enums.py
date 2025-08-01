@@ -63,3 +63,11 @@ class CharacterClassType(models.TextChoices):
      GAMBLER = "GAMBLER"
      OATHBOUND = "OATHBOUND"
      UNKNOWN = "UNKNOWN"
+
+class AuxiliaryCardType(models.TextChoices):
+    NONE = "NONE",
+    REAGENT = "REAGENT",
+    QUEST = "QUEST",
+    CONSUMABLE = "CONSUMABLE",
+    FRAGMENT = "FRAGMENT"
+
