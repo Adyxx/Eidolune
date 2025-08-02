@@ -23,6 +23,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'rank']
 
+class UserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['user_data']
+        
 class DeckCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeckCard

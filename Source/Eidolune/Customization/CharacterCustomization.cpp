@@ -11,6 +11,10 @@
 #include "../Registry/CardRegistry.h"
 #include "../Core/Player.h"
 
+
+#include "UserDataUploader.h"
+
+
 void CharacterCustomization::EquipSpecialistConsumable(std::shared_ptr<Character> character) {
     if (!character || !character->ClassLogic) {
         std::cerr << "❌ Character or class logic is missing.\n";
@@ -88,7 +92,7 @@ void CharacterCustomization::EquipSpecialistConsumable(std::shared_ptr<Character
 
 
 
-void CharacterCustomization::Run() {
+void CharacterCustomization::Run(std::shared_ptr<User> user, UserData& userData) {
     const auto& all = CharacterRegistry::Instance().GetAll();
 
     if (all.empty()) {
@@ -148,14 +152,16 @@ void CharacterCustomization::Run() {
             if (opt == 0) break;
 
             if (selected->Class == CharacterClassType::SPECIALIST && opt == 4) {
-
                 EquipSpecialistConsumable(selected);
-
-                continue;
+            } else {
+                std::cout << "⚠️  Option not implemented yet.\n";
             }
 
-            std::cout << "⚠️  Option not implemented yet.\n";
+            // Sync changes to userData and push to server
+            UserCharacterData updated = UserCharacterData::FromCharacter(selected.get());
+            userData.SyncCharacter(updated);
+            UserDataUploader::UploadUserData(user, userData);
+            std::cout << "✅ Changes saved.\n";
         }
-
     }
 }

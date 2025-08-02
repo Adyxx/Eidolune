@@ -18,12 +18,10 @@ struct ConsumableInstance {
         : SourceCard(std::move(card)), UsesRemaining(uses) {}
 };
 
-// A single slot in the consumable bag
 struct ConsumableSlot {
     std::shared_ptr<ConsumableInstance> item = nullptr;
 };
 
-// The full bag (held per player)
 struct ConsumableBag {
     std::vector<ConsumableSlot> slots;
     int activeSlotIndex = 0;
@@ -45,7 +43,7 @@ public:
     SpecialistClass();
 
     void OnTurnStart(GameState* state, Player* player) override;
-    void ApplySetupBonus(Character* character);
+    void ApplySetupBonus(Character* character) override;
 
     void UseActiveConsumable(GameState* state, Character* character, Player* player, std::shared_ptr<TriggerObserver> observer); 
     void EquipConsumable(Character* character, std::shared_ptr<Card> card, int slotIndex);

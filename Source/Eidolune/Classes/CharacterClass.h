@@ -14,7 +14,7 @@ public:
 
     virtual void OnTurnStart(GameState* state, Player* player) {}
     virtual void OnCardPlayed(GameState* state, Player* player) {}
-    virtual void ApplySetupBonus(Player* player) {}
+    virtual void ApplySetupBonus(Character* character) {}
 
     virtual ~CharacterClass() = default;
 };

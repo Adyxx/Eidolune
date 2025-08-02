@@ -27,8 +27,11 @@ void SpecialistClass::OnTurnStart(GameState* state, Player* player) {
 }
 
 ConsumableBag& SpecialistClass::GetBag(Character* character) {
+    auto& bag = bags[character];
+    if (bag.slots.empty()) bag.slots.resize(3);
     return bags[character];
 }
+
 
 void SpecialistClass::ApplySetupBonus(Character* character) {
     auto& bag = bags[character];
@@ -70,15 +73,16 @@ void SpecialistClass::UseActiveConsumable(GameState* state, Character* character
 
 
 void SpecialistClass::EquipConsumable(Character* character, std::shared_ptr<Card> card, int slotIndex) {
-    if (!card) {
-        std::cerr << "❌ Tried to equip null card.\n";
-        return;
-    }
-
     auto& bag = bags[character];
 
     if (slotIndex < 0 || slotIndex >= static_cast<int>(bag.slots.size())) {
         std::cerr << "❌ Invalid slot index for Specialist bag.\n";
+        return;
+    }
+
+    if (!card) {
+        bag.slots[slotIndex].item = nullptr;
+        std::cout << "🧹 Slot " << slotIndex << " unequipped.\n";
         return;
     }
 

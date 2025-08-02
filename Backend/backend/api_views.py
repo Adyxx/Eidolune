@@ -4,6 +4,12 @@ from core.models import Card, Deck, Character, DeckCard, Effect, Condition, Trig
 from .serializers import CardSerializer, DeckSerializer, CharacterSerializer, SubtypeSerializer, UserSerializer, DeckCardSerializer, TriggerSerializer, EffectSerializer, ConditionSerializer, CardEffectBindingSerializer
 from core.models import User
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
+
 class CardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
@@ -16,10 +22,26 @@ class CharacterViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Character.objects.all()
     serializer_class = CharacterSerializer
 
+from .serializers import UserSerializer, UserDataSerializer
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    @action(detail=True, methods=["get", "post"], url_path='data')
+    def user_data(self, request, pk=None):
+        user = self.get_object()
+
+        if request.method == "GET":
+            return Response(user.user_data or {})
+
+        if request.method == "POST":
+            print("Saving user_data:", request.data)
+            user.user_data = request.data
+            user.save()
+            return Response({"message": "User data saved."})
+
+        
 class DeckCardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DeckCard.objects.all()
     serializer_class = DeckCardSerializer

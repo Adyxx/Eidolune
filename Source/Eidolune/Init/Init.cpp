@@ -38,9 +38,7 @@
 #include "../Loaders/UserLoader.h"
 #include "../Loaders/DeckLoader.h"
 #include "../Loaders/DeckCardLoader.h"
-
-
-
+#include "../Loaders/UserDataLoader.h"
 
 #include <iostream>
 
@@ -70,7 +68,7 @@ namespace EidoluneInit {
     }
 
     void LoadAll() {
-        std::cout << "📦 Loading all data from API...\n";
+        std::cout << "📦 Loading general data from API...\n";
 
         TriggerLoader::LoadAll();
         EffectLoader::LoadAll();
@@ -80,7 +78,12 @@ namespace EidoluneInit {
         CardLoader::LoadAll();
         CardEffectBindingLoader::LoadAll();
         UserLoader::LoadAll();
-        DeckLoader::LoadAll();
-        DeckCardLoader::LoadAll();
+        //DeckLoader::LoadAll();
+        //DeckCardLoader::LoadAll();
     }
+
+    UserData LoadForUser(std::shared_ptr<User> user) {
+        return UserDataLoader::LoadAllForUser(user);
+    }
+
 }

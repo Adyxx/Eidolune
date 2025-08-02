@@ -21,12 +21,36 @@
 #include "../Registry/DeckRegistry.h"
 
 #include "../Customization/CharacterCustomization.h"
+#include "UserDataLoader.h"
 
 struct UserInfo {
     std::string Username;
     std::vector<std::shared_ptr<Deck>> ValidDecks;
 };
 
+std::shared_ptr<User> GameEngine::PromptUserLogin() {
+    auto allUsers = UserRegistry::Instance().GetAll();
+    if (allUsers.empty()) {
+        std::cout << "❌ No users found.\n";
+        return nullptr;
+    }
+
+    std::vector<std::shared_ptr<User>> userList;
+    std::cout << "\n🔐 Select a User:\n";
+    int index = 0;
+    for (const auto& [_, user] : allUsers) {
+        std::cout << index << ": " << user->Username << "   " << user->Id << "\n";
+        userList.push_back(user);
+        ++index;
+    }
+
+    int selectedIndex;
+    std::cout << "Enter index: ";
+    std::cin >> selectedIndex;
+    std::cin.ignore();
+
+    return userList.at(selectedIndex);
+}
 
 std::pair<std::shared_ptr<Deck>, std::string> SelectDeckForUser(const std::vector<UserInfo>& users, const std::string& prompt) {
     std::cout << "\n🔍 " << prompt << "\n";
@@ -228,6 +252,13 @@ void GameEngine::Run() {
     EidoluneInit::RegisterAll();
     EidoluneInit::LoadAll();
 
+    std::shared_ptr<User> loggedInUser = PromptUserLogin();
+    if (!loggedInUser) return;
+
+    this->currentUser = loggedInUser;
+    this->currentUserData = EidoluneInit::LoadForUser(currentUser);
+    UserDataLoader::ApplyUserCharacterDataToCharacters(currentUserData);
+
     while (true) {
         std::cout << "\n=== 🧭 Main Menu ===\n";
         std::cout << "0: Start Combat\n";
@@ -261,9 +292,8 @@ void GameEngine::RunDeckEditor() {
 }
 
 void GameEngine::RunCharacterCustomization() {
-    std::cout << "\n🎨 Character Customization (WIP)\n";
-    CharacterCustomization::Run();
-    // TODO: edit class, name, cosmetics, etc.
+    std::cout << "\n🎨 Character Customization\n";
+    CharacterCustomization::Run(currentUser, currentUserData);
 }
 
 void GameEngine::RunGacha() {

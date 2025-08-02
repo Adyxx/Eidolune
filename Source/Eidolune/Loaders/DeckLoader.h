@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "../Core/Deck.h"
+#include "../Data/UserData.h"
 
 class DeckLoader {
 public:

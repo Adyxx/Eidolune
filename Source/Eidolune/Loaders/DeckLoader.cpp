@@ -7,12 +7,14 @@
 #include "../Http/ApiClient.h" 
 #include <iostream>
 
+#include "../Core/Deck.h"
 
 std::unordered_map<int, std::shared_ptr<Deck>> DeckLoader::LoadAll() {
     std::cout << "🔄 Loading Decks from API...\n";
 
     std::unordered_map<int, std::shared_ptr<Deck>> result;
     json decksJson = ApiClient::Get("decks/");
+
 
     int loadedCount = 0;
     int skippedCount = 0;
@@ -50,18 +52,6 @@ std::unordered_map<int, std::shared_ptr<Deck>> DeckLoader::LoadAll() {
                 d.value("description", "")
             );
 
-            /*
-            if (d.contains("deck_cards") && d["deck_cards"].is_array()) {
-                for (const auto& dc : d["deck_cards"]) {
-                    if (!dc.contains("card")) continue;
-                    auto card = CardRegistry::Instance().Get(dc["card"].get<int>());
-                    if (!card) continue;
-
-                    auto deckCard = std::make_shared<DeckCard>(deck, card, dc.value("quantity", 1));
-                    deck->DeckCards.push_back(deckCard);
-                }
-            }
-            */
             result[deckId] = deck;
             DeckRegistry::Instance().Register(deckId, deck);
 

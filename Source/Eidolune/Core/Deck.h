@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <nlohmann/json.hpp>
 
 class User;
 class Character;
@@ -10,6 +11,7 @@ class DeckCard;
 
 class Deck {
 public:
+    int ID = -1;
     std::shared_ptr<User> Owner;
     std::string Name;
     
@@ -30,5 +32,8 @@ public:
     std::vector<std::string> GetDeckIssues() const;
 
     std::string ToString() const;
+
+    static std::shared_ptr<Deck> FromJson(const nlohmann::json& j);
+    nlohmann::json ToJson() const;
 
 };
