@@ -10,6 +10,10 @@ public:
 
     void Register(int id, std::shared_ptr<Deck> deck);
     std::shared_ptr<Deck> Get(int id) const;
+    
+    void Remove(int id) {
+        Decks.erase(id);
+    }
 
     const std::unordered_map<int, std::shared_ptr<Deck>>& GetAll() const {
         return Decks;

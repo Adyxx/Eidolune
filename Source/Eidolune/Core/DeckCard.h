@@ -17,7 +17,6 @@ public:
     std::vector<std::shared_ptr<GameCard>> GameCardCopies;
 
     DeckCard(std::shared_ptr<Deck> deck, std::shared_ptr<Card> card, int qty = 1);
-
     std::string ToString() const;
 
     std::shared_ptr<Card> CreateCardInstance() const;

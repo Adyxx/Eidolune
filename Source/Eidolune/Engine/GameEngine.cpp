@@ -22,6 +22,7 @@
 
 #include "../Customization/CharacterCustomization.h"
 #include "UserDataLoader.h"
+#include "DeckBuilder.h"
 
 struct UserInfo {
     std::string Username;
@@ -288,7 +289,7 @@ void GameEngine::Run() {
 
 void GameEngine::RunDeckEditor() {
     std::cout << "\n📚 Deck Editor (WIP)\n";
-    // TODO: list decks, allow modifications
+    DeckBuilder::Run(currentUser, currentUserData);
 }
 
 void GameEngine::RunCharacterCustomization() {

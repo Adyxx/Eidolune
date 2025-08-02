@@ -51,3 +51,16 @@ void UserData::SyncCharacter(const UserCharacterData& character) {
         Characters.push_back(character);
     }
 }
+
+void UserData::SyncDeck(const std::shared_ptr<Deck>& deck) {
+    auto it = std::find_if(Decks.begin(), Decks.end(),
+        [&deck](const std::shared_ptr<Deck>& d) {
+            return d && deck && d->ID == deck->ID;
+        });
+
+    if (it != Decks.end()) {
+        *it = deck;
+    } else {
+        Decks.push_back(deck);
+    }
+}

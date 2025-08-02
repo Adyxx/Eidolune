@@ -53,7 +53,6 @@
             }
 
             if (cardCounts[cardId] > limit) {
-                std::cout << "AxxxcxaA ....... " << cardCounts[cardId] << "       \n";
                 result.Issues.push_back(card->Name + " exceeds allowed limit of " + std::to_string(limit) + " copies.");
                 result.IsPlayable = false;
             }

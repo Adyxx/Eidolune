@@ -41,33 +41,59 @@ std::string Deck::ToString() const {
 
 
 std::shared_ptr<Deck> Deck::FromJson(const nlohmann::json& j) {
-    int ownerId = j.at("owner").get<int>();
-    int mainCharId = j.at("main_character").get<int>();
+    if (!j.contains("owner") || !j.contains("name") || !j.contains("main_character")) {
+        std::cerr << "❌ Deck JSON missing required fields.\n";
+        return nullptr;
+    }
+
+    int ownerId = j["owner"].get<int>();
+    int mainCharId = j["main_character"].get<int>();
 
     auto owner = UserRegistry::Instance().Get(ownerId);
-    auto mainChar = CharacterRegistry::Instance().Get(mainCharId);
-    if (!owner || !mainChar) return nullptr;
+    if (!owner) {
+        std::cerr << "❌ Deck owner (ID " << ownerId << ") not found.\n";
+        return nullptr;
+    }
+
+    std::shared_ptr<Character> mainChar = nullptr;
+    if (mainCharId != -1) {
+        mainChar = CharacterRegistry::Instance().Get(mainCharId);
+        if (!mainChar) {
+            std::cerr << "⚠️ Main character (ID " << mainCharId << ") not found.\n";
+        }
+    }
 
     std::shared_ptr<Character> partner = nullptr;
     if (j.contains("partner_character") && !j["partner_character"].is_null()) {
-        partner = CharacterRegistry::Instance().Get(j["partner_character"].get<int>());
+        int partnerId = j["partner_character"].get<int>();
+        partner = CharacterRegistry::Instance().Get(partnerId);
+        if (!partner) {
+            std::cerr << "⚠️ Partner character (ID " << partnerId << ") not found.\n";
+        }
     }
 
     auto deck = std::make_shared<Deck>(
         owner,
-        j.at("name").get<std::string>(),
+        j.value("name", "Unnamed Deck"),
         mainChar,
         partner,
         j.value("description", "")
     );
 
+    // Load cards
     if (j.contains("deck_cards") && j["deck_cards"].is_array()) {
         for (const auto& dc : j["deck_cards"]) {
             if (!dc.contains("card")) continue;
-            auto card = CardRegistry::Instance().Get(dc["card"].get<int>());
-            if (!card) continue;
 
-            auto deckCard = std::make_shared<DeckCard>(deck, card, dc.value("quantity", 1));
+            int cardId = dc["card"].get<int>();
+            auto card = CardRegistry::Instance().Get(cardId);
+            if (!card) {
+                std::cerr << "⚠️ Deck card ID " << cardId << " not found.\n";
+                continue;
+            }
+
+            int qty = dc.value("quantity", 1);
+            auto deckCard = std::make_shared<DeckCard>(deck, card, qty);
             deck->DeckCards.push_back(deckCard);
         }
     }
@@ -77,23 +103,21 @@ std::shared_ptr<Deck> Deck::FromJson(const nlohmann::json& j) {
 
 nlohmann::json Deck::ToJson() const {
     nlohmann::json j;
-    j["owner"] = Owner ? Owner->Id : -1;
+
+    j["id"] = ID; 
     j["name"] = Name;
     j["main_character"] = MainCharacter ? MainCharacter->ID : -1;
-    
     if (PartnerCharacter) {
         j["partner_character"] = PartnerCharacter->ID;
     } else {
         j["partner_character"] = nullptr;
     }
 
-    j["description"] = Description;
-
-    j["deck_cards"] = nlohmann::json::array();
+    j["cards"] = nlohmann::json::array();
     for (const auto& dc : DeckCards) {
         if (!dc || !dc->CardRef) continue;
-        j["deck_cards"].push_back({
-            {"card", dc->CardRef->ID},
+        j["cards"].push_back({
+            {"card_id", dc->CardRef->ID},
             {"quantity", dc->Quantity}
         });
     }

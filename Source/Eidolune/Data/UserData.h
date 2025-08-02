@@ -15,5 +15,5 @@ struct UserData {
     static UserData FromJson(const nlohmann::json& j);
 
     void SyncCharacter(const UserCharacterData& character);
-
+    void SyncDeck(const std::shared_ptr<Deck>& deck);
 };
