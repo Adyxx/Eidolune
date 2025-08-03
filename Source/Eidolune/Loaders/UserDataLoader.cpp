@@ -23,6 +23,23 @@ UserData UserDataLoader::LoadAllForUser(std::shared_ptr<User> user) {
     userData = UserData::FromJson(dataJson);
     userData.UserId = user->Id;
 
+    // 🔄 Resolve owned cards
+    int cardsResolved = 0;
+    for (auto& userCard : userData.Cards) {
+        auto card = CardRegistry::Instance().Get(userCard.CardId);
+        if (card) {
+            userCard.ResolvedCard = card;
+            ++cardsResolved;
+        } else {
+            std::cerr << "❌ Owned card ID " << userCard.CardId << " not found in CardRegistry.\n";
+        }
+        if (userCard.ResolvedCard) {
+            std::cout << "🃏 Owned card: " << userCard.ResolvedCard->Name
+                      << " (ID: " << userCard.CardId << ", Qty: " << userCard.Quantity << ")\n";
+        }
+    }
+    std::cout << "✅ Resolved " << cardsResolved << " owned cards.\n";
+
     // 🔄 Register decks
     int deckCount = 0;
     for (const auto& deck : userData.Decks) {
