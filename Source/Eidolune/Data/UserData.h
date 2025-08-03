@@ -16,4 +16,5 @@ struct UserData {
 
     void SyncCharacter(const UserCharacterData& character);
     void SyncDeck(const std::shared_ptr<Deck>& deck);
+    void RemoveDeckById(int deckId);
 };

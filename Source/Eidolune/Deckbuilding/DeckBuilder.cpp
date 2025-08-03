@@ -69,17 +69,25 @@ void DeckBuilder::Run(std::shared_ptr<User> currentUser, UserData& currentUserDa
                 int action = PromptInt(0, 2);
 
                 if (action == 0) {
+                    std::cout <<"ssssssss"  << selectedDeck->ID << "    \n";
                     EditDeck(selectedDeck);
+                    std::cout <<"xxxxxxxx"  << selectedDeck->ID << "    \n";
                     currentUserData.SyncDeck(selectedDeck);
                     UserDataUploader::UploadUserData(currentUser, currentUserData);
                 } else if (action == 1) {
                     if (Confirm("Are you sure you want to delete this deck? (y/n): ")) {
-                        DeckRegistry::Instance().Remove(selectedDeck->ID);
-                        std::cout << "Deck deleted.\n";
+                        int deletedDeckId = selectedDeck->ID;
+
+                        DeckRegistry::Instance().Remove(deletedDeckId);
+                        currentUserData.RemoveDeckById(deletedDeckId);
+
+                        UserDataUploader::UploadUserData(currentUser, currentUserData);
+
+                        std::cout << "✅ Deck deleted.\n";
                         break;
                     }
                 } else {
-                    break; // back to deck list
+                    break; 
                 }
             }
         }

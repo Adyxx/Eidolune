@@ -1,6 +1,8 @@
 #include "UserData.h"
 #include "UserCharacterData.h"
 #include "Deck.h"
+#include "UserRegistry.h"
+#include <iostream>
 
 nlohmann::json UserData::ToJson() const {
     nlohmann::json j;
@@ -23,6 +25,12 @@ UserData UserData::FromJson(const nlohmann::json& j) {
     UserData data;
     data.UserId = j.value("user_id", -1);
 
+    auto owner = UserRegistry::Instance().Get(data.UserId);
+    if (!owner) {
+        std::cerr << "❌ Could not find user with ID " << data.UserId << " in registry.\n";
+        return data;
+    }
+
     if (j.contains("characters") && j["characters"].is_array()) {
         for (const auto& charJson : j["characters"]) {
             data.Characters.push_back(UserCharacterData::FromJson(charJson));
@@ -31,13 +39,14 @@ UserData UserData::FromJson(const nlohmann::json& j) {
 
     if (j.contains("decks") && j["decks"].is_array()) {
         for (const auto& deckJson : j["decks"]) {
-            auto deck = Deck::FromJson(deckJson);
+            auto deck = Deck::FromJson(deckJson, owner);
             if (deck) data.Decks.push_back(deck);
         }
     }
 
     return data;
 }
+
 
 void UserData::SyncCharacter(const UserCharacterData& character) {
     auto it = std::find_if(Characters.begin(), Characters.end(),
@@ -64,3 +73,17 @@ void UserData::SyncDeck(const std::shared_ptr<Deck>& deck) {
         Decks.push_back(deck);
     }
 }
+
+void UserData::RemoveDeckById(int deckId) {
+    auto it = std::remove_if(Decks.begin(), Decks.end(),
+        [deckId](const std::shared_ptr<Deck>& d) {
+            return d && d->ID == deckId;
+        });
+    if (it != Decks.end()) {
+        Decks.erase(it, Decks.end());
+        std::cout << "🗑️ Removed deck with ID " << deckId << " from user data.\n";
+    } else {
+        std::cerr << "⚠️ Tried to remove non-existent deck ID " << deckId << " from user data.\n";
+    }
+}
+

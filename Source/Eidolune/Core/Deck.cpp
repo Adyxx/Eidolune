@@ -40,20 +40,18 @@ std::string Deck::ToString() const {
 }
 
 
-std::shared_ptr<Deck> Deck::FromJson(const nlohmann::json& j) {
-    if (!j.contains("owner") || !j.contains("name") || !j.contains("main_character")) {
+std::shared_ptr<Deck> Deck::FromJson(const nlohmann::json& j, std::shared_ptr<User> owner) {
+    if (!j.contains("name") || !j.contains("main_character")) {
         std::cerr << "❌ Deck JSON missing required fields.\n";
         return nullptr;
     }
 
-    int ownerId = j["owner"].get<int>();
-    int mainCharId = j["main_character"].get<int>();
-
-    auto owner = UserRegistry::Instance().Get(ownerId);
     if (!owner) {
-        std::cerr << "❌ Deck owner (ID " << ownerId << ") not found.\n";
+        std::cerr << "❌ Cannot create deck: null owner passed in.\n";
         return nullptr;
     }
+
+    int mainCharId = j["main_character"].get<int>();
 
     std::shared_ptr<Character> mainChar = nullptr;
     if (mainCharId != -1) {
@@ -79,13 +77,15 @@ std::shared_ptr<Deck> Deck::FromJson(const nlohmann::json& j) {
         partner,
         j.value("description", "")
     );
+    
+    deck->ID = j.value("id", -1);
 
     // Load cards
-    if (j.contains("deck_cards") && j["deck_cards"].is_array()) {
-        for (const auto& dc : j["deck_cards"]) {
-            if (!dc.contains("card")) continue;
+    if (j.contains("cards") && j["cards"].is_array()) {
+        for (const auto& dc : j["cards"]) {
+            if (!dc.contains("card_id")) continue;
 
-            int cardId = dc["card"].get<int>();
+            int cardId = dc["card_id"].get<int>();
             auto card = CardRegistry::Instance().Get(cardId);
             if (!card) {
                 std::cerr << "⚠️ Deck card ID " << cardId << " not found.\n";
@@ -100,6 +100,7 @@ std::shared_ptr<Deck> Deck::FromJson(const nlohmann::json& j) {
 
     return deck;
 }
+
 
 nlohmann::json Deck::ToJson() const {
     nlohmann::json j;

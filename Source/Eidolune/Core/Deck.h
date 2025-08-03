@@ -33,7 +33,7 @@ public:
 
     std::string ToString() const;
 
-    static std::shared_ptr<Deck> FromJson(const nlohmann::json& j);
+    static std::shared_ptr<Deck> FromJson(const nlohmann::json& j, std::shared_ptr<User> owner);
     nlohmann::json ToJson() const;
 
 };
