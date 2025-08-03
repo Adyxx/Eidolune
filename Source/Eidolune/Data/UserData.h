@@ -24,4 +24,7 @@ struct UserData {
     void SyncCard(const UserCardData& newCard);
     
     void RemoveDeckById(int deckId);
+
+    int GetOwnedCardCount(int cardId) const;
+
 };

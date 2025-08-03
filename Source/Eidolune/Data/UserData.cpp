@@ -111,3 +111,12 @@ void UserData::SyncCard(const UserCardData& newCard) {
         Cards.push_back(newCard);
     }
 }
+
+int UserData::GetOwnedCardCount(int cardId) const {
+    for (const auto& cardData : Cards) {
+        if (cardData.CardId == cardId) {
+            return cardData.Quantity;
+        }
+    }
+    return 0;
+}

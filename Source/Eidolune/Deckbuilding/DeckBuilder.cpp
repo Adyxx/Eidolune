@@ -14,17 +14,18 @@
 #include "DeckValidator.h"
 #include "DeckBuilder.h"
 #include "UserDataUploader.h"
+#include "UserCharacterData.h"
 
 // Forward declarations for helper functions
 namespace {
     int PromptInt(int min, int max, const std::string& prompt = "Choose option: ");
     void ListUserDecks(const std::vector<std::shared_ptr<Deck>>& decks);
     std::shared_ptr<Deck> CreateNewDeck(std::shared_ptr<User> user);
-    void EditDeck(std::shared_ptr<Deck> deck);
+    void EditDeck(std::shared_ptr<Deck> deck, UserData& currentUserData);
     void RenameDeck(std::shared_ptr<Deck> deck);
     void ChangeDescription(std::shared_ptr<Deck> deck);
-    void AssignMainCharacter(std::shared_ptr<Deck> deck);
-    void ChangeCards(std::shared_ptr<Deck> deck);
+    void AssignMainCharacter(std::shared_ptr<Deck> deck, UserData& currentUserData);
+    void ChangeCards(std::shared_ptr<Deck> deck, UserData& currentUserData);
     void ShowCardsInDeck(const std::shared_ptr<Deck>& deck);
     bool Confirm(const std::string& question);
 }
@@ -51,7 +52,7 @@ void DeckBuilder::Run(std::shared_ptr<User> currentUser, UserData& currentUserDa
             // create new deck
             auto newDeck = CreateNewDeck(currentUser);
             if (newDeck) {
-                EditDeck(newDeck);
+                EditDeck(newDeck, currentUserData);
                 currentUserData.SyncDeck(newDeck);
                 UserDataUploader::UploadUserData(currentUser, currentUserData);
             }
@@ -69,9 +70,7 @@ void DeckBuilder::Run(std::shared_ptr<User> currentUser, UserData& currentUserDa
                 int action = PromptInt(0, 2);
 
                 if (action == 0) {
-                    std::cout <<"ssssssss"  << selectedDeck->ID << "    \n";
-                    EditDeck(selectedDeck);
-                    std::cout <<"xxxxxxxx"  << selectedDeck->ID << "    \n";
+                    EditDeck(selectedDeck, currentUserData);
                     currentUserData.SyncDeck(selectedDeck);
                     UserDataUploader::UploadUserData(currentUser, currentUserData);
                 } else if (action == 1) {
@@ -97,6 +96,21 @@ void DeckBuilder::Run(std::shared_ptr<User> currentUser, UserData& currentUserDa
 // --- Implementations of helper functions ---
 
 namespace {
+
+void ShowAllCardsForUser(std::shared_ptr<User> user, UserData& data) {
+    const auto& allCards = CardRegistry::Instance().GetAll();
+    const int cardsPerRow = 3;
+
+    int i = 0;
+    for (const auto& [cardId, card] : allCards) {
+        int ownedQty = data.GetOwnedCardCount(cardId);
+        std::cout << cardId << ": " << card->Name << " [" << ownedQty << "x]";
+
+        if (++i % cardsPerRow == 0) std::cout << " ||\n";
+        else std::cout << " || ";
+    }
+    std::cout << "\n";
+}
 
 int PromptInt(int min, int max, const std::string& prompt) {
     int val;
@@ -139,7 +153,7 @@ std::shared_ptr<Deck> CreateNewDeck(std::shared_ptr<User> user) {
     return deck;
 }
 
-void EditDeck(std::shared_ptr<Deck> deck) {
+void EditDeck(std::shared_ptr<Deck> deck, UserData& currentUserData) {
     while (true) {
         std::cout << "\nEditing deck: " << deck->Name << "\n";
         std::cout << "0: Rename\n";
@@ -153,8 +167,8 @@ void EditDeck(std::shared_ptr<Deck> deck) {
         switch (choice) {
             case 0: RenameDeck(deck); break;
             case 1: ChangeDescription(deck); break;
-            case 2: AssignMainCharacter(deck); break;
-            case 3: ChangeCards(deck); break;
+            case 2: AssignMainCharacter(deck, currentUserData); break;
+            case 3: ChangeCards(deck, currentUserData); break;
             case 4: return;  // back to deck list
         }
     }
@@ -182,7 +196,7 @@ void ChangeDescription(std::shared_ptr<Deck> deck) {
     std::cout << "Description updated.\n";
 }
 
-void AssignMainCharacter(std::shared_ptr<Deck> deck) {
+void AssignMainCharacter(std::shared_ptr<Deck> deck, UserData& currentUserData) {
     auto charactersMap = CharacterRegistry::Instance().GetAll();
     if (charactersMap.empty()) {
         std::cout << "No characters loaded.\n";
@@ -196,7 +210,12 @@ void AssignMainCharacter(std::shared_ptr<Deck> deck) {
 
     std::cout << "Choose a Main Character:\n";
     for (size_t i = 0; i < chars.size(); ++i) {
-        std::cout << i << ": " << chars[i]->Name << "\n";
+        int charId = chars[i]->ID;
+        bool owned = UserCharacterData::IsCharacterOwned(charId, currentUserData.Characters);
+        std::cout << i << ": " << chars[i]->Name;
+        if (!owned) std::cout << " [NOT OWNED]";
+        else std::cout << " [OWNED]";
+        std::cout << "\n";
     }
     std::cout << chars.size() << ": None\n";
 
@@ -206,9 +225,15 @@ void AssignMainCharacter(std::shared_ptr<Deck> deck) {
         deck->MainCharacter = nullptr;
         std::cout << "Main character cleared.\n";
     } else {
+        int charId = chars[choice]->ID;
+        if (!UserCharacterData::IsCharacterOwned(charId, currentUserData.Characters)) {
+            std::cout << "❌ You do not own this character.\n";
+            return;
+        }
         deck->MainCharacter = chars[choice];
         std::cout << "Main character set to " << deck->MainCharacter->Name << "\n";
     }
+
 }
 
 void ShowCardsInDeck(const std::shared_ptr<Deck>& deck) {
@@ -224,7 +249,7 @@ void ShowCardsInDeck(const std::shared_ptr<Deck>& deck) {
     }
 }
 
-void ChangeCards(std::shared_ptr<Deck> deck) {
+void ChangeCards(std::shared_ptr<Deck> deck, UserData& currentUserData) {
     while (true) {
         ShowCardsInDeck(deck);
         int totalCards = 0;
@@ -254,6 +279,7 @@ void ChangeCards(std::shared_ptr<Deck> deck) {
             std::cout << "Card removed.\n";
 
         } else if (choice == 1) {
+            ShowAllCardsForUser(deck->Owner, currentUserData);
             std::cout << "Enter Card ID to add: ";
             int cardId;
             std::cin >> cardId;
@@ -282,6 +308,15 @@ void ChangeCards(std::shared_ptr<Deck> deck) {
                 if (!card) {
                     std::cout << "Card ID not found.\n";
                     continue;
+                }
+                int ownedQty = currentUserData.GetOwnedCardCount(cardId);
+                if (ownedQty == 0) {
+                    std::cout << "❌ You do not own any copies of this card.\n";
+                    continue;
+                }
+                if (qty > ownedQty) {
+                    std::cout << "⚠️ You only own " << ownedQty << " copies. Reducing quantity to " << ownedQty << ".\n";
+                    qty = ownedQty;
                 }
                 auto deckCard = std::make_shared<DeckCard>(deck, card, qty);
                 deck->DeckCards.push_back(deckCard);

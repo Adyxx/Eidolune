@@ -46,3 +46,9 @@ UserCharacterData UserCharacterData::FromCharacter(Character* character) {
 }
 
 
+bool UserCharacterData::IsCharacterOwned(int charId, const std::vector<UserCharacterData>& ownedChars) {
+    return std::any_of(ownedChars.begin(), ownedChars.end(),
+        [charId](const UserCharacterData& data) {
+            return data.CharacterId == charId;
+        });
+}

@@ -11,7 +11,7 @@
 #include "../Registry/CardRegistry.h"
 #include "../Core/Player.h"
 
-
+#include "UserCharacterData.h"
 #include "UserDataUploader.h"
 
 
@@ -91,7 +91,6 @@ void CharacterCustomization::EquipSpecialistConsumable(std::shared_ptr<Character
 }
 
 
-
 void CharacterCustomization::Run(std::shared_ptr<User> user, UserData& userData) {
     const auto& all = CharacterRegistry::Instance().GetAll();
 
@@ -108,10 +107,17 @@ void CharacterCustomization::Run(std::shared_ptr<User> user, UserData& userData)
     while (true) {
         std::cout << "\n=== 🎨 Character Customization ===\n";
         for (size_t i = 0; i < characters.size(); ++i) {
-            std::cout << i << ": " << characters[i]->Name;
-            if (characters[i]->Class == CharacterClassType::SPECIALIST) {
+            const auto& character = characters[i];
+            bool owned = UserCharacterData::IsCharacterOwned(character->ID, userData.Characters);
+            std::cout << i << ": " << character->Name;
+            
+            if (character->Class == CharacterClassType::SPECIALIST) {
                 std::cout << " [Specialist]";
             }
+            if (owned) {
+                std::cout << " [OWNED]";
+            }
+
             std::cout << "\n";
         }
 

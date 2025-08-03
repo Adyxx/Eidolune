@@ -20,4 +20,6 @@ struct UserCharacterData {
     nlohmann::json ToJson() const;
     static UserCharacterData FromJson(const nlohmann::json& j);
     static UserCharacterData FromCharacter(Character* character);
+
+    static bool IsCharacterOwned(int charId, const std::vector<UserCharacterData>& ownedChars);
 };
