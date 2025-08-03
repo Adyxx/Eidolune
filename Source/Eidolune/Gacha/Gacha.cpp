@@ -14,13 +14,14 @@ float GetAdjustedRarity4Rate(int pullsSinceLastRare, int softPity, int hardPity,
     if (pullsSinceLastRare >= hardPity) return 1.0f;
 
     float increment = (1.0f - baseRate) / (hardPity - softPity);
+
     return baseRate + increment * (pullsSinceLastRare - softPity);
 }
 
 Rarity RollRarity(const Banner& banner, int pity, std::mt19937& rng) {
     float rarity4Rate = GetAdjustedRarity4Rate(pity, banner.SoftPityStart, banner.HardPity, banner.BaseRates.at(Rarity::LEGENDARY));
     float r = std::uniform_real_distribution<float>(0.0f, 1.0f)(rng);
-
+    //std::cout << "RARITY........... " << rarity4Rate << "\n";
     float accum = 0.0f;
     for (const auto& [rarity, rate] : banner.BaseRates) {
         float finalRate = (rarity == Rarity::LEGENDARY) ? rarity4Rate : rate;
@@ -32,6 +33,7 @@ Rarity RollRarity(const Banner& banner, int pity, std::mt19937& rng) {
 
 std::shared_ptr<Card> PullOneCard(const Banner& banner, Rarity rarity, std::mt19937& rng) {
     std::vector<BannerCardEntry> candidates;
+    
     for (const auto& entry : banner.Pool) {
         if (entry.Card->CardRarity == rarity) {
             candidates.push_back(entry);
@@ -44,20 +46,6 @@ std::shared_ptr<Card> PullOneCard(const Banner& banner, Rarity rarity, std::mt19
     return candidates[dist(rng)].Card;
 }
 
-void PrintCardResult(const Card& card, int quantity, bool newCharacter) {
-    std::string rarityStr;
-    switch (card.CardRarity) {
-        case Rarity::COMMON: rarityStr = "★★"; break;
-        case Rarity::RARE: rarityStr = "★★★"; break;
-        case Rarity::EPIC: rarityStr = "★★★★"; break;
-        case Rarity::LEGENDARY: rarityStr = "★★★★★"; break;
-    }
-
-    std::cout << "- " << rarityStr << " " << card.Name;
-    if (quantity > 1) std::cout << " (x" << quantity << ")";
-    if (newCharacter) std::cout << " [New Character Unlocked!]";
-    std::cout << "\n";
-}
 
 }
 
@@ -80,15 +68,23 @@ void Gacha::Run(std::shared_ptr<User> user, UserData& userData) {
         ++tracker.PullsSinceLastRare;
 
         Rarity rolledRarity = RollRarity(banner, tracker.PullsSinceLastRare, rng);
+        
+        // If legendary pulled, reset pity
         if (rolledRarity == Rarity::LEGENDARY) tracker.PullsSinceLastRare = 0;
 
         auto card = PullOneCard(banner, rolledRarity, rng);
-        if (!card) continue;
+
+        if (!card) {
+            std::cout << "- No valid card found for rarity! [" << static_cast<int>(rolledRarity) << "]\n";
+            continue;
+        }
 
         bool newCharacter = false;
+
         if (card->IsCharacterCard && card->CharacterRef) {
             int charId = card->CharacterRef->ID;
-            auto existingChar = std::find_if(userData.Characters.begin(), userData.Characters.end(),
+            auto existingChar = std::find_if(
+                userData.Characters.begin(), userData.Characters.end(),
                 [charId](const UserCharacterData& c) { return c.CharacterId == charId; });
 
             if (existingChar == userData.Characters.end()) {
@@ -100,7 +96,20 @@ void Gacha::Run(std::shared_ptr<User> user, UserData& userData) {
 
         UserCardData userCard = UserCardData::FromCard(card.get());
         userData.SyncCard(userCard);
-        PrintCardResult(*card, userCard.Quantity, newCharacter);
+
+        std::string rarityStr;
+        switch (card->CardRarity) {
+            case Rarity::COMMON: rarityStr = "★★"; break;
+            case Rarity::RARE: rarityStr = "★★★"; break;
+            case Rarity::EPIC: rarityStr = "★★★★"; break;
+            case Rarity::LEGENDARY: rarityStr = "★★★★★"; break;
+        }
+
+        std::cout << "- " << rarityStr << " " << card->Name;
+        if (userCard.Quantity > 1) std::cout << " (x" << userCard.Quantity << ")";
+        if (newCharacter) std::cout << " [New Character Unlocked!]";
+        std::cout << " (Pity: " << tracker.PullsSinceLastRare << "/" << banner.HardPity << ")";
+        std::cout << "\n";
     }
 
     UserDataUploader::UploadUserData(user, userData);

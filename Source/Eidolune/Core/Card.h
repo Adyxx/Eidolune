@@ -46,4 +46,12 @@ public:
         return AuxilaryType == AuxiliaryCardType::CONSUMABLE || AuxilaryType == AuxiliaryCardType::REAGENT;
     }
 
+    bool IsPullable() const {
+        if (AuxilaryType != AuxiliaryCardType::NONE) return false;
+        if (CardRarity == Rarity::COMMON && Name == "Basic potion") return false;
+        // Add any other disqualifying logic
+        return true;
+    }
+
+
 };

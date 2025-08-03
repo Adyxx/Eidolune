@@ -103,13 +103,17 @@ void ShowAllCardsForUser(std::shared_ptr<User> user, UserData& data) {
 
     int i = 0;
     for (const auto& [cardId, card] : allCards) {
+
+        if (!card || card->AuxilaryType != AuxiliaryCardType::NONE) continue;
+
         int ownedQty = data.GetOwnedCardCount(cardId);
         std::cout << cardId << ": " << card->Name << " [" << ownedQty << "x]";
 
         if (++i % cardsPerRow == 0) std::cout << " ||\n";
         else std::cout << " || ";
     }
-    std::cout << "\n";
+
+    if (i % cardsPerRow != 0) std::cout << "\n"; 
 }
 
 int PromptInt(int min, int max, const std::string& prompt) {
@@ -245,7 +249,11 @@ void ShowCardsInDeck(const std::shared_ptr<Deck>& deck) {
     int index = 0;
     for (const auto& deckCard : deck->DeckCards) {
         if (!deckCard || !deckCard->CardRef) continue;
-        std::cout << index++ << ": (" << deckCard->CardRef->ID << ") " << deckCard->Quantity << "x " << deckCard->CardRef->Name << "\n";
+
+        if (deckCard->CardRef->AuxilaryType != AuxiliaryCardType::NONE) continue;
+
+        std::cout << index++ << ": (" << deckCard->CardRef->ID << ") " 
+                  << deckCard->Quantity << "x " << deckCard->CardRef->Name << "\n";
     }
 }
 
@@ -307,6 +315,10 @@ void ChangeCards(std::shared_ptr<Deck> deck, UserData& currentUserData) {
                 auto card = CardRegistry::Instance().Get(cardId);
                 if (!card) {
                     std::cout << "Card ID not found.\n";
+                    continue;
+                }
+                if (card->AuxilaryType != AuxiliaryCardType::NONE) {
+                    std::cout << "❌ This card cannot be added to decks.\n";
                     continue;
                 }
                 int ownedQty = currentUserData.GetOwnedCardCount(cardId);

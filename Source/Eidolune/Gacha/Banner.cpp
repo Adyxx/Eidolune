@@ -1,5 +1,7 @@
 #include "Banner.h"
 #include "CardRegistry.h"
+#include "Card.h"
+
 
 Banner LoadBannerById(int id) {
     auto allCards = CardRegistry::Instance().GetAll();
@@ -17,8 +19,11 @@ Banner LoadBannerById(int id) {
     banner.HardPity = 80;
     banner.SoftPityStart = 60;
 
-    for (const auto& pair : allCards) {
-        banner.Pool.push_back({pair.second, 1.0f, false});
+    for (const auto& [_, card] : allCards) {
+        if (!card) continue;
+        if (card->AuxilaryType != AuxiliaryCardType::NONE) continue;
+        if (!card->IsPullable()) continue; 
+        banner.Pool.push_back({card, 1.0f, false});
     }
 
     return banner;

@@ -16,5 +16,5 @@ void UserDataUploader::UploadUserData(std::shared_ptr<User> user, const UserData
 
     ApiClient::Post("users/" + std::to_string(user->Id) + "/data/", payload);
     std::cout << "✅ Data uploaded for user " << user->Username << "\n";
-    std::cout << "Uploading JSON:\n" << payload.dump(4) << "\n";
+    //std::cout << "Uploading JSON:\n" << payload.dump(4) << "\n";
 }
