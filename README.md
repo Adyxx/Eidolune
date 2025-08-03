@@ -1,10 +1,9 @@
-CMake will automatically fetch nlohmann/json during configuration. No need to install manually.
 
+http://127.0.0.1:8000/api/banners/active/
+http://127.0.0.1:8000/api/users/<id>/data/
 
-------
 
 CMake
-Docker
-Supabase
+nlohmann/json
+cpr
 vcpkg
-libpqxx
