@@ -23,6 +23,7 @@
 #include "../Customization/CharacterCustomization.h"
 #include "UserDataLoader.h"
 #include "DeckBuilder.h"
+#include "Gacha.h"
 
 struct UserInfo {
     std::string Username;
@@ -288,7 +289,7 @@ void GameEngine::Run() {
 
 
 void GameEngine::RunDeckEditor() {
-    std::cout << "\n📚 Deck Editor (WIP)\n";
+    std::cout << "\n📚 Deck Editor\n";
     DeckBuilder::Run(currentUser, currentUserData);
 }
 
@@ -298,8 +299,8 @@ void GameEngine::RunCharacterCustomization() {
 }
 
 void GameEngine::RunGacha() {
-    std::cout << "\n🎁 Gacha System (WIP)\n";
-    // TODO: simulate card pull, show results
+    std::cout << "\n🎁 Gacha System\n";
+    Gacha::Run(currentUser, currentUserData);
 }
 
 void GameEngine::RunSaveLoad() {

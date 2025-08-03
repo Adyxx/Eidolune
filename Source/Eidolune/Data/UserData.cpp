@@ -18,6 +18,11 @@ nlohmann::json UserData::ToJson() const {
         j["decks"].push_back(d->ToJson());
     }
 
+    j["owned_cards"] = nlohmann::json::array();
+    for (const auto& c : Cards) {
+        j["owned_cards"].push_back(c.ToJson());
+    }
+
     return j;
 }
 
@@ -41,6 +46,12 @@ UserData UserData::FromJson(const nlohmann::json& j) {
         for (const auto& deckJson : j["decks"]) {
             auto deck = Deck::FromJson(deckJson, owner);
             if (deck) data.Decks.push_back(deck);
+        }
+    }
+
+    if (j.contains("owned_cards") && j["owned_cards"].is_array()) {
+        for (const auto& cardJson : j["owned_cards"]) {
+            data.Cards.push_back(UserCardData::FromJson(cardJson));
         }
     }
 
@@ -87,3 +98,16 @@ void UserData::RemoveDeckById(int deckId) {
     }
 }
 
+
+void UserData::SyncCard(const UserCardData& newCard) {
+    auto it = std::find_if(Cards.begin(), Cards.end(),
+        [&newCard](const UserCardData& c) {
+            return c.CardId == newCard.CardId;
+        });
+
+    if (it != Cards.end()) {
+        it->Quantity += newCard.Quantity;
+    } else {
+        Cards.push_back(newCard);
+    }
+}

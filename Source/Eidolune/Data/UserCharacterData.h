@@ -21,11 +21,3 @@ struct UserCharacterData {
     static UserCharacterData FromJson(const nlohmann::json& j);
     static UserCharacterData FromCharacter(Character* character);
 };
-
-
-/*
-
-characterData.Sync(userData);
-UserDataUploader::UploadUserData(user, userData);
-
-*/
