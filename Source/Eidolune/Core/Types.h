@@ -27,6 +27,7 @@ enum class TriggerScope {
     SELF,               // Only if this card triggered the event
     OTHER_FRIENDLY,     // Another card from same owner
     ANY_FRIENDLY,
+    GLOBAL,
     OTHER_ENEMY,        // Another card from opposing player
     ANY_OTHER,          // Any card, as long as it's not self
     ANY,                // All cards can respond

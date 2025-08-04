@@ -1,5 +1,3 @@
-
-
 #include "TriggerBuilder.h"
 #include "CardEffectBinding.h"
 #include "Effect.h"
@@ -10,59 +8,96 @@
 #include "GameActions.h"
 #include "Target.h"
 
+namespace {
+
+// Helper to determine if the trigger matches the scope rules
+bool IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScope scope) {
+    switch (scope) {
+        case TriggerScope::GLOBAL:
+            return true;
+        case TriggerScope::SELF:
+            return triggerCard && eventCard && eventCard->Id == triggerCard->Id;
+        case TriggerScope::OTHER_FRIENDLY:
+            return triggerCard && eventCard && eventCard != triggerCard &&
+                   eventCard->Owner && triggerCard->Owner &&
+                   eventCard->Owner == triggerCard->Owner;
+        case TriggerScope::ANY_FRIENDLY:
+            return triggerCard && eventCard &&
+                   eventCard->Owner && triggerCard->Owner &&
+                   eventCard->Owner == triggerCard->Owner;
+        case TriggerScope::OTHER_ENEMY:
+            return triggerCard && eventCard && eventCard != triggerCard &&
+                   eventCard->Owner && triggerCard->Owner &&
+                   eventCard->Owner != triggerCard->Owner;
+        case TriggerScope::ANY_OTHER:
+            return triggerCard && eventCard && eventCard != triggerCard;
+        case TriggerScope::ANY:
+            return true;
+        default:
+            std::cout << "❌ Unhandled TriggerScope enum.\n";
+            return false;
+    }
+}
+
+}
+
 std::function<void(std::unordered_map<std::string, void*>)>
 TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
     return [binding](std::unordered_map<std::string, void*> ctx) {
-        auto eventCardPtr = binding->GetEventGameCard();
-        auto* triggerCard = static_cast<GameCard*>(ctx.at("source"));
-        auto* triggerOwner = static_cast<Player*>(ctx.at("owner"));
-
-        if (!eventCardPtr || !triggerCard) {
-            std::cout << "❌ Missing card references in context\n";
+        if (!binding) {
+            std::cout << "❌ Binding is null.\n";
             return;
         }
 
-        auto* eventCard = eventCardPtr.get();
+        auto eventCardPtr = binding->GetEventGameCard();
+        auto* eventCard = eventCardPtr ? eventCardPtr.get() : nullptr;
 
-        switch (binding->GetScope()) {
-            case TriggerScope::SELF:
-                if (eventCard->Id != triggerCard->Id) {
-                    return;
-                }
-                break;
+        auto* triggerCard = ctx.count("source") ? static_cast<GameCard*>(ctx["source"]) : nullptr;
+        auto* triggerOwner = ctx.count("owner") ? static_cast<Player*>(ctx["owner"]) : nullptr;
 
-            case TriggerScope::OTHER_FRIENDLY:
-                if (eventCard == triggerCard) return;
-                if (!eventCard->Owner || !triggerCard->Owner) return;
-                if (eventCard->Owner != triggerCard->Owner) return;
-                break;
-
-            case TriggerScope::ANY_FRIENDLY:
-                if (!eventCard->Owner || !triggerCard->Owner) return;
-                if (eventCard->Owner != triggerCard->Owner) return;
-                break;
-
-            case TriggerScope::OTHER_ENEMY:
-                if (eventCard == triggerCard) return;
-                if (!eventCard->Owner || !triggerCard->Owner) return;
-                if (eventCard->Owner == triggerCard->Owner) return;
-                break;
-
-            case TriggerScope::ANY_OTHER:
-                if (eventCard == triggerCard) return;
-                break;
-
-            case TriggerScope::ANY:
-                break;
-            default:
-                std::cout << "❌ Unhandled TriggerScope: " << "\n";
+        if (!eventCard) {
+            std::cout << "❌ eventCard is null.\n";
+            return;
         }
 
-        if (binding->HasZone()) {
-            if (eventCard->Zone != binding->GetZoneAsCardZone()) return;
+        bool requiresTriggerCard = binding->GetScope() != TriggerScope::GLOBAL;
+        if (requiresTriggerCard && !triggerCard) {
+            std::cout << "❌ triggerCard is required but missing.\n";
+            return;
+        }
+
+        if (requiresTriggerCard && !triggerOwner) {
+            std::cout << "❌ triggerOwner is required but missing.\n";
+            return;
+        }
+
+        if (binding->GetScope() == TriggerScope::GLOBAL) {
+            auto* turnPlayer = ctx.count("turn_player") ? static_cast<Player*>(ctx["turn_player"]) : nullptr;
+            if (!eventCard->Owner || !turnPlayer) {
+                std::cout << "❌ GLOBAL trigger requires eventCard->Owner and turn_player.\n";
+                return;
+            }
+            if (eventCard->Owner != turnPlayer) {
+                // It's not this card's owner's turn, so skip
+                return;
+            }
+            if (eventCard->Owner->PlayerIndex != turnPlayer->PlayerIndex) return;
+        } else {
+            if (!IsTriggerScopeMatch(eventCard, triggerCard, binding->GetScope())) {
+                return;
+            }
+        }
+
+        if (binding->HasZone() && eventCard->Zone != binding->GetZoneAsCardZone()) {
+            return;
         }
 
         auto effect = binding->GetEffect();
+        if (!effect) {
+            std::cout << "❌ Effect is null.\n";
+            return;
+        }
+
         auto effectFunc = effect->GetExecutable();
         if (!effectFunc) {
             std::cout << "❌ Effect function is null.\n";
@@ -70,18 +105,21 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
         }
 
         TargetSpec targetingSpec = binding->GetTargetSpec().value_or(TargetSpec::SELF);
-
         bool targetRequired = effect->RequiresTarget;
 
-        std::vector<Target> possibleTargets = GameActions::GetTargets(triggerOwner, triggerOwner->GetOpponent(), targetingSpec);
+        std::vector<Target> possibleTargets;
+
+        if (triggerOwner) {
+            possibleTargets = GameActions::GetTargets(triggerOwner, triggerOwner->GetOpponent(), targetingSpec);
+        }
 
         Target resolvedTarget = { Target::Type::NONE, nullptr };
 
         if (possibleTargets.empty()) {
-            if (!targetRequired) {
+            if (!targetRequired && triggerOwner) {
                 resolvedTarget = Target::FromPlayer(triggerOwner);
-            } else {
-                std::cout << "❌ Effect requires target but none found.\n";
+            } else if (targetRequired) {
+                std::cout << "❌ Effect requires a target but none found.\n";
                 return;
             }
         } else if (possibleTargets.size() == 1) {
@@ -96,8 +134,6 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
         }
 
         std::cout << "✨ Trigger fired: " << binding->GetTrigger()->ScriptReference << "\n";
-
         effectFunc(eventCard, resolvedTarget, binding->GetValue());
     };
 }
-

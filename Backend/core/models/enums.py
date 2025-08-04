@@ -53,6 +53,7 @@ class TriggerScope(models.TextChoices):
     OTHER_ENEMY = "OTHER_ENEMY"
     ANY_OTHER = "ANY_OTHER"
     ANY = "ANY"
+    GLOBAL = "GLOBAL"
 
 class CharacterClassType(models.TextChoices):
      SPECIALIST = "SPECIALIST"

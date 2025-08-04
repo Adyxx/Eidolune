@@ -222,7 +222,7 @@ void GameEngine::RunCombatLoop() {
         auto current = game.GetCurrentPlayer();
         std::cout << "\n=== 🕒 " << current->GetName() << "'s Turn ===\n";
 
-        GameActions::StartTurn(current.get());
+        GameActions::StartTurn(current.get(), game.GetTriggerObserver());
         GameActions::ShowPlayerState(current.get());
 
         bool turnEnded = false;
@@ -237,7 +237,7 @@ void GameEngine::RunCombatLoop() {
             } else if (input == "attack") {
                 GameActions::Attack(current.get(), game.GetOpponent().get());
             } else if (input == "end") {
-                GameActions::EndTurn(current.get());
+                GameActions::EndTurn(current.get(), game.GetTriggerObserver());
                 turnEnded = true;
             } else {
                 std::cout << "❓ Unknown command.\n";

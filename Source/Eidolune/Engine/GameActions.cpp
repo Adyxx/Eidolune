@@ -155,7 +155,7 @@ namespace GameActions {
         player->Energy -= card->GetCost();
         std::cout << "🔋 Energy left: " << player->Energy << "\n";
 
-        std::cout << "Emitting event <card_played> " << "\n";
+        //std::cout << "Emitting event <card_played> " << "\n";
         observer->Emit("card_played", { {"source", card.get()},{"owner", player} });
 
     }
@@ -270,7 +270,7 @@ namespace GameActions {
                 if (targetCard->CurrentHealth() <= 0) {
                     std::cout << "💀 " << targetCard->GetName() << " is destroyed!\n";
                     Player* owner = targetCard->Owner;
-
+                    targetCard->Zone = CardZone::GRAVEYARD;
                     if (owner) {
                         // Remove from board
                         auto& board = owner->Board;
@@ -286,7 +286,7 @@ namespace GameActions {
                             // Remove all buffs it caused
                             for (auto& ally : board) {
                                 if (ally->ActiveAuras.count(sourceId)) {
-                                    int lostHP = ally->ActiveAuras[sourceId].HealthBuff;
+                                    //int lostHP = ally->ActiveAuras[sourceId].HealthBuff;
                                     ally->RemoveAura(sourceId);
 
                                 }
@@ -327,16 +327,27 @@ namespace GameActions {
         std::cout << "❌ Ability system not yet implemented.\n";
     }
 
-    void StartTurn(Player* player) {
+    void StartTurn(Player* player, std::shared_ptr<TriggerObserver> observer) {
         player->StartTurn();
+
+        observer->Emit("turn_started", {
+            { "turn_player", player }, 
+            { "owner", player },      
+            { "source", nullptr }   
+        });
 
         if (player->DeckRef && player->DeckRef->MainCharacter && player->DeckRef->MainCharacter->ClassLogic) {
             player->DeckRef->MainCharacter->ClassLogic->OnTurnStart(player);
         }
     }
 
-    void EndTurn(Player* player) {
+    void EndTurn(Player* player, std::shared_ptr<TriggerObserver> observer) {
         player->EndTurn();
-    }
 
+        observer->Emit("turn_ended", {
+            { "turn_player", player }, 
+            { "owner", player },    
+            { "source", nullptr }  
+        });
+    }
 }

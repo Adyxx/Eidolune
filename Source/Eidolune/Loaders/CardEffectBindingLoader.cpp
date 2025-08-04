@@ -20,6 +20,7 @@ inline TriggerScope StringToTriggerScope(const std::string& str) {
     if (str == "ANY_FRIENDLY") return TriggerScope::ANY_FRIENDLY;
     if (str == "ANY_OTHER") return TriggerScope::ANY_OTHER;
     if (str == "ANY") return TriggerScope::ANY;
+    if (str == "GLOBAL") return TriggerScope::GLOBAL;
     return TriggerScope::SELF;
 }
 

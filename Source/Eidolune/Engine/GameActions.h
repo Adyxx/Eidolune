@@ -15,8 +15,8 @@ namespace GameActions {
     void PlayCardDirect(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer);
     void Attack(Player* attacker, Player* defender);
     void UseAbility(Player* player, Player* opponent);
-    void StartTurn(Player* player);
-    void EndTurn(Player* player);
+    void StartTurn(Player* player, std::shared_ptr<TriggerObserver> observer);
+    void EndTurn(Player* player, std::shared_ptr<TriggerObserver> observer);
 
     void ResolveCombat(std::shared_ptr<GameCard> attackerCard, GameCard* targetCard, Player* attacker, Player* defender);
 

@@ -36,7 +36,7 @@ void Player::EndTurn() {
 }
 
 void Player::PromptAuxCardChoice(AuxiliaryCardType type, const std::vector<Card*>& options) {
-    std::cout << "Choose...." << "\n";
+    std::cout << "--PICK FROM OPTIONS--" << "\n";
     for (size_t i = 0; i < options.size(); ++i) {
         std::cout << i + 1 << ". " << options[i]->Name << "\n";
     }
