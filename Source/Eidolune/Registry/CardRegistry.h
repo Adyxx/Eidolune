@@ -19,6 +19,7 @@ public:
     const std::unordered_map<int, std::shared_ptr<Card>>& GetAll() const {
         return Cards;
     }
+    static std::vector<Card*> GetCardsByAuxType(AuxiliaryCardType type);
     
 private:
     std::unordered_map<int, std::shared_ptr<Card>> Cards;

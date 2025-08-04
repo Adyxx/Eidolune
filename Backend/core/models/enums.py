@@ -49,6 +49,7 @@ class RelationshipType(models.TextChoices):
 class TriggerScope(models.TextChoices):
     SELF = "SELF"
     OTHER_FRIENDLY = "OTHER_FRIENDLY"
+    ANY_FRIENDLY = "ANY_FRIENDLY"
     OTHER_ENEMY = "OTHER_ENEMY"
     ANY_OTHER = "ANY_OTHER"
     ANY = "ANY"
@@ -67,9 +68,10 @@ class CharacterClassType(models.TextChoices):
 class AuxiliaryCardType(models.TextChoices):
     NONE = "NONE",
     REAGENT = "REAGENT",
-    QUEST = "QUEST",
+    OATH = "OATH",
     CONSUMABLE = "CONSUMABLE",
-    FRAGMENT = "FRAGMENT"
+    FRAGMENT = "FRAGMENT",
+    RELIC = "RELIC"
 
 class BannerType(models.TextChoices):
     CARD = "CARD", "Card"

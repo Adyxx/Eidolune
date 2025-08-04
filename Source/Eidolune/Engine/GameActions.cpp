@@ -95,8 +95,8 @@ namespace GameActions {
                 case Target::Type::CARD: {
                     auto* gc = static_cast<GameCard*>(target.ptr);
                     std::cout << "  " << i << ": " << gc->GetName()
-                            << " (" << gc->GetPower().value_or(0)
-                            << "/" << gc->GetHealth().value_or(0) << ")\n";
+                            << " (" << gc->CurrentAttack()
+                            << "/" << gc->CurrentHealth() << ")\n";
                     break;
                 }
                 case Target::Type::PLAYER: {
@@ -207,8 +207,8 @@ namespace GameActions {
         for (size_t i = 0; i < validAttackers.size(); ++i) {
             auto& card = validAttackers[i];
             std::cout << "  " << i << ": " << card->GetName()
-                    << " (" << card->GetPower().value_or(0)
-                    << "/" << card->GetHealth().value_or(0) << ")\n";
+                    << " (" << card->CurrentAttack()
+                    << "/" << card->CurrentHealth() << ")\n";
         }
 
         std::cout << "Select attacker ID: ";
@@ -245,15 +245,16 @@ namespace GameActions {
    void ResolveCombat(std::shared_ptr<GameCard> attackerCard, GameCard* targetCard, Player* attacker, Player* defender) {
         if (targetCard) {
             std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << targetCard->GetName() << "\n";
-            GameActions::ResolveDamage(attackerCard.get(), Target::FromCard(targetCard), attackerCard->GetPower().value_or(0), "combat");
-            GameActions::ResolveDamage(targetCard, Target::FromCard(attackerCard.get()), targetCard->GetPower().value_or(0), "combat");
+            GameActions::ResolveDamage(attackerCard.get(), Target::FromCard(targetCard), attackerCard->CurrentAttack(), "combat");
+            GameActions::ResolveDamage(targetCard, Target::FromCard(attackerCard.get()), targetCard->CurrentAttack(), "combat");
         } else {
             std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << defender->GetName() << "\n";
-            GameActions::ResolveDamage(attackerCard.get(), Target::FromPlayer(defender), attackerCard->GetPower().value_or(0), "combat");
+            GameActions::ResolveDamage(attackerCard.get(), Target::FromPlayer(defender), attackerCard->CurrentAttack(), "combat");
         }
 
         attackerCard->Tapped = true;
     }
+
 
     void ResolveDamage(void* source, Target target, int amount, const std::string& type) {
         if (!target.ptr) return;
@@ -262,22 +263,40 @@ namespace GameActions {
             case Target::Type::CARD: {
                 auto* targetCard = static_cast<GameCard*>(target.ptr);
                 std::cout << "🟥 Dealing " << amount << " to card: " << targetCard->GetName() << "\n";
+
                 targetCard->DamageTaken += amount;
-                if (targetCard->DamageTaken >= targetCard->GetHealth().value_or(0)) {
+
+                // Death Check
+                if (targetCard->CurrentHealth() <= 0) {
                     std::cout << "💀 " << targetCard->GetName() << " is destroyed!\n";
-                    auto* owner = targetCard->Owner;
+                    Player* owner = targetCard->Owner;
+
                     if (owner) {
+                        // Remove from board
                         auto& board = owner->Board;
                         auto it = std::find_if(board.begin(), board.end(),
                             [&](const std::shared_ptr<GameCard>& c) { return c.get() == targetCard; });
                         if (it != board.end()) {
                             owner->Graveyard.push_back(*it);
                             board.erase(it);
+
+                            // This was a potential aura source
+                            int sourceId = targetCard->Id;
+
+                            // Remove all buffs it caused
+                            for (auto& ally : board) {
+                                if (ally->ActiveAuras.count(sourceId)) {
+                                    int lostHP = ally->ActiveAuras[sourceId].HealthBuff;
+                                    ally->RemoveAura(sourceId);
+
+                                }
+                            }
                         }
                     }
                 }
                 break;
             }
+
             case Target::Type::PLAYER: {
                 auto* player = static_cast<Player*>(target.ptr);
                 std::cout << "🟥 Dealing " << amount << " to player: " << player->GetName() << "\n";
@@ -287,6 +306,7 @@ namespace GameActions {
                 }
                 break;
             }
+
             default:
                 std::cout << "❌ Unknown target type.\n";
                 break;

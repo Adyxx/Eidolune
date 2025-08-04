@@ -11,6 +11,8 @@ std::string Player::GetName() const {
 }
 
 void Player::StartTurn() {
+    TurnCount++;
+    CardsPlayedThisTurn = 0;
     std::cout << "▶️ " << GetName() << "'s turn begins.\n";
     if (MaxEnergy < 10) MaxEnergy++;
     Energy = MaxEnergy;
@@ -33,3 +35,15 @@ void Player::EndTurn() {
     }
 }
 
+void Player::PromptAuxCardChoice(AuxiliaryCardType type, const std::vector<Card*>& options) {
+    std::cout << "Choose...." << "\n";
+    for (size_t i = 0; i < options.size(); ++i) {
+        std::cout << i + 1 << ". " << options[i]->Name << "\n";
+    }
+
+    int choice = 0;
+    std::cin >> choice;
+    choice = std::clamp(choice, 1, (int)options.size());
+
+    AddChosenAuxCard(options[choice - 1]);
+}

@@ -37,6 +37,11 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
                 if (eventCard->Owner != triggerCard->Owner) return;
                 break;
 
+            case TriggerScope::ANY_FRIENDLY:
+                if (!eventCard->Owner || !triggerCard->Owner) return;
+                if (eventCard->Owner != triggerCard->Owner) return;
+                break;
+
             case TriggerScope::OTHER_ENEMY:
                 if (eventCard == triggerCard) return;
                 if (!eventCard->Owner || !triggerCard->Owner) return;

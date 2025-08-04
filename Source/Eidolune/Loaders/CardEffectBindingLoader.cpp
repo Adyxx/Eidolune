@@ -17,6 +17,7 @@ inline ListeningZone StringToListeningZone(const std::string& str) {
 inline TriggerScope StringToTriggerScope(const std::string& str) {
     if (str == "OTHER_FRIENDLY") return TriggerScope::OTHER_FRIENDLY;
     if (str == "OTHER_ENEMY") return TriggerScope::OTHER_ENEMY;
+    if (str == "ANY_FRIENDLY") return TriggerScope::ANY_FRIENDLY;
     if (str == "ANY_OTHER") return TriggerScope::ANY_OTHER;
     if (str == "ANY") return TriggerScope::ANY;
     return TriggerScope::SELF;

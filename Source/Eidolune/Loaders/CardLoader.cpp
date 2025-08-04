@@ -24,6 +24,7 @@ static CardType ParseCardType(const std::string& s) {
     if (s == "SPELL") return CardType::SPELL;
     if (s == "RITUAL") return CardType::RITUAL;
     if (s == "ASSET") return CardType::ASSET;
+    if (s == "OTHER") return CardType::OTHER;
     throw std::runtime_error("Unknown card type: " + s);
 }
 /*
@@ -58,9 +59,10 @@ CharacterClassType ParseClassLock(const std::string& s) {
 
 AuxiliaryCardType ParseAuxiliaryType(const std::string& s) {
     if (s == "REAGENT") return AuxiliaryCardType::REAGENT;
-    if (s == "QUEST") return AuxiliaryCardType::QUEST;
+    if (s == "OATH") return AuxiliaryCardType::OATH;
     if (s == "FRAGMENT") return AuxiliaryCardType::FRAGMENT;
     if (s == "CONSUMABLE") return AuxiliaryCardType::CONSUMABLE;
+    if (s == "RELIC") return AuxiliaryCardType::RELIC;
     return AuxiliaryCardType::NONE;
 }
 

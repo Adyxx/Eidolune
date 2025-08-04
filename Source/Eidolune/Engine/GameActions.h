@@ -6,6 +6,8 @@
 #include "TriggerObserver.h"
 #include <memory>
 #include "Target.h"
+#include "CardEffectBinding.h"
+#include "Condition.h"
 
 namespace GameActions {
 
@@ -29,4 +31,7 @@ namespace GameActions {
 
     std::vector<Target> GetTargets(Player* player, Player* opponent, TargetSpec spec);
     Target ChooseTarget(Player* player, const std::vector<Target>& targets);
+
+
+
 }

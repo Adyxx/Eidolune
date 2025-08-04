@@ -6,6 +6,7 @@
 #include "Card.h"
 #include "Currency.h"
 #include "CardRegistry.h"
+#include <nlohmann/json.hpp>
 
 enum class BannerType {
     CARD,

@@ -12,7 +12,8 @@ from .models.condition import Condition
 from .models.cardeffectbinding import CardEffectBinding
 from .models.users import User
 from .services.deck_service import get_deck_issues
-from .models.banner import Banner, BannerItem
+from .models.banner import Banner, BannerItem, BannerItemForm
+from .models.enums import AuxiliaryCardType
 
 
 ### INLINE ADMIN CLASSES ###
@@ -50,6 +51,10 @@ class CardAdmin(admin.ModelAdmin):
     inlines = [CardEffectBindingInline]
     filter_horizontal = ("subtypes",)
 
+    def get_search_results(self, request, queryset, search_term):
+        if request.GET.get('_banner_autocomplete'):
+            queryset = queryset.filter(auxilarytype=AuxiliaryCardType.NONE)
+        return super().get_search_results(request, queryset, search_term)
 
 ### CHARACTER ADMIN ###
 
@@ -85,10 +90,17 @@ class UserAdmin(BaseUserAdmin):
 class BannerItemInline(admin.TabularInline):
     model = BannerItem
     extra = 1
+    form = BannerItemForm
     autocomplete_fields = ['card']
     show_change_link = True
     readonly_fields = ['card_rarity']
     fields = ['card', 'card_rarity', 'is_featured']
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'card' and hasattr(formfield.widget, 'attrs'):
+            formfield.widget.attrs['data-ajax--params'] = '{"_banner_autocomplete": 1}'
+        return formfield
 
     def card_rarity(self, obj):
         return obj.card.rarity if obj.card else "-"

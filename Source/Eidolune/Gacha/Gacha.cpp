@@ -54,12 +54,12 @@ Rarity RollRarity(const Banner& banner, int pity, std::mt19937& rng) {
     // Roll based on final adjusted rates
     float r = std::uniform_real_distribution<float>(0.0f, 1.0f)(rng);
     //std::cout << "RARITY........... " << adjustedRates[Rarity::LEGENDARY] << "\n";
-    
+    /*
     std::cout << "Adjusted Rates:\n";
     for (const auto& [rarity, rate] : adjustedRates) {
         std::cout << "  " << static_cast<int>(rarity) << ": " << rate << "\n";
     }
-
+    */
     float accum = 0.0f;
     for (const auto& [rarity, rate] : adjustedRates) {
         accum += rate;

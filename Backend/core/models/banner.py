@@ -1,6 +1,8 @@
 from django.db import models
 from .enums import BannerType, CurrencyType
 from .card import Card
+from django import forms
+from .enums import AuxiliaryCardType
 
 class Banner(models.Model):
     name = models.CharField(max_length=100)
@@ -27,9 +29,25 @@ class Banner(models.Model):
 class BannerItem(models.Model):
     banner = models.ForeignKey(Banner, on_delete=models.CASCADE, related_name="items")
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
-    
+
     # Only applies to non-legendary featured cards
-    is_featured = models.BooleanField(default=False)  
+    is_featured = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('banner', 'card') 
 
     def __str__(self):
         return f"{self.card.name} in {self.banner.name}"
+    
+
+
+class BannerItemForm(forms.ModelForm):
+    class Meta:
+        model = BannerItem
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Filter to only show cards with auxilarytype = NONE
+        self.fields['card'].queryset = Card.objects.filter(auxilarytype=AuxiliaryCardType.NONE)

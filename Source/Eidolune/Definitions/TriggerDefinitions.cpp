@@ -4,7 +4,6 @@
 void RegisterTriggerDefinitions() {
     auto& registry = TriggerRegistry::Instance();
 
-    // Trigger: OnPlay
     TriggerInfo onPlay;
     onPlay.Name = "OnPlay";
     onPlay.Description = "When this card is played.";
@@ -12,11 +11,9 @@ void RegisterTriggerDefinitions() {
 
     auto onPlayTrigger = std::make_shared<Trigger>("card_played");
 
-    //registry.RegisterInfo("on_play", onPlay);
     registry.RegisterShared("on_play", onPlayTrigger);
     registry.RegisterShared(1, onPlayTrigger);
 
-    // Trigger: OnDeath
     TriggerInfo onDeath;
     onDeath.Name = "OnDeath";
     onDeath.Description = "When this card dies.";
@@ -24,9 +21,9 @@ void RegisterTriggerDefinitions() {
 
     auto onDeathTrigger = std::make_shared<Trigger>("card_died");
 
-    //registry.RegisterInfo("on_death", onDeath);
     registry.RegisterShared("on_death", onDeathTrigger);
     registry.RegisterShared(2, onDeathTrigger);
+
 }
 
 
