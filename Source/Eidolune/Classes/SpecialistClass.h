@@ -42,11 +42,11 @@ class SpecialistClass : public CharacterClass {
 public:
     SpecialistClass();
 
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
     void ApplySetupBonus(Character* character) override;
+    void UseClassAbility(Character* character, Player* player, std::shared_ptr<TriggerObserver> observer) override;
 
-    void UseActiveConsumable(GameState* state, Character* character, Player* player, std::shared_ptr<TriggerObserver> observer); 
     void EquipConsumable(Character* character, std::shared_ptr<Card> card, int slotIndex);
-    ConsumableBag& GetBag(Character* character); 
+    ConsumableBag& GetBag(Character* character);
 };
 

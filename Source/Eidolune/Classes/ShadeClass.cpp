@@ -8,6 +8,6 @@ ShadeClass::ShadeClass() {
     Description = "";
 }
 
-void ShadeClass::OnTurnStart(GameState* state, Player* player) {
+void ShadeClass::OnTurnStart(Player* player) {
     std::cout << "[Shade Turn Start Triggered]\n";
 }

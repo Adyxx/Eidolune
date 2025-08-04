@@ -3,18 +3,21 @@
 #include <string>
 #include <memory>
 #include "../Core/Player.h"
-
-class GameState;
-
+#include "TriggerObserver.h"
+#include <iostream>
 
 class CharacterClass {
 public:
     std::string Name;
     std::string Description;
 
-    virtual void OnTurnStart(GameState* state, Player* player) {}
-    virtual void OnCardPlayed(GameState* state, Player* player) {}
+    virtual void OnTurnStart(Player* player) {}
+    virtual void OnCardPlayed(Player* player) {}
     virtual void ApplySetupBonus(Character* character) {}
+
+    virtual void UseClassAbility(Character* character, Player* player, std::shared_ptr<TriggerObserver> observer) {
+        std::cout << "⚠️ This class has no active ability.\n";
+    }
 
     virtual ~CharacterClass() = default;
 };

@@ -8,6 +8,6 @@ GamblerClass::GamblerClass() {
     Description = "";
 }
 
-void GamblerClass::OnTurnStart(GameState* state, Player* player) {
+void GamblerClass::OnTurnStart(Player* player) {
     std::cout << "[Gambler Turn Start Triggered]\n";
 }

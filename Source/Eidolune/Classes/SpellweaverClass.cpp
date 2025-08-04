@@ -7,6 +7,10 @@ SpellweaverClass::SpellweaverClass() {
     Description = "";
 }
 
-void SpellweaverClass::OnTurnStart(GameState* state, Player* player) {
+void SpellweaverClass::OnTurnStart(Player* player) {
     std::cout << "[Spellweaver Turn Start Triggered]\n";
+}
+
+void SpellweaverClass::UseClassAbility(Character* character, Player* player, std::shared_ptr<TriggerObserver> observer) {
+    
 }

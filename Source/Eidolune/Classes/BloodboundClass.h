@@ -4,5 +4,11 @@
 class BloodboundClass : public CharacterClass {
 public:
     BloodboundClass();
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
+    void ApplySetupBonus(Character* character) override;
+
+    int GetBloodEcho(Character* character);
+    void TrackHealthChange(Character* character, int deltaHP);
+private:
+    std::unordered_map<Character*, int> bloodEcho;
 };

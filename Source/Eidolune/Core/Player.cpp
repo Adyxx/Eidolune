@@ -14,7 +14,7 @@ void Player::StartTurn() {
     std::cout << "▶️ " << GetName() << "'s turn begins.\n";
     if (MaxEnergy < 10) MaxEnergy++;
     Energy = MaxEnergy;
-    //DrawCard(nullptr, this, 1);
+
     DrawCard(nullptr, Target::FromPlayer(this), 1);
 
 }

@@ -7,5 +7,5 @@
 class MachinistClass : public CharacterClass {
 public:
     MachinistClass();
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
 };

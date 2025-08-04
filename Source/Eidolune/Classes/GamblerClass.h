@@ -7,5 +7,5 @@
 class GamblerClass : public CharacterClass {
 public:
     GamblerClass();
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
 };

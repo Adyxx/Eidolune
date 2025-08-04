@@ -6,5 +6,5 @@
 class ShadeClass : public CharacterClass {
 public:
     ShadeClass();
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
 };

@@ -8,6 +8,6 @@ MachinistClass::MachinistClass() {
     Description = "";
 }
 
-void MachinistClass::OnTurnStart(GameState* state, Player* player) {
+void MachinistClass::OnTurnStart(Player* player) {
     std::cout << "[Machinist Turn Start Triggered]\n";
 }

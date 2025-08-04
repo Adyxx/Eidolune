@@ -20,16 +20,54 @@ float GetAdjustedRarity4Rate(int pullsSinceLastRare, int softPity, int hardPity,
 }
 
 Rarity RollRarity(const Banner& banner, int pity, std::mt19937& rng) {
-    float rarity4Rate = GetAdjustedRarity4Rate(pity, banner.SoftPityStart, banner.HardPity, banner.BaseRates.at(Rarity::LEGENDARY));
-    float r = std::uniform_real_distribution<float>(0.0f, 1.0f)(rng);
-    //std::cout << "RARITY........... " << rarity4Rate << "\n";
-    float accum = 0.0f;
+    float baseLegendaryRate = banner.BaseRates.at(Rarity::LEGENDARY);
+    float adjustedLegendaryRate = GetAdjustedRarity4Rate(pity, banner.SoftPityStart, banner.HardPity, baseLegendaryRate);
+    
+    // Calculate total remaining probability to distribute
+    float extraLegendaryRate = adjustedLegendaryRate - baseLegendaryRate;
+
+    // Total of non-legendary base rates (to proportionally reduce from)
+    float nonLegendaryBaseTotal = 0.0f;
     for (const auto& [rarity, rate] : banner.BaseRates) {
-        float finalRate = (rarity == Rarity::LEGENDARY) ? rarity4Rate : rate;
-        accum += finalRate;
+        if (rarity != Rarity::LEGENDARY) {
+            nonLegendaryBaseTotal += rate;
+        }
+    }
+
+    std::map<Rarity, float> adjustedRates;
+
+    for (const auto& [rarity, rate] : banner.BaseRates) {
+        if (rarity == Rarity::LEGENDARY) {
+            adjustedRates[rarity] = adjustedLegendaryRate;
+        } else {
+            // Reduce each non-legendary rate proportionally
+            float reduction = (rate / nonLegendaryBaseTotal) * extraLegendaryRate;
+            adjustedRates[rarity] = std::max(0.0f, rate - reduction); // avoid negatives
+        }
+    }
+
+    // Normalize just in case due to floating point rounding
+    float sum = 0.0f;
+    for (const auto& [_, rate] : adjustedRates) sum += rate;
+    for (auto& [_, rate] : adjustedRates) rate /= sum;
+
+    // Roll based on final adjusted rates
+    float r = std::uniform_real_distribution<float>(0.0f, 1.0f)(rng);
+    //std::cout << "RARITY........... " << adjustedRates[Rarity::LEGENDARY] << "\n";
+    
+    std::cout << "Adjusted Rates:\n";
+    for (const auto& [rarity, rate] : adjustedRates) {
+        std::cout << "  " << static_cast<int>(rarity) << ": " << rate << "\n";
+    }
+
+    float accum = 0.0f;
+    for (const auto& [rarity, rate] : adjustedRates) {
+        accum += rate;
         if (r < accum) return rarity;
     }
-    return Rarity::COMMON;
+
+
+    return Rarity::COMMON; 
 }
 
 std::shared_ptr<Card> PullOneCard(const Banner& banner, Rarity rarity, std::mt19937& rng) {

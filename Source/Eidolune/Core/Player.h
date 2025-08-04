@@ -10,7 +10,7 @@ class GameCard;
 
 class Player {
 public:
-    int ID = -1; // note for the future.. this is not being set anywhere (yet)
+    int ID = -1; 
     std::shared_ptr<Deck> DeckRef;
     std::vector<std::shared_ptr<GameCard>> Hand;
     std::vector<std::shared_ptr<GameCard>> Board;

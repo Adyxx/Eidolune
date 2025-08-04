@@ -69,5 +69,6 @@ void BannerLoader::LoadAll() {
         } catch (const std::exception& e) {
             std::cerr << "❌ Error loading banner: " << e.what() << "\n";
         }
+        std::cout << "✅ Banners loaded.\n";
     }
 }

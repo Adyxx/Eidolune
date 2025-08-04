@@ -2,7 +2,7 @@
 #include "TriggerObserver.h"
 #include <iostream>
 #include <algorithm>
-
+#include "Character.h"
 
 
 namespace GameActions {
@@ -309,6 +309,10 @@ namespace GameActions {
 
     void StartTurn(Player* player) {
         player->StartTurn();
+
+        if (player->DeckRef && player->DeckRef->MainCharacter && player->DeckRef->MainCharacter->ClassLogic) {
+            player->DeckRef->MainCharacter->ClassLogic->OnTurnStart(player);
+        }
     }
 
     void EndTurn(Player* player) {

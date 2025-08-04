@@ -8,6 +8,6 @@ SoulforgedClass::SoulforgedClass() {
     Description = "";
 }
 
-void SoulforgedClass::OnTurnStart(GameState* state, Player* player) {
+void SoulforgedClass::OnTurnStart(Player* player) {
     std::cout << "[SoulforgedClass Turn Start Triggered]\n";
 }

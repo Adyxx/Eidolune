@@ -5,5 +5,5 @@
 class SoulforgedClass : public CharacterClass {
 public:
     SoulforgedClass();
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
 };

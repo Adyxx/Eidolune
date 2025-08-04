@@ -8,6 +8,6 @@ OathboundClass::OathboundClass() {
     Description = "";
 }
 
-void OathboundClass::OnTurnStart(GameState* state, Player* player) {
+void OathboundClass::OnTurnStart(Player* player) {
     std::cout << "[Oathbound Turn Start Triggered]\n";
 }

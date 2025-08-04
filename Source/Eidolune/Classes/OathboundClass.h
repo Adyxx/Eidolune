@@ -5,5 +5,5 @@
 class OathboundClass : public CharacterClass {
 public:
     OathboundClass();
-    void OnTurnStart(GameState* state, Player* player) override;
+    void OnTurnStart(Player* player) override;
 };

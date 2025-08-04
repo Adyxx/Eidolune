@@ -21,7 +21,8 @@ SpecialistClass::SpecialistClass() {
     Description = "Bring a bag of consumables to the game. Combine ingredients and interact with the bag.";
 }
 
-void SpecialistClass::OnTurnStart(GameState* state, Player* player) {
+void SpecialistClass::OnTurnStart(Player* player) {
+    std::cout << "[Specialist Turn Start Triggered]\n";
     // Optional future rotation:
     // bags[player->ID].Rotate();
 }
@@ -40,7 +41,7 @@ void SpecialistClass::ApplySetupBonus(Character* character) {
 }
 
 
-void SpecialistClass::UseActiveConsumable(GameState* state, Character* character, Player* player, std::shared_ptr<TriggerObserver> observer) {
+void SpecialistClass::UseClassAbility(Character* character, Player* player, std::shared_ptr<TriggerObserver> observer) {
     auto& bag = bags[character];
     auto* slot = bag.GetActiveSlot();
 
