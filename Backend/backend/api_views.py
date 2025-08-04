@@ -9,6 +9,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
+from core.models import Banner, BannerItem
+from .serializers import BannerSerializer, BannerItemSerializer
+from django.utils.timezone import now
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.db import models
 
 class CardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Card.objects.all()
@@ -66,3 +72,21 @@ class SubtypeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Subtype.objects.all()
     serializer_class = SubtypeSerializer
 
+
+class BannerViewSet(viewsets.ModelViewSet):
+    queryset = Banner.objects.all()
+    serializer_class = BannerSerializer
+
+    @action(detail=False, methods=['get'], url_path='active')
+    def active_banners(self, request):
+        now_time = now()
+        active = self.queryset.filter(
+            models.Q(is_limited=False) | #always shows non-limited banners
+            models.Q(start_time__lte=now_time, end_time__gte=now_time)
+        )
+        serializer = self.get_serializer(active, many=True)
+        return Response(serializer.data)
+    
+class BannerItemViewSet(viewsets.ModelViewSet):
+    queryset = BannerItem.objects.all()
+    serializer_class = BannerItemSerializer

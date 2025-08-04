@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 class Card(models.Model):
     name = models.CharField(max_length=100)
-    image_path = models.CharField(null=True, max_length=200)
+    image_path = models.CharField(null=True, blank=True, max_length=200)
     cost = models.IntegerField()
     rarity = models.CharField(max_length=20, choices=Rarity.choices)
     type = models.CharField(max_length=20, choices=CardType.choices)

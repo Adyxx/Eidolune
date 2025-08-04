@@ -12,6 +12,7 @@ from .models.condition import Condition
 from .models.cardeffectbinding import CardEffectBinding
 from .models.users import User
 from .services.deck_service import get_deck_issues
+from .models.banner import Banner, BannerItem
 
 
 ### INLINE ADMIN CLASSES ###
@@ -80,3 +81,19 @@ class UserAdmin(BaseUserAdmin):
         ("Custom Fields", {"fields": ("rank",)}),
     )
     list_display = ("username", "email", "rank", "is_staff", "is_active")
+
+class BannerItemInline(admin.TabularInline):
+    model = BannerItem
+    extra = 1
+    autocomplete_fields = ['card']
+    show_change_link = True
+    readonly_fields = ['card_rarity']
+    fields = ['card', 'card_rarity', 'is_featured']
+
+    def card_rarity(self, obj):
+        return obj.card.rarity if obj.card else "-"
+    card_rarity.short_description = "Rarity"
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    inlines = [BannerItemInline]

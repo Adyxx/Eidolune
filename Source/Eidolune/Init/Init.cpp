@@ -39,6 +39,7 @@
 #include "../Loaders/DeckLoader.h"
 #include "../Loaders/DeckCardLoader.h"
 #include "../Loaders/UserDataLoader.h"
+#include "../Loaders/BannerLoader.h"
 
 #include <iostream>
 
@@ -80,6 +81,7 @@ namespace EidoluneInit {
         UserLoader::LoadAll();
         //DeckLoader::LoadAll();
         //DeckCardLoader::LoadAll();
+        BannerLoader::LoadAll();
     }
 
     UserData LoadForUser(std::shared_ptr<User> user) {

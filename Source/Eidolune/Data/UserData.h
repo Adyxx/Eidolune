@@ -14,7 +14,8 @@ struct UserData {
     std::vector<UserCardData> Cards;
     std::vector<std::shared_ptr<Deck>> Decks;
 
-    std::unordered_map<int, GachaPullTracker> GachaTrackers;
+    std::unordered_map<std::string, GachaPullTracker> GachaTrackers;
+
 
     nlohmann::json ToJson() const;
     static UserData FromJson(const nlohmann::json& j);

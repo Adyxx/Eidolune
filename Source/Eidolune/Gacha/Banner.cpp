@@ -2,7 +2,7 @@
 #include "CardRegistry.h"
 #include "Card.h"
 
-
+/*
 Banner LoadBannerById(int id) {
     auto allCards = CardRegistry::Instance().GetAll();
     Banner banner;
@@ -28,3 +28,4 @@ Banner LoadBannerById(int id) {
 
     return banner;
 }
+*/

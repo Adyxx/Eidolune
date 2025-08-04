@@ -71,3 +71,11 @@ class AuxiliaryCardType(models.TextChoices):
     CONSUMABLE = "CONSUMABLE",
     FRAGMENT = "FRAGMENT"
 
+class BannerType(models.TextChoices):
+    CARD = "CARD", "Card"
+    EQUIP = "EQUIP", "Equipment"
+    CHARACTER = "CHARACTER", "Character"
+
+class CurrencyType(models.TextChoices):
+    STANDARD_PULL = "STANDARD_PULL", "Standard Pull Currency"
+    LIMITED_PULL = "LIMITED_PULL", "Limited Pull Currency"

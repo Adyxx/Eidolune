@@ -30,12 +30,11 @@ struct Banner {
 
     CurrencyType PullCurrency;
     bool IsLimited = false;
-    time_t StartTime;
-    time_t EndTime;
+    std::string  StartTime;
+    std::string  EndTime;
+
+    std::shared_ptr<Card> FeaturedCard = nullptr;
 
     nlohmann::json ToJson() const;
     static Banner FromJson(const nlohmann::json& j);
 };
-
-// PLACEHOLDER
-Banner LoadBannerById(int id);
