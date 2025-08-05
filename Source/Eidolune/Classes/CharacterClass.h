@@ -6,6 +6,8 @@
 #include "TriggerObserver.h"
 #include <iostream>
 
+class Character;
+
 class CharacterClass {
 public:
     std::string Name;

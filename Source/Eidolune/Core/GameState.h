@@ -2,8 +2,10 @@
 
 #include <vector>
 #include <memory>
+
+#include "TriggerObserver.h"
+
 #include "Player.h"
-#include "../Engine/TriggerObserver.h"
 
 class GameState {
 public:

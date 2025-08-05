@@ -7,7 +7,7 @@
 class Gear {
     std::string id;
     std::string name;
-    EquipmentSlot slot;
+    //EquipmentSlot slot;
     std::string setId;
     std::vector<GearEffectBinding> effects;
 

@@ -9,11 +9,11 @@
 #include "TriggerBuilder.h"
 #include "TriggerRegistry.h"
 #include "ConditionEvaluator.h"
-
+#include "CardUtils.h"
 #include <iostream>
-
+/*
 extern void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer);
-
+*/
 static std::unordered_map<Character*, ConsumableBag> bags;
 
 SpecialistClass::SpecialistClass() {
@@ -56,7 +56,7 @@ void SpecialistClass::UseClassAbility(Character* character, Player* player, std:
     gameCard->Owner = player;
     gameCard->Zone = CardZone::CONSUMABLE_BAG;
 
-    SubscribeCardTriggers(gameCard, observer);
+    CardUtils::SubscribeCardTriggers(gameCard, observer);
 
     if (player->Energy < gameCard->GetCost()) {
         std::cout << "🚫 Not enough energy to use consumable: " << gameCard->GetName() << "\n";

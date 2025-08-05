@@ -1,10 +1,10 @@
+#include <iostream>
 
 #include "EffectDefinitions.h"
 #include "EffectRegistry.h"
-#include "../Core/DeckCard.h"
-#include "../Core/Player.h"
-#include "../Core/GameCard.h"
-#include <iostream>
+//#include "DeckCard.h"
+#include "Player.h"
+#include "GameCard.h"
 #include "TriggerObserver.h"
 #include "GameActions.h"
 
@@ -106,5 +106,8 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("override_deck_limit", OverrideDeckLimit);
     EffectRegistry::Instance().Register("deal_damage", DealDamage);
     EffectRegistry::Instance().Register("Aura_OverallStatBoost", Aura_OverallStatBoost);
+    EffectRegistry::Instance().Register("exile_self", ExileSelf);
+
+    
     std::cout << "✅ Core effect functions registered.\n";
 }

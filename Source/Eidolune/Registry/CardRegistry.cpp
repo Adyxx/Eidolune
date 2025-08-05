@@ -18,14 +18,15 @@ std::shared_ptr<Card> CardRegistry::Get(int id) const {
     return nullptr;
 }
 
-std::vector<Card*> CardRegistry::GetCardsByAuxType(AuxiliaryCardType type) {
-    std::vector<Card*> result;
-    const auto& cards = CardRegistry::Instance().GetAll();  // get the full map
+std::vector<std::shared_ptr<Card>> CardRegistry::GetCardsByAuxType(AuxiliaryCardType type) {
+    std::vector<std::shared_ptr<Card>> result;
+    const auto& cards = CardRegistry::Instance().GetAll();  
 
     for (const auto& [id, cardPtr] : cards) {
         if (cardPtr && cardPtr->AuxilaryType == type) {
-            result.push_back(cardPtr.get());
+            result.push_back(cardPtr);  // Keep as shared_ptr, not .get()
         }
     }
+
     return result;
 }

@@ -6,15 +6,16 @@
 #include <stdexcept>
 #include "GameCard.h"
 #include "Types.h"
-#include "../Registry/EffectRegistry.h"
-#include "../Registry/TriggerRegistry.h"
-
+//#include "EffectRegistry.h"
+//#include "TriggerRegistry.h"
 
 class Card;
-class Trigger;
-class Effect;
+//class Trigger;
+//class Effect;
 class Condition;
-class Restriction;
+
+#include "Trigger.h"
+#include "Effect.h"
 
 class CardEffectBinding {
 public:

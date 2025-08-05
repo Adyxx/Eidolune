@@ -2,10 +2,11 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include "../Core/Trigger.h"
 #include <functional>
 #include <iostream>
 #include <memory>
+
+#include "Trigger.h"
 
 
 struct TriggerInfo {

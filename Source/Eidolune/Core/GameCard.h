@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <unordered_map>
+
 #include "Card.h"
 #include "Types.h"
-#include <unordered_map>
-class Player;
 
+class Player;
 
 struct AuraEffect {
     int AttackBuff;

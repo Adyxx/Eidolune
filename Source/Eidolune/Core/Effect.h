@@ -1,12 +1,14 @@
 #pragma once
 #include <string>
 #include <stdexcept>
-#include "Types.h"
 #include <optional>
 #include <functional>
-#include "Target.h"
 
-//#include "../External/json.hpp"
+#include "Types.h"
+//#include "Target.h"
+
+struct Target;
+
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 

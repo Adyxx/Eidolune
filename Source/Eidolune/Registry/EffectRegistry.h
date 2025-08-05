@@ -3,12 +3,12 @@
 #include <unordered_map>
 #include <functional>
 #include <optional>
-#include "Types.h"
-#include "Target.h"
-#include "../Core/Effect.h"
-
 #include <iostream>
 #include <memory>
+
+#include "Types.h"
+#include "Target.h"
+#include "Effect.h"
 
 struct EffectEntry {
     std::function<void(void*, Target, std::optional<int>)> Func;

@@ -16,8 +16,8 @@ void OathboundClass::OnTurnStart(Player* player) {
     if (turn == 1 || turn == 4 || turn == 7) {
         auto allOaths = CardRegistry::GetCardsByAuxType(AuxiliaryCardType::OATH);
 
-        std::vector<Card*> available;
-        for (Card* card : allOaths) {
+        std::vector<std::shared_ptr<Card>> available;
+        for (const auto& card : allOaths) {
             if (!player->HasChosenAuxCard(card)) {
                 available.push_back(card);
             }

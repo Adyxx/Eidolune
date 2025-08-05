@@ -1,10 +1,4 @@
-
-#include "../Engine/GameEngine.h"
-#include "../Loaders/CardLoader.h"
-#include "../Core/Effect.h"
-#include "../Core/Trigger.h"
-#include <iostream>
-#include <iostream>
+#include "GameEngine.h"
 
 int main() {
     // chcp 65001

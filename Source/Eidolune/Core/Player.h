@@ -1,14 +1,20 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <memory>
 #include <string>
-#include "Deck.h"
+#include <unordered_map>
+
 //#include "GameCard.h"
 #include "Types.h"
-#include "Card.h"
+//#include "Card.h"
 
+
+class Card;
+class Deck;
 class GameCard;
+class TriggerObserver;
 
 class Player {
 public:
@@ -18,6 +24,10 @@ public:
     std::vector<std::shared_ptr<GameCard>> Board;
     std::vector<std::shared_ptr<GameCard>> Graveyard;
     std::vector<std::shared_ptr<GameCard>> DrawPile;
+    // ???
+    std::vector<std::shared_ptr<GameCard>> ExileZone;
+    std::vector<std::shared_ptr<GameCard>> OathZone;
+    //
 
     int TurnCount = 0;
     int Health = 20;
@@ -46,18 +56,20 @@ public:
     virtual ~Player() = default; 
     Player() = default;
 
-    std::unordered_map<AuxiliaryCardType, std::vector<Card*>> ChosenAuxiliaryCards;
 
-    bool HasChosenAuxCard(Card* card) const {
-        auto it = ChosenAuxiliaryCards.find(card->AuxilaryType);
-        if (it == ChosenAuxiliaryCards.end()) return false;
+    std::shared_ptr<TriggerObserver> Observer;
 
-        return std::find(it->second.begin(), it->second.end(), card) != it->second.end();
+    std::shared_ptr<TriggerObserver> GetTriggerObserver() const {
+        return Observer;
     }
 
-    void AddChosenAuxCard(Card* card) {
-        ChosenAuxiliaryCards[card->AuxilaryType].push_back(card);
-    }
-    void PromptAuxCardChoice(AuxiliaryCardType type, const std::vector<Card*>& options);
+
+    std::unordered_map<AuxiliaryCardType, std::vector<std::shared_ptr<Card>>> ChosenAuxiliaryCards;
+
+
+    bool HasChosenAuxCard(const std::shared_ptr<Card>& card) const;
+    void AddChosenAuxCard(std::shared_ptr<Card> card);
+    void PromptAuxCardChoice(AuxiliaryCardType type, const std::vector<std::shared_ptr<Card>>& options);
+
 
 };

@@ -4,6 +4,7 @@
 #include "Target.h"
 #include "EffectDefinitions.h"
 #include "Character.h"
+#include "Deck.h"
 
 void RegisterGenericAbilities() {
     CharacterAbilityRegistry::Instance().Register("draw_1", {

@@ -1,29 +1,33 @@
 #include <iostream>
 #include <random>
+#include "GameEngine.h"
 
 #include "Init.h"
-#include "GameEngine.h"
 #include "GameActions.h"
-#include "TriggerObserver.h"
+//#include "TriggerObserver.h"
 #include "ConditionEvaluator.h"
-#include "Trigger.h"
+//#include "Trigger.h"
 #include "TriggerBuilder.h"
-#include "Condition.h"
+//#include "Condition.h"
 #include "DeckValidator.h"
 
-#include "../Definitions/EffectDefinitions.h"
-#include "../Core/Player.h"
-#include "../Core/GameCard.h"   
-#include "../Core/DeckCard.h"
-#include "../Core/CardEffectBinding.h"
+#include "EffectDefinitions.h"
+//#include "../Core/Player.h"
+//#include "../Core/GameCard.h"   
+#include "DeckCard.h"
+#include "CardEffectBinding.h"
 
-#include "../Registry/UserRegistry.h"
-#include "../Registry/DeckRegistry.h"
+#include "UserRegistry.h"
+#include "DeckRegistry.h"
 
-#include "../Customization/CharacterCustomization.h"
 #include "UserDataLoader.h"
+
+#include "CardUtils.h"
 #include "DeckBuilder.h"
+#include "CharacterCustomization.h"
 #include "Gacha.h"
+
+
 
 struct UserInfo {
     std::string Username;
@@ -79,60 +83,6 @@ std::pair<std::shared_ptr<Deck>, std::string> SelectDeckForUser(const std::vecto
     return { user.ValidDecks.at(deckIndex), user.Username };
 }
 
-void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-
-    if (card->Model->EffectBindings.empty()) {
-        return;
-    }
-
-    for (const auto& originalBinding : card->Model->EffectBindings) {
-
-        auto binding = std::make_shared<CardEffectBinding>(*originalBinding);
-
-        if (!binding) {
-            std::cout << "❌ Failed to copy original binding.\n";
-            continue;
-        }
-
-        auto triggerPtr = binding->GetTrigger();
-        if (!triggerPtr) {
-            std::cout << "⚠️ Skipping binding: no trigger found.\n";
-            continue;
-        }
-
-        std::string triggerCode = triggerPtr->ScriptReference;
-
-        auto* triggerMeta = TriggerRegistry::Instance().GetInfo(triggerCode);
-        if (!triggerMeta) {
-            std::cout << "❌ No trigger metadata found for code: " << triggerCode << "\n";
-            continue;
-        }
-
-        std::string eventName = triggerMeta->Event;
-
-        binding->EventGameCard = card;
-
-        std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
-        auto builder = TriggerBuilder::Build(binding);
-
-        auto conditionPtr = binding->GetCondition();
-        if (conditionPtr) {
-            std::string conditionCode = conditionPtr->ToString();
-
-            effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
-                if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetValue().value_or(0))) {
-
-                    builder(ctx);
-                } 
-            };
-        } else {
-            effectToRegister = builder;
-        }
-
-        observer->Subscribe(eventName, effectToRegister);
-    }
-
-}
 
 std::vector<UserInfo> BuildUserDeckInfoList() {
     std::vector<UserInfo> users;
@@ -172,6 +122,8 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
     p2->Opponent = p1.get();
 
     auto observer = game.GetTriggerObserver();
+    p1->Observer = observer;
+    p2->Observer = observer;
 
     for (auto& player : game.Players) {
         for (auto& deckCard : player->DeckRef->DeckCards) {
@@ -179,7 +131,7 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
                 auto card = std::make_shared<GameCard>(deckCard->CardRef);
                 card->Owner = player.get();
                 card->Zone = CardZone::DECK;
-                SubscribeCardTriggers(card, observer);
+                CardUtils::SubscribeCardTriggers(card, observer);
                 deckCard->GameCardCopies.push_back(card);
             }
         }

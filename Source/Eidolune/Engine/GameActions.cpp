@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include "Character.h"
-
+#include "Deck.h"
 
 namespace GameActions {
 
