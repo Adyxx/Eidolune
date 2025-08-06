@@ -9,3 +9,8 @@ Trigger::Trigger(const json& j) {
     Description = j["description"];
     Event = j.contains("event") ? j["event"] : "";
 }
+
+
+std::string Trigger::GetName() const {
+    return ScriptReference;
+}

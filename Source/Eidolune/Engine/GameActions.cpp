@@ -300,6 +300,15 @@ namespace GameActions {
             case Target::Type::PLAYER: {
                 auto* player = static_cast<Player*>(target.ptr);
                 std::cout << "🟥 Dealing " << amount << " to player: " << player->GetName() << "\n";
+
+                if (source) {
+                    if (auto* sourceCard = static_cast<GameCard*>(source)) {
+                        if (sourceCard->Owner) {
+                            sourceCard->Owner->DealtDamageToEnemyHeroThisTurn = true;
+                        }
+                    }
+                }
+
                 player->Health -= amount;
                 if (player->Health <= 0) {
                     std::cout << "☠️ " << player->GetName() << " has died!\n";

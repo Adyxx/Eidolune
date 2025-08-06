@@ -15,6 +15,7 @@ std::string Player::GetName() const {
 void Player::StartTurn() {
     TurnCount++;
     CardsPlayedThisTurn = 0;
+    DealtDamageToEnemyHeroThisTurn = false;
     std::cout << "▶️ " << GetName() << "'s turn begins.\n";
     if (MaxEnergy < 10) MaxEnergy++;
     Energy = MaxEnergy;
@@ -66,4 +67,16 @@ void Player::AddChosenAuxCard(std::shared_ptr<Card> card) {
         OathZone.push_back(gameCard);
         std::cout << "🛡️ Oath card '" << card->Name << "' added to OathZone.\n";
     }
+}
+
+int Player::PromptChooseOption(const std::vector<std::string>& options) {
+    // std::cout << "Player " << player->UserName << ", choose one:\n";
+    std::cout << "--PICK FROM OPTIONS--" << "\n";
+    for (size_t i = 0; i < options.size(); ++i) {
+        std::cout << "  [" << i << "] " << options[i] << "\n";
+    }
+
+    int choice = -1;
+    std::cin >> choice; // Replace with proper UI/input method
+    return choice;
 }

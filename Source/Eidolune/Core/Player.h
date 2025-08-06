@@ -36,6 +36,7 @@ public:
     int MaxEnergy = 0;
     int MaxHandSize = 10;
     int PlayerIndex = 0;
+    bool DealtDamageToEnemyHeroThisTurn = false;
 
     int CardsPlayedThisTurn = 0;
     
@@ -71,5 +72,5 @@ public:
     void AddChosenAuxCard(std::shared_ptr<Card> card);
     void PromptAuxCardChoice(AuxiliaryCardType type, const std::vector<std::shared_ptr<Card>>& options);
 
-
+    int PromptChooseOption(const std::vector<std::string>& options);
 };

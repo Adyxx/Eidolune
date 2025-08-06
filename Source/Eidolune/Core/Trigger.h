@@ -14,4 +14,7 @@ public:
 
     std::string ToString() const;
     Trigger(const json& j);
+
+    std::string GetName() const;
+
 };

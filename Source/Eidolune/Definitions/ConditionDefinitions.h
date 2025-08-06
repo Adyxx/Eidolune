@@ -6,7 +6,10 @@
 
 bool owner_below_10_health(std::shared_ptr<GameCard> card, int value);
 bool card_damaged(std::shared_ptr<GameCard> card, int value);
+bool damaged_enemy_hero_this_turn(std::shared_ptr<GameCard> card, std::optional<int> value);
+bool has_time_counters_equal(std::shared_ptr<GameCard> card, std::optional<int> value);
 void RegisterConditionFunctions();
+
 /*
 bool played_more_than_n_cards_this_turn(std::shared_ptr<GameCard> card, int n) {
     if (!card || !card->Owner) return false;

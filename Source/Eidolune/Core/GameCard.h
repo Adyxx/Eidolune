@@ -18,14 +18,15 @@ struct AuraEffect {
 
 class GameCard : public std::enable_shared_from_this<GameCard> {
 public:
+    int Id;
     std::shared_ptr<Card> Model;
     Player* Owner = nullptr;
     CardZone Zone = CardZone::DECK;
     bool SummoningSickness = true;
     bool Tapped = false;
     int DamageTaken = 0;
-    int Id;
-
+    
+    int TimeCounter = 0;
     // Buffing aura tracking
     std::unordered_map<int, AuraEffect> ActiveAuras; // SourceCardID → Effect
 

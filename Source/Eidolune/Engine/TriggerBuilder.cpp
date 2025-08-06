@@ -88,9 +88,11 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
                 return;
             }
         }
-
+        
         if (binding->HasZone() && eventCard->Zone != binding->GetZoneAsCardZone()) {
             return;
+        } else {
+            std::cout << "SSSSSSSS\n";
         }
 
         std::cout << "📌 Trigger is using Effect pointer: " << binding->GetEffect() << " (" << binding->BoundEffect->ScriptReference << ")\n";

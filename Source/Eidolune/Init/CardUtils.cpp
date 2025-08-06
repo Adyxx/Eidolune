@@ -45,7 +45,7 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
             std::string conditionCode = conditionPtr->ToString();
 
             effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
-                if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetValue().value_or(0))) {
+                if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetConditionValue().value_or(0))) {
 
                     builder(ctx);
                 } 

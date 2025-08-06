@@ -6,6 +6,7 @@
 #include "TriggerObserver.h"
 
 #include "Player.h"
+#include "unordered_set"
 
 class GameState {
 public:

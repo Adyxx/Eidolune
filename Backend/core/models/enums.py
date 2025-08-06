@@ -32,6 +32,9 @@ class ListeningZone(models.TextChoices):
     DECK = "DECK"
     GRAVEYARD = "GRAVEYARD"
     ANY = "ANY"
+    OATH_ZONE = "OATH_ZONE"
+    EXILE = "EXILE"
+    CONSUMABLE_BAG = "CONSUMABLE_BAG"
 
 class Gender(models.TextChoices):
     MALE = "MALE"

@@ -50,6 +50,8 @@ void DrawCard(void* source, Target target, std::optional<int> value) {
 }
 
 void ApplyHaste(void* source, Target  target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    card->SummoningSickness = false;
     std::cout << "[Haste] triggered.\n";
 }
 
@@ -89,12 +91,9 @@ void Aura_OverallStatBoost(void* source, Target, std::optional<int> value) {
             continue;
         }
 
-        // Apply the aura
         card->ApplyAura(sourceCard->Id, buffAmount, buffAmount);
 
-        std::cout << "🟢 Aura from [" << sourceCard->GetName()
-                  << "] applied to [" << card->GetName()
-                  << "] (+" << buffAmount << "/+" << buffAmount << ")\n";
+        std::cout << "🟢 Aura from [" << sourceCard->GetName() << "] applied to [" << card->GetName() << "] (+" << buffAmount << "/+" << buffAmount << ")\n";
     }
 }
 
@@ -105,7 +104,6 @@ void Summon(void* source, Target target, std::optional<int> value) {
         std::cout << "❌ Summon: No binding in context\n";
         return;
     }
-
 
     auto* sourceCard = static_cast<GameCard*>(source);
     if (!sourceCard || !binding->LinkedCard) {
@@ -122,6 +120,73 @@ void Summon(void* source, Target target, std::optional<int> value) {
     std::cout << "⚔️ Summoned: " << summoned->GetName() << " for " << player->GetName() << "\n";
 }
 
+void GetTimeCounter(void* source, Target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    if (card && value) {
+        card->TimeCounter += value.value();
+        std::cout << "⏳ Gained " << value.value() << " time counters.\n";
+    }
+}
+
+void RemoveTimeCounter(void* source, Target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    if (card && value) {
+        card->TimeCounter -= value.value();
+        std::cout << "⌛ Removed " << value.value() << " time counters. Now: " << card->TimeCounter << "\n";
+    }
+}
+
+void ChooseBasedOnTimeCounter(void* source, Target target, std::optional<int>) {
+    auto* card = static_cast<GameCard*>(source);
+    if (!card || !card->Model) return;
+
+    int time = card->TimeCounter;
+    std::string prefix = "time_" + std::to_string(time) + "_opt";
+
+    std::vector<std::shared_ptr<CardEffectBinding>> matchingBindings;
+
+    for (const auto& binding : card->Model->EffectBindings) {
+        if (!binding || !binding->GetTrigger()) continue;
+
+        const std::string& triggerName = binding->GetTrigger()->GetName();
+        if (triggerName.rfind(prefix, 0) == 0) { // starts with prefix
+            matchingBindings.push_back(binding);
+        }
+    }
+
+    if (matchingBindings.empty()) {
+        std::cout << "❌ No choice options for time_" << time << "\n";
+        return;
+    }
+
+    std::shared_ptr<CardEffectBinding> chosenBinding;
+
+    if (matchingBindings.size() == 1) {
+        chosenBinding = matchingBindings[0];
+    } else {
+        std::vector<std::string> optionLabels;
+        for (const auto& b : matchingBindings) {
+            optionLabels.push_back(b->GetTrigger()->GetName()); // or use b->ToString() if better
+        }
+
+        int choiceIndex = card->Owner->PromptChooseOption(optionLabels); // see below
+        if (choiceIndex < 0 || choiceIndex >= static_cast<int>(matchingBindings.size())) {
+            std::cout << "❌ Invalid choice index.\n";
+            return;
+        }
+
+        chosenBinding = matchingBindings[choiceIndex];
+    }
+
+    std::string chosenEvent = chosenBinding->GetTrigger()->GetName();
+
+    std::cout << "📤 Emitting trigger: " << chosenEvent << "\n";
+    card->Owner->Observer->Emit(chosenEvent, {
+        { "source", card },
+        { "owner", card->Owner }
+    });
+}
+
 
 
 void RegisterEffectFunctions() {
@@ -134,6 +199,10 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("exile_self", ExileSelf);
 
     EffectRegistry::Instance().Register("summon", Summon);
+
+    EffectRegistry::Instance().Register("get_time_counter", GetTimeCounter);
+    EffectRegistry::Instance().Register("remove_time_counter", RemoveTimeCounter);
+    EffectRegistry::Instance().Register("choose_on_time_counter", ChooseBasedOnTimeCounter);
 
     std::cout << "✅ Core effect functions registered.\n";
 }
