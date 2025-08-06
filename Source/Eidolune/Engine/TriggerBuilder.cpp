@@ -7,6 +7,7 @@
 #include "Types.h"
 #include "GameActions.h"
 #include "Target.h"
+#include "EffectContext.h"
 
 namespace {
 
@@ -92,6 +93,8 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
             return;
         }
 
+        std::cout << "📌 Trigger is using Effect pointer: " << binding->GetEffect() << " (" << binding->BoundEffect->ScriptReference << ")\n";
+
         auto effect = binding->GetEffect();
         if (!effect) {
             std::cout << "❌ Effect is null.\n";
@@ -134,6 +137,19 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
         }
 
         std::cout << "✨ Trigger fired: " << binding->GetTrigger()->ScriptReference << "\n";
+        
+        std::cout << "[FROM TriggerBuilder]: " << binding->ToString() <<"\n";
+        //effectFunc(eventCard, resolvedTarget, binding->GetValue());
+
+        // Inject binding into context
+        auto& ctxC = GetEffectCallContext();
+        ctxC.CurrentBinding = binding;
+
+        // Call the actual effect
         effectFunc(eventCard, resolvedTarget, binding->GetValue());
+
+        // Clear context after execution to avoid leaks between triggers
+        ctxC.CurrentBinding = nullptr;
+
     };
 }

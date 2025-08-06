@@ -21,7 +21,7 @@ from .models.enums import AuxiliaryCardType
 class CardEffectBindingInline(admin.TabularInline):
     model = CardEffectBinding
     extra = 1
-
+    fk_name = 'card'
 
 class DeckCardInline(admin.TabularInline):
     model = DeckCard

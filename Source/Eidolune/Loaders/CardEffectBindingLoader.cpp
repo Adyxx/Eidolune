@@ -87,10 +87,15 @@ std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll
                 }
             }
 
-            // --- Optional Value ---
-            std::optional<int> value = std::nullopt;
+            // --- Optional Values ---
+            std::optional<int> effectValue = std::nullopt;
             if (b.contains("value") && !b["value"].is_null()) {
-                value = b["value"].get<int>();
+                effectValue = b["value"].get<int>();
+            }
+
+            std::optional<int> conditionValue = std::nullopt;
+            if (b.contains("condition_value") && !b["condition_value"].is_null()) {
+                conditionValue = b["condition_value"].get<int>();
             }
 
             // --- Optional Targeting ---
@@ -112,18 +117,38 @@ std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll
                 scope = StringToTriggerScope(b["scope"].get<std::string>());
             }
 
+            // --- Optional LinkedCard ---
+            std::shared_ptr<Card> linkedCard = nullptr;
+            if (b.contains("linked_card") && !b["linked_card"].is_null()) {
+                int linkedCardId = b["linked_card"].get<int>();
+                linkedCard = CardRegistry::Instance().Get(linkedCardId);
+                if (!linkedCard) {
+                    std::cerr << "⚠️ Unknown linked_card ID: " << linkedCardId << "\n";
+                } else {
+                    std::cout << "🔗 Linked card: " << linkedCard->Name << "\n";
+                }
+            }
+
             // --- Final Binding Creation ---
             auto binding = std::make_shared<CardEffectBinding>(
                 card,
                 trigger,
                 effect,
                 condition,
-                value,
+                effectValue,
                 targeting
             );
 
             binding->SetZone(zone);
             binding->SetScope(scope);
+
+            if (conditionValue.has_value()) {
+                binding->SetConditionValue(conditionValue.value());
+            }
+
+            if (linkedCard) {
+                binding->SetLinkedCard(linkedCard);
+            }
 
             card->EffectBindings.push_back(binding);
             bindings.push_back(binding);

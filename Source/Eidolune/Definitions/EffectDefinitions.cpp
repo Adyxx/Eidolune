@@ -2,11 +2,12 @@
 
 #include "EffectDefinitions.h"
 #include "EffectRegistry.h"
-//#include "DeckCard.h"
 #include "Player.h"
 #include "GameCard.h"
 #include "TriggerObserver.h"
 #include "GameActions.h"
+#include "CardUtils.h"
+#include "EffectContext.h"
 
 void DrawCard(void* source, Target target, std::optional<int> value) {
     if (target.type != Target::Type::PLAYER) {
@@ -98,6 +99,30 @@ void Aura_OverallStatBoost(void* source, Target, std::optional<int> value) {
 }
 
 
+void Summon(void* source, Target target, std::optional<int> value) {
+    auto binding = GetEffectCallContext().CurrentBinding;
+    if (!binding) {
+        std::cout << "❌ Summon: No binding in context\n";
+        return;
+    }
+
+
+    auto* sourceCard = static_cast<GameCard*>(source);
+    if (!sourceCard || !binding->LinkedCard) {
+        std::cout << "❌ Invalid source or no linked card\n";
+        return;
+    }
+
+    auto* player = static_cast<Player*>(target.ptr);
+    if (!player || !player->Observer) return;
+
+    auto summoned = CardUtils::RegisterCardMidGame(binding->LinkedCard, player, CardZone::BOARD, player->Observer);
+    if (!summoned) return;
+
+    std::cout << "⚔️ Summoned: " << summoned->GetName() << " for " << player->GetName() << "\n";
+}
+
+
 
 void RegisterEffectFunctions() {
     std::cout << "📦 Registering core effect functions...\n";
@@ -108,6 +133,7 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("Aura_OverallStatBoost", Aura_OverallStatBoost);
     EffectRegistry::Instance().Register("exile_self", ExileSelf);
 
-    
+    EffectRegistry::Instance().Register("summon", Summon);
+
     std::cout << "✅ Core effect functions registered.\n";
 }

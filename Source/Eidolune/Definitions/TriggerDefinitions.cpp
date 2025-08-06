@@ -3,7 +3,15 @@
 
 void RegisterTriggerDefinitions() {
     auto& registry = TriggerRegistry::Instance();
+    /*
+    TriggerInfo OnDeckBuild;
+    OnDeckBuild.Name = "OnDeckBuild";
+    OnDeckBuild.Description = "On deck build alteration for card-max-copy-per-deck restrictions.";
+    OnDeckBuild.Event = "";
 
+    auto OnDeckBuildTrigger = std::make_shared<Trigger>("");
+    registry.RegisterShared("on_deck_build", OnDeckBuildTrigger);
+    */
     TriggerInfo onPlay;
     onPlay.Name = "OnPlay";
     onPlay.Description = "When this card is played.";
@@ -12,7 +20,6 @@ void RegisterTriggerDefinitions() {
     auto onPlayTrigger = std::make_shared<Trigger>("card_played");
 
     registry.RegisterShared("on_play", onPlayTrigger);
-    //registry.RegisterShared(1, onPlayTrigger);
 
     TriggerInfo onDeath;
     onDeath.Name = "OnDeath";
@@ -22,7 +29,6 @@ void RegisterTriggerDefinitions() {
     auto onDeathTrigger = std::make_shared<Trigger>("card_died");
 
     registry.RegisterShared("on_death", onDeathTrigger);
-    //registry.RegisterShared(2, onDeathTrigger);
 
     TriggerInfo onTurnStart;
     onTurnStart.Name = "OnTurnStart";

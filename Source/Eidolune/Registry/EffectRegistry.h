@@ -34,6 +34,7 @@ public:
         std::cout << "[EffectRegistry] Registered effect function: " << name << "\n";
     }
 
+
     std::shared_ptr<Effect> Get(const std::string& name) const {
         auto it = registry.find(name);
         return (it != registry.end()) ? it->second : nullptr;

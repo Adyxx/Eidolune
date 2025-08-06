@@ -27,18 +27,11 @@ Effect::Effect(const std::string& name,
 
 
 std::string Effect::ToString() const {
-    return Name;
+    return Name.empty() ? "<UnnamedEffect>" : Name;
 }
 
+
 std::function<void(void*, Target, std::optional<int>)> Effect::GetExecutable() const {
-    /*
-    auto effectPtr = EffectRegistry::Instance().Get(this->ScriptReference);
-    if (!effectPtr) {
-        std::cout << "Effect not found: " << ScriptReference << "\n";
-        throw std::runtime_error("Effect not found: " + ScriptReference);
-    }
-    return effectPtr->GetExecutable();
-    */
 
     if (!Executable) {
         std::cout << "⚠️ [Effect::GetExecutable] Executable is NULL for: " << ScriptReference << "\n";
@@ -47,7 +40,13 @@ std::function<void(void*, Target, std::optional<int>)> Effect::GetExecutable() c
 
 }
 
+
 TargetHint Effect::GetTargetHint() const {
     auto effectPtr = EffectRegistry::Instance().Get(ScriptReference);
     return effectPtr ? effectPtr->GetTargetHint() : TargetHint::NONE;
+}
+
+bool Effect::RequiresLinkedCard() const {
+    std::cout << "asdasdasdnxncdjkncxyknyyxccyx\n";
+    return ScriptReference == "summon"; 
 }

@@ -17,13 +17,14 @@ CardEffectBinding::CardEffectBinding(std::shared_ptr<Card> card,
       Targeting(targetSpec) {}
 
 std::string CardEffectBinding::ToString() const {
-    return "Binding(" + (BoundEffect ? BoundEffect->ToString() : "NoEffect") + ")";
+    try {
+        if (!BoundEffect) return "Binding(NoEffect)";
+        return "Binding(" + BoundEffect->ToString() + ")";
+    } catch (...) {
+        return "Binding(Effect: <EXCEPTION>)";
+    }
 }
 
-void CardEffectBinding::Validate() const {
-    if (!BoundEffect) throw std::runtime_error("Missing effect in binding");
-    if (!BoundTrigger) throw std::runtime_error("Missing trigger in binding");
-}
 
 std::shared_ptr<GameCard> CardEffectBinding::GetEventGameCard() {
     if (auto ptr = EventGameCard.lock()) {

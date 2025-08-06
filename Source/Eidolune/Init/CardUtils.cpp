@@ -53,7 +53,7 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
         } else {
             effectToRegister = builder;
         }
-        
+
         observer->Subscribe(eventName, effectToRegister);
     }
 
@@ -61,6 +61,7 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
 
 
 std::shared_ptr<GameCard> RegisterCardMidGame(std::shared_ptr<Card> templateCard, Player* owner, CardZone zone, std::shared_ptr<TriggerObserver> observer) {
+
     if (!templateCard || !owner) {
         std::cerr << "❌ Invalid input to RegisterCardMidGame.\n";
         return nullptr;
@@ -70,10 +71,8 @@ std::shared_ptr<GameCard> RegisterCardMidGame(std::shared_ptr<Card> templateCard
     gameCard->Owner = owner;
     gameCard->Zone = zone;
 
-    // Subscribe to triggers
     CardUtils::SubscribeCardTriggers(gameCard, observer);
 
-    // Add to appropriate zone
     switch (zone) {
         case CardZone::DECK:
             owner->DrawPile.push_back(gameCard);

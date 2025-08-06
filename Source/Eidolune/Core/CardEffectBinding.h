@@ -30,6 +30,15 @@ public:
     ListeningZone Zone = ListeningZone::ANY;
     TriggerScope Scope = TriggerScope::SELF;
 
+    ////////////////
+    std::shared_ptr<Card> LinkedCard;
+    std::optional<int> ConditionValue;
+    std::shared_ptr<Card> GetLinkedCard() const { return LinkedCard; }
+    void SetLinkedCard(std::shared_ptr<Card> linked) { LinkedCard = linked; }
+    std::optional<int> GetConditionValue() const { return ConditionValue; }
+    void SetConditionValue(int value) { ConditionValue = value; }
+    ////////////////
+
     std::shared_ptr<Trigger> GetTrigger() const { return BoundTrigger; }
     std::shared_ptr<Card> GetEventCard() const { return ParentCard; }
     std::shared_ptr<Effect> GetEffect() const { return BoundEffect; }
@@ -74,7 +83,5 @@ public:
     std::weak_ptr<GameCard> EventGameCard;
 
     std::shared_ptr<GameCard> GetEventGameCard(); 
-
-    void Validate() const;
 
 };
