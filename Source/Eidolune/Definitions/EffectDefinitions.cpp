@@ -70,7 +70,35 @@ void ExileSelf(void* source, Target target, std::optional<int>) {
     auto* card = static_cast<GameCard*>(source);
     if (!card || !card->Owner) return;
 
-    std::cout << "☠️ Exiling " << card->GetName() << "\n";
+    auto& player = card->Owner;
+
+    // Try to find and move the card from any zone it's in
+    auto tryMoveCard = [&](std::vector<std::shared_ptr<GameCard>>& zone, const std::string& zoneName) -> bool {
+        auto it = std::find_if(zone.begin(), zone.end(),
+            [&](const std::shared_ptr<GameCard>& c) {
+                return c.get() == card;
+            });
+
+        if (it != zone.end()) {
+            std::cout << "📤 Moving " << card->GetName() << " from " << zoneName << " to Exile.\n";
+            player->ExileZone.push_back(std::move(*it));
+            zone.erase(it);
+            return true;
+        }
+        return false;
+    };
+
+    // Search zones
+    bool moved = tryMoveCard(player->Hand, "Hand")
+              || tryMoveCard(player->Board, "Board")
+              || tryMoveCard(player->Graveyard, "Graveyard")
+              || tryMoveCard(player->DrawPile, "DrawPile")
+              || tryMoveCard(player->OathZone, "OathZone");
+
+    if (!moved) {
+        std::cout << "⚠️ Could not find card in any zone. Possible logic error.\n";
+    }
+
     card->Zone = CardZone::EXILE;
 }
 

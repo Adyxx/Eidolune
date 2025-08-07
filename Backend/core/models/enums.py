@@ -32,7 +32,7 @@ class ListeningZone(models.TextChoices):
     DECK = "DECK"
     GRAVEYARD = "GRAVEYARD"
     ANY = "ANY"
-    OATH_ZONE = "OATH_ZONE"
+    OATHZONE = "OATHZONE"
     EXILE = "EXILE"
     CONSUMABLE_BAG = "CONSUMABLE_BAG"
 

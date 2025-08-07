@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cardeffectbinding',
             name='zone',
-            field=models.CharField(choices=[('BOARD', 'Board'), ('HAND', 'Hand'), ('DECK', 'Deck'), ('GRAVEYARD', 'Graveyard'), ('ANY', 'Any'), ('OATH_ZONE', 'Oath Zone'), ('EXILE', 'Exile'), ('CONSUMABLE_BAG', 'Consumable Bag')], default='ANY', max_length=30),
+            field=models.CharField(choices=[('BOARD', 'Board'), ('HAND', 'Hand'), ('DECK', 'Deck'), ('GRAVEYARD', 'Graveyard'), ('ANY', 'Any'), ('OATHZONE', 'Oath Zone'), ('EXILE', 'Exile'), ('CONSUMABLE_BAG', 'Consumable Bag')], default='ANY', max_length=30),
         ),
     ]

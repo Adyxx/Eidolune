@@ -230,6 +230,8 @@ namespace GameActions {
             std::cout << "❌ No valid target selected.\n";
             return;
         }
+        
+        
 
         if (target.type == Target::Type::CARD) {
             auto* targetCard = static_cast<GameCard*>(target.ptr);
@@ -243,6 +245,8 @@ namespace GameActions {
     }
 
    void ResolveCombat(std::shared_ptr<GameCard> attackerCard, GameCard* targetCard, Player* attacker, Player* defender) {
+        attacker->Observer->Emit("card_attacked", { {"source", attackerCard.get()}, {"owner", attacker} });
+
         if (targetCard) {
             std::cout << "⚔️ " << attackerCard->GetName() << " attacks " << targetCard->GetName() << "\n";
             GameActions::ResolveDamage(attackerCard.get(), Target::FromCard(targetCard), attackerCard->CurrentAttack(), "combat");

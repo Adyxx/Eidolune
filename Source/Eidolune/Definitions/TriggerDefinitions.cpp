@@ -41,6 +41,13 @@ void RegisterTriggerDefinitions() {
     auto onTurnEndTrigger = std::make_shared<Trigger>("turn_ended");
     registry.RegisterShared("on_turn_end", onTurnEndTrigger);
 
+    TriggerInfo onAttack;
+    onAttack.Name = "OnAttack";
+    onAttack.Description = "When unit attacks.";
+    onAttack.Event = "card_attacked";
+    auto onAttackTrigger = std::make_shared<Trigger>("card_attacked");
+    registry.RegisterShared("on_attack", onAttackTrigger);
+
     //////////////////////////////////////////////////////////////
 
     TriggerInfo time_1_opt1;

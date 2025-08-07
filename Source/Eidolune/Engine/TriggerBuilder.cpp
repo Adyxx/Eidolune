@@ -9,9 +9,34 @@
 #include "Target.h"
 #include "EffectContext.h"
 
-namespace {
 
-// Helper to determine if the trigger matches the scope rules
+
+
+namespace {
+void PrintAllCardsForPlayer(Player* player) {
+    auto printZone = [](const std::string& name, const std::vector<std::shared_ptr<GameCard>>& zone) {
+        std::cout << "📦 " << name << " [" << zone.size() << "]: ";
+        for (const auto& card : zone) {
+            std::cout << card->GetName() << " ";
+        }
+        std::cout << "\n";
+    };
+
+    if (!player) {
+        std::cout << "⚠️ Cannot print cards: player is null.\n";
+        return;
+    }
+
+    std::cout << "\n🔍 ZONE STATE FOR PLAYER " << player->PlayerIndex << ":\n";
+    printZone("Hand", player->Hand);
+    printZone("Board", player->Board);
+    printZone("Graveyard", player->Graveyard);
+    printZone("DrawPile", player->DrawPile);
+    printZone("Exile", player->ExileZone);
+    printZone("OathZone", player->OathZone);
+    std::cout << "--------------------------------\n";
+}
+    // Helper to determine if the trigger matches the scope rules
 bool IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScope scope) {
     switch (scope) {
         case TriggerScope::GLOBAL:
@@ -40,11 +65,16 @@ bool IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScop
     }
 }
 
+
+
+
 }
 
 std::function<void(std::unordered_map<std::string, void*>)>
 TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
     return [binding](std::unordered_map<std::string, void*> ctx) {
+        //std::cout << "🚨 Trigger callback called for event: " << binding->GetTrigger()->Event << "\n";
+
         if (!binding) {
             std::cout << "❌ Binding is null.\n";
             return;
@@ -88,12 +118,12 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
                 return;
             }
         }
-        
+
         if (binding->HasZone() && eventCard->Zone != binding->GetZoneAsCardZone()) {
             return;
-        } else {
-            std::cout << "SSSSSSSS\n";
         }
+
+        PrintAllCardsForPlayer(triggerOwner);
 
         std::cout << "📌 Trigger is using Effect pointer: " << binding->GetEffect() << " (" << binding->BoundEffect->ScriptReference << ")\n";
 
@@ -155,3 +185,4 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
 
     };
 }
+

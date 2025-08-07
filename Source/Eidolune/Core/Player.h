@@ -24,10 +24,10 @@ public:
     std::vector<std::shared_ptr<GameCard>> Board;
     std::vector<std::shared_ptr<GameCard>> Graveyard;
     std::vector<std::shared_ptr<GameCard>> DrawPile;
-    // ???
+    
     std::vector<std::shared_ptr<GameCard>> ExileZone;
     std::vector<std::shared_ptr<GameCard>> OathZone;
-    //
+    
 
     int TurnCount = 0;
     int Health = 20;

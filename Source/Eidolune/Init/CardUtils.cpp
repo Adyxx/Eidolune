@@ -5,6 +5,7 @@
 namespace CardUtils {
 
 void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
+    
 
     if (card->Model->EffectBindings.empty()) {
         return;
@@ -53,7 +54,7 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
         } else {
             effectToRegister = builder;
         }
-
+        //std::cout << card->ToString() << "  " << eventName << "\n";
         observer->Subscribe(eventName, effectToRegister);
     }
 

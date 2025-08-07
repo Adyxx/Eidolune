@@ -64,8 +64,8 @@ void Player::AddChosenAuxCard(std::shared_ptr<Card> card) {
 
     if (card->AuxilaryType == AuxiliaryCardType::OATH) {
         auto gameCard = CardUtils::RegisterCardMidGame(card, this, CardZone::OATHZONE, GetTriggerObserver());
-        OathZone.push_back(gameCard);
-        std::cout << "🛡️ Oath card '" << card->Name << "' added to OathZone.\n";
+        //OathZone.push_back(gameCard);
+        //std::cout << "🛡️ Oath card '" << card->Name << "' added to OathZone.\n";
     }
 }
 

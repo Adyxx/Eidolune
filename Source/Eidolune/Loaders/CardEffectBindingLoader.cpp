@@ -11,6 +11,7 @@ inline ListeningZone StringToListeningZone(const std::string& str) {
     if (str == "DECK") return ListeningZone::DECK;
     if (str == "BOARD") return ListeningZone::BOARD;
     if (str == "GRAVEYARD") return ListeningZone::GRAVEYARD;
+    if (str == "OATHZONE") return ListeningZone::OATHZONE;
     return ListeningZone::ANY;
 }
 

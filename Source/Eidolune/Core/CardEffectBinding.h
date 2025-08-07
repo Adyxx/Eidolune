@@ -57,6 +57,7 @@ public:
             case ListeningZone::DECK: return CardZone::DECK;
             case ListeningZone::GRAVEYARD: return CardZone::GRAVEYARD;
             case ListeningZone::ANY: return CardZone::UNKNOWN;
+            case ListeningZone::OATHZONE: return CardZone::OATHZONE;
             default: throw std::runtime_error("Unhandled ListeningZone in GetZoneAsCardZone()");
         }
     }
