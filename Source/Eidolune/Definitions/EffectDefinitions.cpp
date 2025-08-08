@@ -111,19 +111,25 @@ void Aura_OverallStatBoost(void* source, Target, std::optional<int> value) {
     if (!sourceCard || !sourceCard->Owner) return;
 
     int buffAmount = value.value_or(1);
-    auto& board = sourceCard->Owner->Board;
 
-    for (auto& card : board) {
-        if (!card) continue;
+    for (int row = 0; row < Player::BoardHeight; ++row) {
+        for (int col = 0; col < Player::BoardWidth; ++col) {
+            auto& slot = sourceCard->Owner->GridBoard[row][col];
+            if (!slot) continue;
 
-        if (card->ActiveAuras.count(sourceCard->Id)) {
-            // Already applied
-            continue;
+            auto& card = slot;
+
+            // Avoid reapplying the same aura multiple times
+            if (card->ActiveAuras.count(sourceCard->Id)) {
+                continue;
+            }
+
+            card->ApplyAura(sourceCard->Id, buffAmount, buffAmount);
+
+            std::cout << "🟢 Aura from [" << sourceCard->GetName()
+                      << "] applied to [" << card->GetName()
+                      << "] (+" << buffAmount << "/+" << buffAmount << ")\n";
         }
-
-        card->ApplyAura(sourceCard->Id, buffAmount, buffAmount);
-
-        std::cout << "🟢 Aura from [" << sourceCard->GetName() << "] applied to [" << card->GetName() << "] (+" << buffAmount << "/+" << buffAmount << ")\n";
     }
 }
 
@@ -232,7 +238,7 @@ void SearchDeck(void* source, Target target, std::optional<int> value) {
     // If template linked, filter based on its metadata
     if (binding->LinkedCard && binding->LinkedCard->AuxiliaryType == AuxiliaryCardType::TEMPLATE) {
         auto* templateCard = binding->LinkedCard.get();
-
+        std::cout << "AAAA\n";
         for (auto& card : player->DrawPile) {
             if (templateCard->Type != CardType::UNKNOWN &&
                 card->Model->Type != templateCard->Type) continue;
@@ -245,7 +251,8 @@ void SearchDeck(void* source, Target target, std::optional<int> value) {
                 if (!hasSubtype) continue;
             }
 
-            if (templateCard->Cost > 0 && card->Model->Cost > templateCard->Cost) continue;
+            if (templateCard->Cost >= 0 && card->Model->Cost > templateCard->Cost) continue;
+
 
             validCards.push_back(card);
         }

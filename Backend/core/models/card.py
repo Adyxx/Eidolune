@@ -8,9 +8,9 @@ from django.core.exceptions import ValidationError
 class Card(models.Model):
     name = models.CharField(max_length=100)
     image_path = models.CharField(null=True, blank=True, max_length=200)
-    cost = models.IntegerField()
-    rarity = models.CharField(max_length=20, choices=Rarity.choices)
-    type = models.CharField(max_length=20, choices=CardType.choices)
+    cost = models.IntegerField(null=True, blank=True)
+    rarity = models.CharField(max_length=20, choices=Rarity.choices, null=True, blank=True)
+    type = models.CharField(max_length=20, choices=CardType.choices, null=True, blank=True)
     power = models.IntegerField(null=True, blank=True)
     health = models.IntegerField(null=True, blank=True)
 
@@ -36,6 +36,14 @@ class Card(models.Model):
     )
     
     def clean(self):
+        if self.auxiliarytype != AuxiliaryCardType.TEMPLATE:
+            if self.cost is None:
+                raise ValidationError("Non-template cards must have a cost.")
+            if not self.rarity:
+                raise ValidationError("Non-template cards must have a rarity.")
+            if not self.type:
+                raise ValidationError("Non-template cards must have a type.")
+
         if self.is_character_card and not self.character:
             raise ValidationError("Character card must have a character assigned.")
 

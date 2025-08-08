@@ -85,7 +85,7 @@ int Player::PromptChooseOption(const std::vector<std::string>& options) {
     return choice;
 }
 
-    std::vector<std::shared_ptr<GameCard>> Player::GetAllBoardCards() {
+std::vector<std::shared_ptr<GameCard>> Player::GetAllBoardCards() {
         std::vector<std::shared_ptr<GameCard>> cards;
 
         for (int row = 0; row < Player::BoardHeight; ++row) {
@@ -99,7 +99,7 @@ int Player::PromptChooseOption(const std::vector<std::string>& options) {
         return cards;
     }
 
-    bool Player::RemoveCardFromBoard(GameCard* card) {
+bool Player::RemoveCardFromBoard(GameCard* card) {
     for (int row = 0; row < Player::BoardHeight; ++row) {
         for (int col = 0; col < Player::BoardWidth; ++col) {
             if (GridBoard[row][col] && GridBoard[row][col].get() == card) {

@@ -76,6 +76,7 @@ class AuxiliaryCardType(models.TextChoices):
     CONSUMABLE = "CONSUMABLE",
     FRAGMENT = "FRAGMENT",
     RELIC = "RELIC"
+    TEMPLATE = "TEMPLATE"
 
 class BannerType(models.TextChoices):
     CARD = "CARD", "Card"

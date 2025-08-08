@@ -63,6 +63,7 @@ AuxiliaryCardType ParseAuxiliaryType(const std::string& s) {
     if (s == "FRAGMENT") return AuxiliaryCardType::FRAGMENT;
     if (s == "CONSUMABLE") return AuxiliaryCardType::CONSUMABLE;
     if (s == "RELIC") return AuxiliaryCardType::RELIC;
+    if (s == "TEMPLATE") return AuxiliaryCardType::TEMPLATE;
     return AuxiliaryCardType::NONE;
 }
 
@@ -73,29 +74,54 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
     std::unordered_map<int, std::shared_ptr<Card>> result;
 
     for (const auto& c : jsonArray) {
-        if (!c.contains("id") || !c.contains("name") || !c.contains("cost") || !c.contains("rarity") || !c.contains("type")) {
-            std::cerr << "❌ Skipping card — missing required fields: " << c.dump() << "\n";
+        if (!c.contains("id") || !c.contains("name")) {
+            std::cerr << "❌ Skipping card — missing ID or name: " << c.dump() << "\n";
+            continue;
+        }
+
+        AuxiliaryCardType auxType = AuxiliaryCardType::NONE;
+        if (c.contains("auxiliarytype") && !c["auxiliarytype"].is_null()) {
+            auxType = ParseAuxiliaryType(c["auxiliarytype"]);
+        }
+
+        bool isTemplate = (auxType == AuxiliaryCardType::TEMPLATE);
+
+        // For non-templates, enforce required fields
+        if (!isTemplate && (!c.contains("cost") || !c.contains("rarity") || !c.contains("type"))) {
+            std::cerr << "❌ Skipping non-template card — missing required fields: " << c.dump() << "\n";
             continue;
         }
 
         auto card = std::make_shared<Card>();
+        card->ID = c["id"].get<int>();
         card->Name = c["name"];
-        card->Cost = c["cost"];
+        card->AuxiliaryType = auxType;
 
-        try {
-            card->CardRarity = ParseRarity(c["rarity"]);
-            card->Type = ParseCardType(c["type"]);
-        } catch (const std::exception& e) {
-            std::cerr << "❌ Parse error: " << e.what() << " in card: " << c.dump() << "\n";
-            continue;
+        if (!isTemplate) {
+            card->Cost = c["cost"];
+            try {
+                card->CardRarity = ParseRarity(c["rarity"]);
+                card->Type = ParseCardType(c["type"]);
+            } catch (const std::exception& e) {
+                std::cerr << "❌ Parse error: " << e.what() << " in card: " << c.dump() << "\n";
+                continue;
+            }
+        } else {
+            
+            card->Cost = c.contains("cost") && !c["cost"].is_null() ? c["cost"].get<int>() : -1;
+            card->CardRarity = Rarity::COMMON; 
+            card->Type = c.contains("type") && !c["type"].is_null()
+                ? ParseCardType(c["type"])
+                : CardType::UNKNOWN;
         }
+
 
         card->Text = c.value("text", "");
 
         if (c.contains("power") && !c["power"].is_null()) {
             card->Power = c["power"];
         } else {
-            card->Power = 0; 
+            card->Power = 0;
         }
 
         if (c.contains("health") && !c["health"].is_null()) {
@@ -124,8 +150,8 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
         if (c.contains("subtypes") && c["subtypes"].is_array()) {
             for (const auto& subtypeId : c["subtypes"]) {
                 if (!subtypeId.is_number_integer()) continue;
-                    auto subtype = SubtypeRegistry::Instance().Get(subtypeId);
-                    if (subtype) card->Subtypes.push_back(subtype);
+                auto subtype = SubtypeRegistry::Instance().Get(subtypeId);
+                if (subtype) card->Subtypes.push_back(subtype);
             }
         }
 
@@ -133,16 +159,10 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
             card->ClassLock = ParseClassLock(c["classlock"]);
         }
 
-        if (c.contains("auxiliarytype") && !c["auxiliarytype"].is_null()) {
-            card->AuxiliaryType = ParseAuxiliaryType(c["auxiliarytype"]);
-        }
-        
-        int cardId = c["id"].get<int>();
-        result[cardId] = card;
-
-        card->ID = cardId;
-        CardRegistry::Instance().Register(cardId, card);
+        result[card->ID] = card;
+        CardRegistry::Instance().Register(card->ID, card);
     }
+
     std::cout << "✅ Loaded " << result.size() << " cards.\n";
     return result;
 }
