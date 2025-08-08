@@ -26,14 +26,18 @@ void Player::StartTurn() {
 
 void Player::EndTurn() {
     std::cout << "⏹ " << GetName() << "'s turn ends.\n";
+
     if ((int)Hand.size() > MaxHandSize) {
         std::cout << "🗑️ You have too many cards. (not implemented: discard)\n";
     }
 
-    for (auto& card : Board) {
-        if (card) {
-            card->Tapped = false;
-            card->SummoningSickness = false;
+    for (int row = 0; row < BoardHeight; ++row) {
+        for (int col = 0; col < BoardWidth; ++col) {
+            auto& card = GridBoard[row][col];
+            if (card) {
+                card->Tapped = false;
+                card->SummoningSickness = false;
+            }
         }
     }
 }
@@ -80,3 +84,53 @@ int Player::PromptChooseOption(const std::vector<std::string>& options) {
     std::cin >> choice; // Replace with proper UI/input method
     return choice;
 }
+
+    std::vector<std::shared_ptr<GameCard>> Player::GetAllBoardCards() {
+        std::vector<std::shared_ptr<GameCard>> cards;
+
+        for (int row = 0; row < Player::BoardHeight; ++row) {
+            for (int col = 0; col < Player::BoardWidth; ++col) {
+                if (GridBoard[row][col]) {
+                    cards.push_back(GridBoard[row][col]);
+                }
+            }
+        }
+
+        return cards;
+    }
+
+    bool Player::RemoveCardFromBoard(GameCard* card) {
+    for (int row = 0; row < Player::BoardHeight; ++row) {
+        for (int col = 0; col < Player::BoardWidth; ++col) {
+            if (GridBoard[row][col] && GridBoard[row][col].get() == card) {
+
+                Graveyard.push_back(GridBoard[row][col]);
+                GridBoard[row][col] = nullptr;
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void Player::RemoveAllAurasFromSource(int sourceId) {
+    for (int row = 0; row < Player::BoardHeight; ++row) {
+        for (int col = 0; col < Player::BoardWidth; ++col) {
+            if (GridBoard[row][col] && GridBoard[row][col]->ActiveAuras.count(sourceId)) {
+                GridBoard[row][col]->RemoveAura(sourceId);
+            }
+        }
+    }
+}
+
+    std::shared_ptr<GameCard> Player::GetCardAt(const Position& pos) const {
+        if (!pos.IsValid()) return nullptr;
+        return GridBoard[pos.row][pos.col];
+    }
+
+    bool Player::IsOccupied(const Position& pos) const {
+        return GetCardAt(pos) != nullptr;
+    }
+    

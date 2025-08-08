@@ -126,25 +126,25 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
     p2->Observer = observer;
 
     for (auto& player : game.Players) {
+        // Build a fresh per-player DrawPile from the deck model (do NOT mutate the deck model)
+        player->DrawPile.clear();
+
         for (auto& deckCard : player->DeckRef->DeckCards) {
             for (int i = 0; i < deckCard->Quantity; ++i) {
                 auto card = std::make_shared<GameCard>(deckCard->CardRef);
                 card->Owner = player.get();
                 card->Zone = CardZone::DECK;
                 CardUtils::SubscribeCardTriggers(card, observer);
-                deckCard->GameCardCopies.push_back(card);
+
+                // Push directly into this player's draw pile — do NOT store it back into deckCard->GameCardCopies
+                player->DrawPile.push_back(card);
             }
         }
 
-        player->DrawPile.clear();
-        for (auto& deckCard : player->DeckRef->DeckCards) {
-            for (auto& gameCard : deckCard->GameCardCopies) {
-                player->DrawPile.push_back(gameCard);
-            }
-        }
-
+        // Shuffle player's draw pile (each player gets their own shuffled pile)
         std::shuffle(player->DrawPile.begin(), player->DrawPile.end(), std::mt19937{ std::random_device{}() });
 
+        // Initial draw (3 cards in your code)
         for (int i = 0; i < 3; ++i) {
             DrawCard(nullptr, Target::FromPlayer(player.get()), 1);
         }

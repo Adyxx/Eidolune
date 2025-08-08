@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "Character.h"
 #include "Deck.h"
+#include "Position.h"
 
 namespace GameActions {
 
@@ -19,13 +20,24 @@ namespace GameActions {
         }
     }
 
+
     void ShowBoard(Player* player) {
-        std::cout << "🛡️ Board: ";
-        for (auto& card : player->Board) {
-            std::cout << card->GetName() << " ";
+        std::cout << "\n🛡️ Board for " << player->GetName() << ":\n";
+
+        for (int row = 0; row < Player::BoardHeight; ++row) {
+            for (int col = 0; col < Player::BoardWidth; ++col) {
+                auto& slot = player->GridBoard[row][col];
+                int tileID = row * Player::BoardWidth + col + 1;
+
+                if (slot)
+                    std::cout << "[" << tileID << ": " << slot->GetName() << "]";
+                else
+                    std::cout << "[" << tileID << ": ---]";
+            }
+            std::cout << "\n";
         }
-        std::cout << "\n";
     }
+
 
     void ShowPlayerState(Player* player) {
     std::cout << "\n🧝 Player: " << player->GetName()
@@ -39,9 +51,16 @@ namespace GameActions {
     std::vector<Target> GetTargets(Player* player, Player* opponent, TargetSpec spec) {
         std::vector<Target> targets;
 
+        auto addBoardCards = [&](Player* p) {
+            for (int row = 0; row < Player::BoardHeight; ++row)
+                for (int col = 0; col < Player::BoardWidth; ++col)
+                    if (p->GridBoard[row][col])
+                        targets.push_back(Target::FromCard(p->GridBoard[row][col].get()));
+        };
+
         switch (spec) {
             case TargetSpec::ENEMY_BOARD:
-                for (auto& c : opponent->Board) targets.push_back(Target::FromCard(c.get()));
+                addBoardCards(opponent);
                 break;
 
             case TargetSpec::ENEMY_HERO:
@@ -49,12 +68,12 @@ namespace GameActions {
                 break;
 
             case TargetSpec::ENEMY_BOARD_OR_HERO:
-                for (auto& c : opponent->Board) targets.push_back(Target::FromCard(c.get()));
+                addBoardCards(opponent);
                 targets.push_back(Target::FromPlayer(opponent));
                 break;
 
             case TargetSpec::FRIENDLY_BOARD:
-                for (auto& c : player->Board) targets.push_back(Target::FromCard(c.get()));
+                addBoardCards(player);
                 break;
 
             case TargetSpec::FRIENDLY_HERO:
@@ -63,8 +82,8 @@ namespace GameActions {
                 break;
 
             case TargetSpec::ANY:
-                for (auto& c : player->Board) targets.push_back(Target::FromCard(c.get()));
-                for (auto& c : opponent->Board) targets.push_back(Target::FromCard(c.get()));
+                addBoardCards(player);
+                addBoardCards(opponent);
                 targets.push_back(Target::FromPlayer(player));
                 targets.push_back(Target::FromPlayer(opponent));
                 break;
@@ -147,9 +166,29 @@ namespace GameActions {
             card->Zone = CardZone::GRAVEYARD;
             player->Graveyard.push_back(card);
         } else {
+            std::cout << "Enter position to place unit (1–14): ";
+            int posID;
+            std::cin >> posID;
+            std::cin.ignore();
+
+            if (posID < 1 || posID > 14) {
+                std::cout << "🚫 Invalid position.\n";
+                return;
+            }
+
+            auto pos = FromID(posID);
+            auto& slot = player->GridBoard[pos.row][pos.col];
+
+            if (slot) {
+                std::cout << "🚫 That tile is already occupied.\n";
+                return;
+            }
+
             card->Zone = CardZone::BOARD;
-            player->Board.push_back(card);
-            std::cout << "▶️ " << player->GetName() << " plays " << card->GetName() << " to the board\n";
+            slot = card;
+            std::cout << "▶️ " << player->GetName() << " plays " << card->GetName()
+                    << " to position " << posID << "\n";
+
         }
 
         player->Energy -= card->GetCost();
@@ -179,7 +218,21 @@ namespace GameActions {
             player->Graveyard.push_back(card);
         } else {
             card->Zone = CardZone::BOARD;
-            player->Board.push_back(card);
+            bool placed = false;
+            for (int row = 0; row < Player::BoardHeight && !placed; ++row) {
+                for (int col = 0; col < Player::BoardWidth; ++col) {
+                    if (!player->GridBoard[row][col]) {
+                        player->GridBoard[row][col] = card;
+                        placed = true;
+                        break;
+                    }
+                }
+            }
+            if (!placed) {
+                std::cout << "🚫 No empty slot on board!\n";
+                return;
+            }
+
             std::cout << "▶️ " << player->GetName() << " plays " << card->GetName() << " to the board\n";
         }
 
@@ -192,11 +245,13 @@ namespace GameActions {
     void Attack(Player* attacker, Player* defender) {
         std::vector<std::shared_ptr<GameCard>> validAttackers;
 
-        for (auto& card : attacker->Board) {
-            if (!card->SummoningSickness && !card->Tapped && card->GetPower().value_or(0) > 0) {
-                validAttackers.push_back(card);
+        for (int row = 0; row < Player::BoardHeight; ++row)
+            for (int col = 0; col < Player::BoardWidth; ++col) {
+                auto& card = attacker->GridBoard[row][col];
+                if (card && !card->SummoningSickness && !card->Tapped && card->GetPower().value_or(0) > 0)
+                    validAttackers.push_back(card);
             }
-        }
+
 
         if (validAttackers.empty()) {
             std::cout << "❌ No valid attackers.\n";
@@ -275,28 +330,16 @@ namespace GameActions {
                     std::cout << "💀 " << targetCard->GetName() << " is destroyed!\n";
                     Player* owner = targetCard->Owner;
                     targetCard->Zone = CardZone::GRAVEYARD;
+
+
                     if (owner) {
-                        // Remove from board
-                        auto& board = owner->Board;
-                        auto it = std::find_if(board.begin(), board.end(),
-                            [&](const std::shared_ptr<GameCard>& c) { return c.get() == targetCard; });
-                        if (it != board.end()) {
-                            owner->Graveyard.push_back(*it);
-                            board.erase(it);
-
-                            // This was a potential aura source
-                            int sourceId = targetCard->Id;
-
-                            // Remove all buffs it caused
-                            for (auto& ally : board) {
-                                if (ally->ActiveAuras.count(sourceId)) {
-                                    //int lostHP = ally->ActiveAuras[sourceId].HealthBuff;
-                                    ally->RemoveAura(sourceId);
-
-                                }
-                            }
-                        }
+                        owner->Graveyard.push_back(std::shared_ptr<GameCard>(targetCard));  // already shared_ptr
+                        owner->RemoveCardFromBoard(targetCard);
+                        owner->RemoveAllAurasFromSource(targetCard->Id);
                     }
+
+
+
                 }
                 break;
             }
@@ -334,7 +377,7 @@ namespace GameActions {
         }
     }
 
-    
+        
 
     void UseAbility(Player* player, Player* opponent) {
         std::cout << "❌ Ability system not yet implemented.\n";

@@ -83,10 +83,25 @@ std::shared_ptr<GameCard> RegisterCardMidGame(std::shared_ptr<Card> templateCard
             owner->Hand.push_back(gameCard);
             std::cout << "✋ Card '" << gameCard->GetName() << "' added to HAND.\n";
             break;
-        case CardZone::BOARD:
-            owner->Board.push_back(gameCard);
-            std::cout << "⚔️ Card '" << gameCard->GetName() << "' added to BOARD.\n";
+        case CardZone::BOARD: {
+            std::vector<std::pair<int,int>> freeSlots;
+
+            for (int r = 0; r < 2; ++r)
+                for (int c = 0; c < 7; ++c)
+                    if (!owner->GridBoard[r][c])
+                        freeSlots.push_back({r, c});
+
+            if (!freeSlots.empty()) {
+                auto [row, col] = freeSlots[rand() % freeSlots.size()];
+                owner->GridBoard[row][col] = gameCard;
+                std::cout << "⚔️ Card '" << gameCard->GetName()
+                        << "' placed randomly at (" << row << "," << col << ").\n";
+            } else {
+                std::cout << "🚫 No space on BOARD for '" << gameCard->GetName() << "'.\n";
+            }
             break;
+        }
+
         case CardZone::GRAVEYARD:
             owner->Graveyard.push_back(gameCard);
             std::cout << "☠️ Card '" << gameCard->GetName() << "' added to GRAVEYARD.\n";

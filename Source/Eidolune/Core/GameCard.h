@@ -25,9 +25,8 @@ public:
     bool SummoningSickness = true;
     bool Tapped = false;
     int DamageTaken = 0;
-    
     int TimeCounter = 0;
-    // Buffing aura tracking
+
     std::unordered_map<int, AuraEffect> ActiveAuras; // SourceCardID → Effect
 
     GameCard(std::shared_ptr<Card> model);
