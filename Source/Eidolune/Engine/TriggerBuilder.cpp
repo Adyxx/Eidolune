@@ -11,61 +11,59 @@
 
 
 
-
 namespace {
-void PrintAllCardsForPlayer(Player* player) {
-    auto printZone = [](const std::string& name, const std::vector<std::shared_ptr<GameCard>>& zone) {
-        std::cout << "📦 " << name << " [" << zone.size() << "]: ";
-        for (const auto& card : zone) {
-            std::cout << card->GetName() << " ";
+    /*
+    void PrintAllCardsForPlayer(Player* player) {
+        auto printZone = [](const std::string& name, const std::vector<std::shared_ptr<GameCard>>& zone) {
+            std::cout << "📦 " << name << " [" << zone.size() << "]: ";
+            for (const auto& card : zone) {
+                std::cout << card->GetName() << " ";
+            }
+            std::cout << "\n";
+        };
+
+        if (!player) {
+            std::cout << "⚠️ Cannot print cards: player is null.\n";
+            return;
         }
-        std::cout << "\n";
-    };
 
-    if (!player) {
-        std::cout << "⚠️ Cannot print cards: player is null.\n";
-        return;
+        std::cout << "\n🔍 ZONE STATE FOR PLAYER " << player->PlayerIndex << ":\n";
+        printZone("Hand", player->Hand);
+        printZone("Board", player->Board);
+        printZone("Graveyard", player->Graveyard);
+        printZone("DrawPile", player->DrawPile);
+        printZone("Exile", player->ExileZone);
+        printZone("OathZone", player->OathZone);
+        std::cout << "--------------------------------\n";
     }
-
-    std::cout << "\n🔍 ZONE STATE FOR PLAYER " << player->PlayerIndex << ":\n";
-    printZone("Hand", player->Hand);
-    printZone("Board", player->Board);
-    printZone("Graveyard", player->Graveyard);
-    printZone("DrawPile", player->DrawPile);
-    printZone("Exile", player->ExileZone);
-    printZone("OathZone", player->OathZone);
-    std::cout << "--------------------------------\n";
-}
-    // Helper to determine if the trigger matches the scope rules
-bool IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScope scope) {
-    switch (scope) {
-        case TriggerScope::GLOBAL:
-            return true;
-        case TriggerScope::SELF:
-            return triggerCard && eventCard && eventCard->Id == triggerCard->Id;
-        case TriggerScope::OTHER_FRIENDLY:
-            return triggerCard && eventCard && eventCard != triggerCard &&
-                   eventCard->Owner && triggerCard->Owner &&
-                   eventCard->Owner == triggerCard->Owner;
-        case TriggerScope::ANY_FRIENDLY:
-            return triggerCard && eventCard &&
-                   eventCard->Owner && triggerCard->Owner &&
-                   eventCard->Owner == triggerCard->Owner;
-        case TriggerScope::OTHER_ENEMY:
-            return triggerCard && eventCard && eventCard != triggerCard &&
-                   eventCard->Owner && triggerCard->Owner &&
-                   eventCard->Owner != triggerCard->Owner;
-        case TriggerScope::ANY_OTHER:
-            return triggerCard && eventCard && eventCard != triggerCard;
-        case TriggerScope::ANY:
-            return true;
-        default:
-            std::cout << "❌ Unhandled TriggerScope enum.\n";
-            return false;
+   */
+    bool IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScope scope) {
+        switch (scope) {
+            case TriggerScope::GLOBAL:
+                return true;
+            case TriggerScope::SELF:
+                return triggerCard && eventCard && eventCard->Id == triggerCard->Id;
+            case TriggerScope::OTHER_FRIENDLY:
+                return triggerCard && eventCard && eventCard != triggerCard &&
+                    eventCard->Owner && triggerCard->Owner &&
+                    eventCard->Owner == triggerCard->Owner;
+            case TriggerScope::ANY_FRIENDLY:
+                return triggerCard && eventCard &&
+                    eventCard->Owner && triggerCard->Owner &&
+                    eventCard->Owner == triggerCard->Owner;
+            case TriggerScope::OTHER_ENEMY:
+                return triggerCard && eventCard && eventCard != triggerCard &&
+                    eventCard->Owner && triggerCard->Owner &&
+                    eventCard->Owner != triggerCard->Owner;
+            case TriggerScope::ANY_OTHER:
+                return triggerCard && eventCard && eventCard != triggerCard;
+            case TriggerScope::ANY:
+                return true;
+            default:
+                std::cout << "❌ Unhandled TriggerScope enum.\n";
+                return false;
+        }
     }
-}
-
-
 
 
 }
@@ -123,9 +121,7 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
             return;
         }
 
-        PrintAllCardsForPlayer(triggerOwner);
-
-        std::cout << "📌 Trigger is using Effect pointer: " << binding->GetEffect() << " (" << binding->BoundEffect->ScriptReference << ")\n";
+        //PrintAllCardsForPlayer(triggerOwner);
 
         auto effect = binding->GetEffect();
         if (!effect) {
@@ -168,19 +164,64 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
             resolvedTarget = chosen;
         }
 
+        /////////////////////////////////////
+
+
+        std::optional<int> resolvedValue;
+
+        if (binding->GetValue().has_value()) {
+            resolvedValue = binding->GetValue();
+        } else {
+            switch (binding->GetValueType()) {
+                case DynamicValueType::YOUR_CARDS_IN_HAND:
+                    resolvedValue = triggerOwner ? (int)triggerOwner->Hand.size() : 0;
+                    break;
+                case DynamicValueType::ENEMY_CARDS_IN_HAND:
+                    resolvedValue = triggerOwner && triggerOwner->GetOpponent()
+                        ? (int)triggerOwner->GetOpponent()->Hand.size()
+                        : 0;
+                    break;
+                case DynamicValueType::FRIENDLY_BOARD_COUNT:
+                    resolvedValue = triggerOwner ? (int)triggerOwner->Board.size() : 0;
+                    break;
+                case DynamicValueType::ENEMY_BOARD_COUNT:
+                    resolvedValue = triggerOwner && triggerOwner->GetOpponent()
+                        ? (int)triggerOwner->GetOpponent()->Board.size()
+                        : 0;
+                    break;
+                case DynamicValueType::FRIENDLY_GRAVEYARD_COUNT:
+                    resolvedValue = triggerOwner ? (int)triggerOwner->Graveyard.size() : 0;
+                    break;
+                case DynamicValueType::ENEMY_GRAVEYARD_COUNT:
+                    resolvedValue = triggerOwner && triggerOwner->GetOpponent()
+                        ? (int)triggerOwner->GetOpponent()->Graveyard.size()
+                        : 0;
+                    break;
+                case DynamicValueType::TURN_NUMBER:
+                    resolvedValue = triggerOwner ? triggerOwner->TurnCount : 0;
+                    break;
+                case DynamicValueType::OWNER_HEALTH:
+                    resolvedValue = triggerOwner ? triggerOwner->Health : 0;
+                    break;
+                case DynamicValueType::OPPONENT_HEALTH:
+                    resolvedValue = triggerOwner && triggerOwner->GetOpponent()
+                        ? triggerOwner->GetOpponent()->Health
+                        : 0;
+                    break;
+                default:
+                    resolvedValue = std::nullopt;
+                    break;
+            }
+        }
+
+        /////////////////////////////////////
+
+
         std::cout << "✨ Trigger fired: " << binding->GetTrigger()->ScriptReference << "\n";
         
-        std::cout << "[FROM TriggerBuilder]: " << binding->ToString() <<"\n";
-        //effectFunc(eventCard, resolvedTarget, binding->GetValue());
-
-        // Inject binding into context
         auto& ctxC = GetEffectCallContext();
         ctxC.CurrentBinding = binding;
-
-        // Call the actual effect
-        effectFunc(eventCard, resolvedTarget, binding->GetValue());
-
-        // Clear context after execution to avoid leaks between triggers
+        effectFunc(eventCard, resolvedTarget, resolvedValue);
         ctxC.CurrentBinding = nullptr;
 
     };

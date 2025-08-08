@@ -100,7 +100,7 @@ void UserDataLoader::ApplyUserCharacterDataToCharacters(UserData& userData) {
                     }
 
                     if (card) {
-                        int defaultUses = (card->AuxilaryType == AuxiliaryCardType::CONSUMABLE) ? 1 : 0;
+                        int defaultUses = (card->AuxiliaryType == AuxiliaryCardType::CONSUMABLE) ? 1 : 0;
                         auto instance = std::make_shared<ConsumableInstance>(card, defaultUses);
                         bag.slots[i].item = instance;
                         std::cout << "✅ Equipped '" << card->Name << "' to Specialist bag slot " << i << "\n";

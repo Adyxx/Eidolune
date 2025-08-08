@@ -21,7 +21,7 @@ Banner LoadBannerById(int id) {
 
     for (const auto& [_, card] : allCards) {
         if (!card) continue;
-        if (card->AuxilaryType != AuxiliaryCardType::NONE) continue;
+        if (card->AuxiliaryType != AuxiliaryCardType::NONE) continue;
         if (!card->IsPullable()) continue; 
         banner.Pool.push_back({card, 1.0f, false});
     }

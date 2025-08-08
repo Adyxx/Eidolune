@@ -53,7 +53,7 @@ class CardAdmin(admin.ModelAdmin):
 
     def get_search_results(self, request, queryset, search_term):
         if request.GET.get('_banner_autocomplete'):
-            queryset = queryset.filter(auxilarytype=AuxiliaryCardType.NONE)
+            queryset = queryset.filter(auxiliarytype=AuxiliaryCardType.NONE)
         return super().get_search_results(request, queryset, search_term)
 
 ### CHARACTER ADMIN ###

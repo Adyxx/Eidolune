@@ -4,7 +4,7 @@
 #include <string>
 
 enum class Rarity { COMMON, RARE, EPIC, LEGENDARY };
-enum class CardType { SPELL, UNIT, EQUIPMENT, ASSET, EVENT, TRAP, RITUAL, OTHER };
+enum class CardType { SPELL, UNIT, EQUIPMENT, ASSET, EVENT, TRAP, RITUAL, OTHER, UNKNOWN };
 enum class RelationshipType { PARTNER, RIVAL, FRIENDLY, LOVE, RESPECT };
 enum class EquipmentSlot { HEAD, BODY, HANDS, LEGS };
 enum class TargetHint { NONE, CARD, PLAYER, CARD_OR_PLAYER, SELF, UNKNOWN, ANY };
@@ -20,7 +20,8 @@ enum class AuxiliaryCardType {
     OATH,
     CONSUMABLE,
     FRAGMENT,
-    RELIC
+    RELIC,
+    TEMPLATE
 };
 
 enum class TriggerScope {
@@ -36,3 +37,16 @@ enum class TriggerScope {
 // LATER....
 enum class CardState { NORMAL, DISABLED, EXHAUSTED, FROZEN, SILENCED, STEALTH, INVISIBLE, ATTACKING, DEFENDING };
 
+enum class DynamicValueType {
+    STATIC_NUMBER,
+    YOUR_CARDS_IN_HAND,
+    ENEMY_CARDS_IN_HAND,
+    FRIENDLY_BOARD_COUNT,
+    ENEMY_BOARD_COUNT,
+    FRIENDLY_GRAVEYARD_COUNT,
+    ENEMY_GRAVEYARD_COUNT,
+    TURN_NUMBER,
+    OWNER_HEALTH,
+    OPPONENT_HEALTH,
+    UNKNOWN
+};

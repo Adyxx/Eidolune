@@ -49,5 +49,5 @@ class BannerItemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Filter to only show cards with auxilarytype = NONE
-        self.fields['card'].queryset = Card.objects.filter(auxilarytype=AuxiliaryCardType.NONE)
+        # Filter to only show cards with auxiliarytype = NONE
+        self.fields['card'].queryset = Card.objects.filter(auxiliarytype=AuxiliaryCardType.NONE)

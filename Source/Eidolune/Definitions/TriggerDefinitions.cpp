@@ -48,6 +48,31 @@ void RegisterTriggerDefinitions() {
     auto onAttackTrigger = std::make_shared<Trigger>("card_attacked");
     registry.RegisterShared("on_attack", onAttackTrigger);
 
+    // ******************************************************
+
+    TriggerInfo onDamageReceived;
+    onDamageReceived.Name = "onDamageReceived";
+    onDamageReceived.Description = "When card receives damage.";
+    onDamageReceived.Event = "damage_received";
+    auto onDamageReceivedTrigger = std::make_shared<Trigger>("damage_received");
+    registry.RegisterShared("on_damage_received", onDamageReceivedTrigger);
+
+    TriggerInfo onEnterBoard;
+    onEnterBoard.Name = "onEnterBoard";
+    onEnterBoard.Description = "When card enters board.";
+    onEnterBoard.Event = "card_entered";
+    auto onEnterBoardTrigger = std::make_shared<Trigger>("card_entered");
+    registry.RegisterShared("on_enter_board", onEnterBoardTrigger);
+
+    TriggerInfo onCardDrawn;
+    onCardDrawn.Name = "onCardDrawn";
+    onCardDrawn.Description = "When card is drawn.";
+    onCardDrawn.Event = "card_drawn";
+    auto onCardDrawnTrigger = std::make_shared<Trigger>("card_drawn");
+    registry.RegisterShared("on_card_drawn", onCardDrawnTrigger);
+
+
+
     //////////////////////////////////////////////////////////////
 
     TriggerInfo time_1_opt1;
@@ -76,7 +101,7 @@ void RegisterTriggerDefinitions() {
     time_2_opt2.Description = "";
     time_2_opt2.Event = "time_2_opt1";
     auto time_2_opt2Trigger = std::make_shared<Trigger>("time_2_opt1");
-    registry.RegisterShared("time_2_opt1", time_2_opt2Trigger);
+    registry.RegisterShared("time_2_opt2", time_2_opt2Trigger);
 
     TriggerInfo time_3_opt1;
     time_3_opt1.Name = "time_3_opt1";

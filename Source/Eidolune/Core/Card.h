@@ -34,7 +34,7 @@ public:
     std::vector<std::shared_ptr<CardEffectBinding>> EffectBindings;
 
     CharacterClassType ClassLock = CharacterClassType::UNKNOWN;
-    AuxiliaryCardType AuxilaryType = AuxiliaryCardType::NONE;
+    AuxiliaryCardType AuxiliaryType = AuxiliaryCardType::NONE;
 
     Card();
     void Validate() const;
@@ -42,11 +42,11 @@ public:
     bool HasSubtype(const std::string& targetSubtype) const;
     
     inline bool IsConsumable() const {
-        return AuxilaryType == AuxiliaryCardType::CONSUMABLE || AuxilaryType == AuxiliaryCardType::REAGENT;
+        return AuxiliaryType == AuxiliaryCardType::CONSUMABLE || AuxiliaryType == AuxiliaryCardType::REAGENT;
     }
 
     bool IsPullable() const {
-        if (AuxilaryType != AuxiliaryCardType::NONE) return false;
+        if (AuxiliaryType != AuxiliaryCardType::NONE) return false;
         if (CardRarity == Rarity::COMMON && Name == "Basic potion") return false;
         // Add any other disqualifying logic
         return true;

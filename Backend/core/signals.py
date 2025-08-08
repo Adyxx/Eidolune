@@ -1,4 +1,3 @@
-# core/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -22,27 +21,40 @@ def create_default_user_data(sender, instance, created, **kwargs):
         print("⚠️ User already has decks, skipping default data creation.")
         return
 
-    starter_character = Character.objects.get(id=DEFAULT_CHARACTER_ID)
+    # Try to get starter character
+    try:
+        starter_character = Character.objects.get(id=DEFAULT_CHARACTER_ID)
+    except Character.DoesNotExist:
+        print(f"⚠️ No character with id={DEFAULT_CHARACTER_ID} found. Skipping default character.")
+        starter_character = None
 
-    UserCharacterData.objects.create(
-        user=instance,
-        character=starter_character,
-        level=1,
-        consumables=[],
-        equipped={},
-    )
+    # Create UserCharacterData only if character exists
+    if starter_character:
+        UserCharacterData.objects.create(
+            user=instance,
+            character=starter_character,
+            level=1,
+            consumables=[],
+            equipped={},
+        )
 
-    deck = Deck.objects.create(
-        owner=instance,
-        name="Starter Deck",
-        main_character=starter_character,
-        partner_character=None,
-        description="Your first deck!"
-    )
+    # Create a deck only if we have a main character
+    if starter_character:
+        deck = Deck.objects.create(
+            owner=instance,
+            name="Starter Deck",
+            main_character=starter_character,
+            partner_character=None,
+            description="Your first deck!"
+        )
 
-    for card_id, quantity in DEFAULT_CARDS:
-        card = Card.objects.get(id=card_id)
-        DeckCard.objects.create(deck=deck, card=card, quantity=quantity)
+        # Add default cards (skip missing ones)
+        for card_id, quantity in DEFAULT_CARDS:
+            try:
+                card = Card.objects.get(id=card_id)
+                DeckCard.objects.create(deck=deck, card=card, quantity=quantity)
+            except Card.DoesNotExist:
+                print(f"⚠️ No card with id={card_id} found. Skipping.")
 
     from collections import defaultdict
 
@@ -70,5 +82,4 @@ def create_default_user_data(sender, instance, created, **kwargs):
     }
     
     instance.save(update_fields=["user_data"])
-
     print("✅ Default user data created.")

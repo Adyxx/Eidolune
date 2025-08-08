@@ -57,16 +57,16 @@ void Player::PromptAuxCardChoice(AuxiliaryCardType type, const std::vector<std::
 
 
 bool Player::HasChosenAuxCard(const std::shared_ptr<Card>& card) const {
-    auto it = ChosenAuxiliaryCards.find(card->AuxilaryType);
+    auto it = ChosenAuxiliaryCards.find(card->AuxiliaryType);
     if (it == ChosenAuxiliaryCards.end()) return false;
 
     return std::find(it->second.begin(), it->second.end(), card) != it->second.end();
 }
 
 void Player::AddChosenAuxCard(std::shared_ptr<Card> card) {
-    ChosenAuxiliaryCards[card->AuxilaryType].push_back(card);
+    ChosenAuxiliaryCards[card->AuxiliaryType].push_back(card);
 
-    if (card->AuxilaryType == AuxiliaryCardType::OATH) {
+    if (card->AuxiliaryType == AuxiliaryCardType::OATH) {
         auto gameCard = CardUtils::RegisterCardMidGame(card, this, CardZone::OATHZONE, GetTriggerObserver());
         //OathZone.push_back(gameCard);
         //std::cout << "🛡️ Oath card '" << card->Name << "' added to OathZone.\n";

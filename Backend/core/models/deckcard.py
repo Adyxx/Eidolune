@@ -13,8 +13,8 @@ class DeckCard(models.Model):
         unique_together = ("deck", "card")
 
     def clean(self):
-            if self.card.auxilarytype != AuxiliaryCardType.NONE:
-                raise ValidationError(f"Cannot include non-playable card ({self.card.name}) of type {self.card.auxilarytype} in a deck.")
+            if self.card.auxiliarytype != AuxiliaryCardType.NONE:
+                raise ValidationError(f"Cannot include non-playable card ({self.card.name}) of type {self.card.auxiliarytype} in a deck.")
     
     def __str__(self):
         return f"{self.quantity}x {self.card.name} in {self.deck.name}"

@@ -38,6 +38,21 @@ inline TargetSpec StringToTargetSpec(const std::string& str) {
     return TargetSpec::UNKNOWN;
 }
 
+
+inline DynamicValueType StringToDynamicValueType(const std::string& str) {
+    if (str == "your_cards_in_hand") return DynamicValueType::YOUR_CARDS_IN_HAND;
+    if (str == "enemy_cards_in_hand") return DynamicValueType::ENEMY_CARDS_IN_HAND;
+    if (str == "friendly_board_count") return DynamicValueType::FRIENDLY_BOARD_COUNT;
+    if (str == "enemy_board_count") return DynamicValueType::ENEMY_BOARD_COUNT;
+    if (str == "friendly_graveyard_count") return DynamicValueType::FRIENDLY_GRAVEYARD_COUNT;
+    if (str == "enemy_graveyard_count") return DynamicValueType::ENEMY_GRAVEYARD_COUNT;
+    if (str == "turn_number") return DynamicValueType::TURN_NUMBER;
+    if (str == "owner_health") return DynamicValueType::OWNER_HEALTH;
+    if (str == "opponent_health") return DynamicValueType::OPPONENT_HEALTH;
+    if (str.find_first_not_of("0123456789") == std::string::npos) return DynamicValueType::STATIC_NUMBER;
+    return DynamicValueType::UNKNOWN;
+}
+
 std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll() {
     std::cout << "🔄 Loading CardEffectBindings from API...\n";
 
@@ -89,10 +104,19 @@ std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll
             }
 
             // --- Optional Values ---
-            std::optional<int> effectValue = std::nullopt;
+            // --- Optional Values (now supports static or dynamic) ---
+            std::string rawValue;
             if (b.contains("value") && !b["value"].is_null()) {
-                effectValue = b["value"].get<int>();
+                rawValue = b["value"].get<std::string>();
             }
+
+            DynamicValueType valueType = StringToDynamicValueType(rawValue);
+
+            std::optional<int> staticValue = std::nullopt;
+            if (valueType == DynamicValueType::STATIC_NUMBER && !rawValue.empty()) {
+                staticValue = std::stoi(rawValue);
+            }
+
 
             std::optional<int> conditionValue = std::nullopt;
             if (b.contains("condition_value") && !b["condition_value"].is_null()) {
@@ -136,9 +160,12 @@ std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll
                 trigger,
                 effect,
                 condition,
-                effectValue,
+                rawValue,    // full raw string value (could be "3" or "enemy_board_count")
+                valueType,   // parsed enum
+                staticValue, // only set if it's a number
                 targeting
             );
+
 
             binding->SetZone(zone);
             binding->SetScope(scope);

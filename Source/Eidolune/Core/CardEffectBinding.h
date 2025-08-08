@@ -24,7 +24,13 @@ public:
     std::shared_ptr<Effect> BoundEffect;
     std::shared_ptr<Condition> BoundCondition;
 
-    std::optional<int> Value;
+    //std::optional<int> Value;
+    
+    std::string RawValue; // direct from JSON
+    DynamicValueType ValueType = DynamicValueType::UNKNOWN;
+    std::optional<int> StaticValue;
+
+    
     std::optional<TargetSpec> Targeting;
 
     ListeningZone Zone = ListeningZone::ANY;
@@ -42,7 +48,10 @@ public:
     std::shared_ptr<Trigger> GetTrigger() const { return BoundTrigger; }
     std::shared_ptr<Card> GetEventCard() const { return ParentCard; }
     std::shared_ptr<Effect> GetEffect() const { return BoundEffect; }
-    std::optional<int> GetValue() const { return Value; }
+    
+    std::optional<int> GetValue() const { return StaticValue; }
+    DynamicValueType GetValueType() const { return ValueType; }
+
     std::optional<TargetSpec> GetTargetSpec() const { return Targeting; }
     std::shared_ptr<Condition> GetCondition() const { return BoundCondition; }
     std::shared_ptr<Card> GetCard() const { return ParentCard; }
@@ -72,12 +81,14 @@ public:
 
 
     CardEffectBinding(std::shared_ptr<Card> card,
-                      std::shared_ptr<Trigger> trigger,
-                      std::shared_ptr<Effect> effect,
-                      std::shared_ptr<Condition> condition = nullptr,
-                      std::optional<int> value = std::nullopt,
-                      std::optional<TargetSpec> targetSpec = std::nullopt);
-    
+                    std::shared_ptr<Trigger> trigger,
+                    std::shared_ptr<Effect> effect,
+                    std::shared_ptr<Condition> condition,
+                    const std::string& rawValue,
+                    DynamicValueType valueType,
+                    std::optional<int> staticValue = std::nullopt,
+                    std::optional<TargetSpec> targetSpec = std::nullopt);
+
 
     std::string ToString() const;
 

@@ -29,7 +29,7 @@ class Card(models.Model):
         choices=CharacterClassType.choices,
         default=CharacterClassType.UNKNOWN
     )
-    auxilarytype = models.CharField(
+    auxiliarytype = models.CharField(
         max_length=20,
         choices=AuxiliaryCardType.choices,
         default=AuxiliaryCardType.NONE

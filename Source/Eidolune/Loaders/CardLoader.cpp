@@ -133,8 +133,8 @@ std::unordered_map<int, std::shared_ptr<Card>> CardLoader::LoadAll() {
             card->ClassLock = ParseClassLock(c["classlock"]);
         }
 
-        if (c.contains("auxilarytype") && !c["auxilarytype"].is_null()) {
-            card->AuxilaryType = ParseAuxiliaryType(c["auxilarytype"]);
+        if (c.contains("auxiliarytype") && !c["auxiliarytype"].is_null()) {
+            card->AuxiliaryType = ParseAuxiliaryType(c["auxiliarytype"]);
         }
         
         int cardId = c["id"].get<int>();

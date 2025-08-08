@@ -23,7 +23,7 @@ std::vector<std::shared_ptr<Card>> CardRegistry::GetCardsByAuxType(AuxiliaryCard
     const auto& cards = CardRegistry::Instance().GetAll();  
 
     for (const auto& [id, cardPtr] : cards) {
-        if (cardPtr && cardPtr->AuxilaryType == type) {
+        if (cardPtr && cardPtr->AuxiliaryType == type) {
             result.push_back(cardPtr);  // Keep as shared_ptr, not .get()
         }
     }

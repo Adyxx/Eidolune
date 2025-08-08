@@ -85,3 +85,25 @@ class BannerType(models.TextChoices):
 class CurrencyType(models.TextChoices):
     STANDARD_PULL = "STANDARD_PULL", "Standard Pull Currency"
     LIMITED_PULL = "LIMITED_PULL", "Limited Pull Currency"
+
+
+from enum import Enum
+
+class DynamicValueType(str, Enum):
+    STATIC_NUMBER = "static_number"  # Optional placeholder
+    YOUR_CARDS_IN_HAND = "your_cards_in_hand"
+    ENEMY_CARDS_IN_HAND = "enemy_cards_in_hand"
+    FRIENDLY_BOARD_COUNT = "friendly_board_count"
+    ENEMY_BOARD_COUNT = "enemy_board_count"
+    FRIENDLY_GRAVEYARD_COUNT = "friendly_graveyard_count"
+    ENEMY_GRAVEYARD_COUNT = "enemy_graveyard_count"
+    TURN_NUMBER = "turn_number"
+    OWNER_HEALTH = "owner_health"
+    OPPONENT_HEALTH = "opponent_health"
+
+    @classmethod
+    def choices(cls):
+        # For Django dropdown — include numeric values inline
+        numeric_choices = [(str(i), str(i)) for i in range(0, 21)]
+        enum_choices = [(v.value, v.name.replace("_", " ").title()) for v in cls if v != cls.STATIC_NUMBER]
+        return numeric_choices + enum_choices

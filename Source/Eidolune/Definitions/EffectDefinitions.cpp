@@ -8,6 +8,8 @@
 #include "GameActions.h"
 #include "CardUtils.h"
 #include "EffectContext.h"
+#include "Card.h"
+#include "Subtype.h"
 
 void DrawCard(void* source, Target target, std::optional<int> value) {
     if (target.type != Target::Type::PLAYER) {
@@ -197,7 +199,7 @@ void ChooseBasedOnTimeCounter(void* source, Target target, std::optional<int>) {
             optionLabels.push_back(b->GetTrigger()->GetName()); // or use b->ToString() if better
         }
 
-        int choiceIndex = card->Owner->PromptChooseOption(optionLabels); // see below
+        int choiceIndex = card->Owner->PromptChooseOption(optionLabels);
         if (choiceIndex < 0 || choiceIndex >= static_cast<int>(matchingBindings.size())) {
             std::cout << "❌ Invalid choice index.\n";
             return;
@@ -216,6 +218,69 @@ void ChooseBasedOnTimeCounter(void* source, Target target, std::optional<int>) {
 }
 
 
+void SearchDeck(void* source, Target target, std::optional<int> value) {
+    auto binding = GetEffectCallContext().CurrentBinding;
+    if (!binding) return;
+
+    auto* player = static_cast<Player*>(target.ptr);
+    if (!player) return;
+
+    int fetchCount = value.value_or(1);
+
+    std::vector<std::shared_ptr<GameCard>> validCards;
+
+    // If template linked, filter based on its metadata
+    if (binding->LinkedCard && binding->LinkedCard->AuxiliaryType == AuxiliaryCardType::TEMPLATE) {
+        auto* templateCard = binding->LinkedCard.get();
+
+        for (auto& card : player->DrawPile) {
+            if (templateCard->Type != CardType::UNKNOWN &&
+                card->Model->Type != templateCard->Type) continue;
+
+            if (!templateCard->Subtypes.empty()) {
+                bool hasSubtype = false;
+                for (auto& sub : templateCard->Subtypes) {
+                    if (card->Model->HasSubtype(sub->Name)) { hasSubtype = true; break; }
+                }
+                if (!hasSubtype) continue;
+            }
+
+            if (templateCard->Cost > 0 && card->Model->Cost > templateCard->Cost) continue;
+
+            validCards.push_back(card);
+        }
+    }
+    else {
+        // No template — any card is valid
+        validCards = player->DrawPile;
+    }
+
+    if (validCards.empty()) {
+        std::cout << "❌ No valid cards to search for.\n";
+        return;
+    }
+
+    // Let player pick if more than one
+    std::vector<std::string> names;
+    for (auto& c : validCards) names.push_back(c->GetName());
+
+    int choiceIndex = 0;
+    if (validCards.size() > 1)
+        choiceIndex = player->PromptChooseOption(names);
+
+    if (choiceIndex < 0 || choiceIndex >= (int)validCards.size()) return;
+
+    auto chosenCard = validCards[choiceIndex];
+
+    // Remove from deck & put into hand
+    auto it = std::find(player->DrawPile.begin(), player->DrawPile.end(), chosenCard);
+    if (it != player->DrawPile.end()) player->DrawPile.erase(it);
+
+    player->Hand.push_back(chosenCard);
+    chosenCard->Zone = CardZone::HAND;
+
+    std::cout << "🔍 Searched and added: " << chosenCard->GetName() << " to hand.\n";
+}
 
 void RegisterEffectFunctions() {
     std::cout << "📦 Registering core effect functions...\n";
@@ -227,6 +292,7 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("exile_self", ExileSelf);
 
     EffectRegistry::Instance().Register("summon", Summon);
+    EffectRegistry::Instance().Register("search_deck", SearchDeck);
 
     EffectRegistry::Instance().Register("get_time_counter", GetTimeCounter);
     EffectRegistry::Instance().Register("remove_time_counter", RemoveTimeCounter);

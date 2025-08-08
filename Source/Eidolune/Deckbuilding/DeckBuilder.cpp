@@ -104,7 +104,7 @@ void ShowAllCardsForUser(std::shared_ptr<User> user, UserData& data) {
     int i = 0;
     for (const auto& [cardId, card] : allCards) {
 
-        if (!card || card->AuxilaryType != AuxiliaryCardType::NONE) continue;
+        if (!card || card->AuxiliaryType != AuxiliaryCardType::NONE) continue;
 
         int ownedQty = data.GetOwnedCardCount(cardId);
         std::cout << cardId << ": " << card->Name << " [" << ownedQty << "x]";
@@ -250,7 +250,7 @@ void ShowCardsInDeck(const std::shared_ptr<Deck>& deck) {
     for (const auto& deckCard : deck->DeckCards) {
         if (!deckCard || !deckCard->CardRef) continue;
 
-        if (deckCard->CardRef->AuxilaryType != AuxiliaryCardType::NONE) continue;
+        if (deckCard->CardRef->AuxiliaryType != AuxiliaryCardType::NONE) continue;
 
         std::cout << index++ << ": (" << deckCard->CardRef->ID << ") " 
                   << deckCard->Quantity << "x " << deckCard->CardRef->Name << "\n";
@@ -317,7 +317,7 @@ void ChangeCards(std::shared_ptr<Deck> deck, UserData& currentUserData) {
                     std::cout << "Card ID not found.\n";
                     continue;
                 }
-                if (card->AuxilaryType != AuxiliaryCardType::NONE) {
+                if (card->AuxiliaryType != AuxiliaryCardType::NONE) {
                     std::cout << "❌ This card cannot be added to decks.\n";
                     continue;
                 }

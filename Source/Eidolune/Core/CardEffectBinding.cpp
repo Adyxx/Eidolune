@@ -7,13 +7,17 @@ CardEffectBinding::CardEffectBinding(std::shared_ptr<Card> card,
                                      std::shared_ptr<Trigger> trigger,
                                      std::shared_ptr<Effect> effect,
                                      std::shared_ptr<Condition> condition,
-                                     std::optional<int> value,
+                                     const std::string& rawValue,
+                                     DynamicValueType valueType,
+                                     std::optional<int> staticValue,
                                      std::optional<TargetSpec> targetSpec)
     : ParentCard(card),
       BoundTrigger(trigger),
       BoundEffect(effect),
       BoundCondition(condition),
-      Value(value),
+      RawValue(rawValue),
+      ValueType(valueType),
+      StaticValue(staticValue),
       Targeting(targetSpec) {}
 
 std::string CardEffectBinding::ToString() const {

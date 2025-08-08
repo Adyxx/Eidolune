@@ -87,7 +87,7 @@ void SpecialistClass::EquipConsumable(Character* character, std::shared_ptr<Card
         return;
     }
 
-    int defaultUses = (card->AuxilaryType == AuxiliaryCardType::CONSUMABLE) ? 1 : 0;
+    int defaultUses = (card->AuxiliaryType == AuxiliaryCardType::CONSUMABLE) ? 1 : 0;
     auto instance = std::make_shared<ConsumableInstance>(card, defaultUses);
     bag.slots[slotIndex].item = instance;
 
