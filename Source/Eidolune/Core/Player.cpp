@@ -134,3 +134,20 @@ void Player::RemoveAllAurasFromSource(int sourceId) {
         return GetCardAt(pos) != nullptr;
     }
     
+
+
+std::optional<Position> Player::GetRandomFreeBoardSlot() const {
+    std::vector<Position> freeSlots;
+
+    for (int r = 0; r < BoardHeight; ++r) {
+        for (int c = 0; c < BoardWidth; ++c) {
+            if (!GridBoard[r][c]) {
+                freeSlots.emplace_back(r, c);
+            }
+        }
+    }
+
+    if (freeSlots.empty()) return std::nullopt;
+
+    return freeSlots[rand() % freeSlots.size()];
+}

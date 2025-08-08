@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include "Types.h"
 #include "Position.h"
+#include <optional>
+
 class Card;
 class Deck;
 class GameCard;
@@ -97,5 +99,5 @@ public:
     std::vector<std::shared_ptr<GameCard>> GetAllBoardCards();
     bool RemoveCardFromBoard(GameCard* card);
     void RemoveAllAurasFromSource(int sourceId);
-
+    std::optional<Position> GetRandomFreeBoardSlot() const;
 };
