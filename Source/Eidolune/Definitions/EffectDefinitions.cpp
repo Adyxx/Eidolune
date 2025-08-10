@@ -215,7 +215,7 @@ void SearchDeck(void* source, Target target, std::optional<int> value) {
     auto* player = static_cast<Player*>(target.ptr);
     if (!player) return;
 
-    int fetchCount = value.value_or(1);
+    //int fetchCount = value.value_or(1);
 
     std::vector<std::shared_ptr<GameCard>> validCards;
 
@@ -342,6 +342,25 @@ void ReviveFromGraveyard(void* source, Target target, std::optional<int>) {
               << pos.row << "," << pos.col << ").\n";
 }
 
+//////////////////////////////////////////
+
+void ApplySilence(void* source, Target target, std::optional<int>) {
+    auto* card = static_cast<GameCard*>(target.ptr);
+    if (!card) return;
+    card->AddStatus(CardStatus::SILENCED);
+    std::cout << " " << card->GetName() << " is silenced.\n";
+}
+
+
+void ApplyHexproof(void* source, Target target, std::optional<int>) {
+    auto* card = static_cast<GameCard*>(target.ptr);
+    if (!card) return;
+    card->AddStatus(CardStatus::HEXPROOF);
+    std::cout << "🛡️ " << card->GetName() << " gains hexproof.\n";
+}
+
+//////////////////////////////////////////
+
 
 void RegisterEffectFunctions() {
     std::cout << "📦 Registering core effect functions...\n";
@@ -359,10 +378,13 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("remove_time_counter", RemoveTimeCounter);
     EffectRegistry::Instance().Register("choose_on_time_counter", ChooseBasedOnTimeCounter);
 
-    // not tested ....
+    // 
     EffectRegistry::Instance().Register("destroy_target", DestroyTarget);
     EffectRegistry::Instance().Register("return_to_hand", ReturnToHand);
     EffectRegistry::Instance().Register("revive_from_graveyard", ReviveFromGraveyard);
+
+    EffectRegistry::Instance().Register("apply_silence", ApplySilence);   // does not work
+    EffectRegistry::Instance().Register("apply_hexproof", ApplyHexproof); // kinda works... but negates aoe too... incorrect..
 
 
     std::cout << "✅ Core effect functions registered.\n";

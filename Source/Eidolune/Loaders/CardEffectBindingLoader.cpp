@@ -53,6 +53,16 @@ inline DynamicValueType StringToDynamicValueType(const std::string& str) {
     return DynamicValueType::UNKNOWN;
 }
 
+inline TargetingRule StringToTargetingRule(const std::string& str) {
+    if (str == "MANUAL") return TargetingRule::MANUAL;
+    if (str == "AOE") return TargetingRule::AOE;
+    if (str == "RANDOM") return TargetingRule::RANDOM;
+    if (str == "WEAKEST") return TargetingRule::WEAKEST;
+    if (str == "STRONGEST") return TargetingRule::STRONGEST;
+    return TargetingRule::NONE;
+}
+
+
 std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll() {
     std::cout << "🔄 Loading CardEffectBindings from API...\n";
 
@@ -123,11 +133,19 @@ std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll
                 conditionValue = b["condition_value"].get<int>();
             }
 
+
             // --- Optional Targeting ---
             std::optional<TargetSpec> targeting = std::nullopt;
             if (b.contains("targeting") && !b["targeting"].is_null()) {
                 std::string targetStr = b["targeting"].get<std::string>();
                 targeting = StringToTargetSpec(targetStr);
+            }
+
+            // --- Optional TargetingRule ---
+            TargetingRule targetingRule = TargetingRule::NONE;
+            if (b.contains("targeting_rule") && !b["targeting_rule"].is_null()) {
+                std::string ruleStr = b["targeting_rule"].get<std::string>();
+                targetingRule = StringToTargetingRule(ruleStr);
             }
 
             // --- Optional Zone ---
@@ -169,7 +187,8 @@ std::vector<std::shared_ptr<CardEffectBinding>> CardEffectBindingLoader::LoadAll
 
             binding->SetZone(zone);
             binding->SetScope(scope);
-
+            binding->SetTargetingRule(targetingRule);
+            
             if (conditionValue.has_value()) {
                 binding->SetConditionValue(conditionValue.value());
             }

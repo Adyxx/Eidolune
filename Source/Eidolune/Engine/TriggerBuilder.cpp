@@ -8,35 +8,10 @@
 #include "GameActions.h"
 #include "Target.h"
 #include "EffectContext.h"
-
+#include <random>
 
 
 namespace {
-    /*
-    void PrintAllCardsForPlayer(Player* player) {
-        auto printZone = [](const std::string& name, const std::vector<std::shared_ptr<GameCard>>& zone) {
-            std::cout << "📦 " << name << " [" << zone.size() << "]: ";
-            for (const auto& card : zone) {
-                std::cout << card->GetName() << " ";
-            }
-            std::cout << "\n";
-        };
-
-        if (!player) {
-            std::cout << "⚠️ Cannot print cards: player is null.\n";
-            return;
-        }
-
-        std::cout << "\n🔍 ZONE STATE FOR PLAYER " << player->PlayerIndex << ":\n";
-        printZone("Hand", player->Hand);
-        printZone("Board", player->Board);
-        printZone("Graveyard", player->Graveyard);
-        printZone("DrawPile", player->DrawPile);
-        printZone("Exile", player->ExileZone);
-        printZone("OathZone", player->OathZone);
-        std::cout << "--------------------------------\n";
-    }
-   */
     bool IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScope scope) {
         switch (scope) {
             case TriggerScope::GLOBAL:
@@ -64,8 +39,6 @@ namespace {
                 return false;
         }
     }
-
-
 }
 
 std::function<void(std::unordered_map<std::string, void*>)>
@@ -80,6 +53,15 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
 
         auto eventCardPtr = binding->GetEventGameCard();
         auto* eventCard = eventCardPtr ? eventCardPtr.get() : nullptr;
+
+        /////////////////////// SILENCE ///////////////////////
+        auto* sourceCard = static_cast<GameCard*>(eventCard);
+
+        if (sourceCard && sourceCard->HasStatus(CardStatus::SILENCED)) {
+            std::cout << "🚫 " << sourceCard->GetName() << " is silenced — skipping effect trigger.\n";
+            return;
+        }
+        /////////////////////// /////// ///////////////////////
 
         auto* triggerCard = ctx.count("source") ? static_cast<GameCard*>(ctx["source"]) : nullptr;
         auto* triggerOwner = ctx.count("owner") ? static_cast<Player*>(ctx["owner"]) : nullptr;
@@ -135,37 +117,6 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
             return;
         }
 
-        TargetSpec targetingSpec = binding->GetTargetSpec().value_or(TargetSpec::SELF);
-        bool targetRequired = effect->RequiresTarget;
-
-        std::vector<Target> possibleTargets;
-
-        if (triggerOwner) {
-            possibleTargets = GameActions::GetTargets(triggerOwner, triggerOwner->GetOpponent(), targetingSpec);
-        }
-
-        Target resolvedTarget = { Target::Type::NONE, nullptr };
-
-        if (possibleTargets.empty()) {
-            if (!targetRequired && triggerOwner) {
-                resolvedTarget = Target::FromPlayer(triggerOwner);
-            } else if (targetRequired) {
-                std::cout << "❌ Effect requires a target but none found.\n";
-                return;
-            }
-        } else if (possibleTargets.size() == 1) {
-            resolvedTarget = possibleTargets.front();
-        } else {
-            Target chosen = GameActions::ChooseTarget(triggerOwner, possibleTargets);
-            if (!chosen.ptr) {
-                std::cout << "❌ No target selected.\n";
-                return;
-            }
-            resolvedTarget = chosen;
-        }
-
-        /////////////////////////////////////
-
 
         std::optional<int> resolvedValue;
 
@@ -216,6 +167,86 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
 
         /////////////////////////////////////
 
+        TargetSpec targetingSpec = binding->GetTargetSpec().value_or(TargetSpec::SELF);
+        TargetingRule targetingRule = binding->targetingRule;
+        bool targetRequired = effect->RequiresTarget;
+
+        std::vector<Target> possibleTargets;
+
+        if (triggerOwner) {
+            possibleTargets = GameActions::GetTargets(triggerOwner, triggerOwner->GetOpponent(), targetingSpec);
+        }
+
+        if (targetingRule == TargetingRule::MANUAL) {
+            possibleTargets.erase(
+                std::remove_if(possibleTargets.begin(), possibleTargets.end(),
+                    [&](const Target& t) {
+                        auto* gc = static_cast<GameCard*>(t.ptr);
+                        return gc && !gc->CanBeTargetedBy(eventCard);
+                    }),
+                possibleTargets.end()
+            );
+        }
+
+        Target resolvedTarget = { Target::Type::NONE, nullptr };
+
+        // If no possible targets
+        if (possibleTargets.empty()) {
+            if (!targetRequired && triggerOwner) {
+                resolvedTarget = Target::FromPlayer(triggerOwner);
+            } else if (targetRequired) {
+                std::cout << "❌ Effect requires a target but none found.\n";
+                return;
+            }
+        }
+        // If AOE, apply effect to all targets immediately
+        else if (targetingRule == TargetingRule::AOE) {
+            for (auto& t : possibleTargets) {
+                effectFunc(eventCard, t, resolvedValue);
+            }
+            return;
+        }
+        // If RANDOM
+        else if (targetingRule == TargetingRule::RANDOM) {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dist(0, static_cast<int>(possibleTargets.size()) - 1);
+            resolvedTarget = possibleTargets[dist(gen)];
+        }
+        // If WEAKEST (lowest HP, tie-breaker: lowest attack)
+        else if (targetingRule == TargetingRule::WEAKEST) {
+            resolvedTarget = *std::min_element(possibleTargets.begin(), possibleTargets.end(),
+                [](const Target& a, const Target& b) {
+                    auto* ca = static_cast<GameCard*>(a.ptr);
+                    auto* cb = static_cast<GameCard*>(b.ptr);
+                    if (!ca || !cb) return false;
+                    if (ca->CurrentHealth() != cb->CurrentHealth())
+                        return ca->CurrentHealth() < cb->CurrentHealth();
+                    return ca->CurrentAttack() < cb->CurrentAttack();
+                });
+        }
+        // If STRONGEST (highest attack, tie-breaker: highest HP)
+        else if (targetingRule == TargetingRule::STRONGEST) {
+            resolvedTarget = *std::max_element(possibleTargets.begin(), possibleTargets.end(),
+                [](const Target& a, const Target& b) {
+                    auto* ca = static_cast<GameCard*>(a.ptr);
+                    auto* cb = static_cast<GameCard*>(b.ptr);
+                    if (!ca || !cb) return false;
+                    if (ca->CurrentAttack() != cb->CurrentAttack())
+                        return ca->CurrentAttack() > cb->CurrentAttack();
+                    return ca->CurrentHealth() > cb->CurrentHealth();
+                });
+        }
+        // Default MANUAL or fallback
+        else {
+            resolvedTarget = GameActions::ChooseTarget(triggerOwner, possibleTargets);
+            if (!resolvedTarget.ptr) {
+                std::cout << "❌ No target selected.\n";
+                return;
+            }
+        }
+
+        /////////////////////////////////////
 
         std::cout << "✨ Trigger fired: " << binding->GetTrigger()->ScriptReference << "\n";
         
@@ -226,4 +257,3 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
 
     };
 }
-

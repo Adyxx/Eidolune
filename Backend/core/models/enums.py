@@ -16,6 +16,15 @@ class CardType(models.TextChoices):
     RITUAL = "RITUAL"
     OTHER = "OTHER"
 
+class TargetingRule(models.TextChoices):
+    MANUAL = "MANUAL"
+    AOE = "AOE"
+    RANDOM = "RANDOM"
+    WEAKEST = "WEAKEST"
+    STRONGEST = "STRONGEST"
+    NONE = "NONE"
+
+
 class TargetSpec(models.TextChoices):
     ENEMY_BOARD = "ENEMY_BOARD"
     ENEMY_HERO = "ENEMY_HERO"

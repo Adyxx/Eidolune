@@ -36,3 +36,16 @@ std::shared_ptr<GameCard> CardEffectBinding::GetEventGameCard() {
     }
     throw std::runtime_error("EventGameCard not set");
 }
+
+
+CardZone CardEffectBinding::GetZoneAsCardZone() const {
+    switch (Zone) {
+        case ListeningZone::BOARD: return CardZone::BOARD;
+        case ListeningZone::HAND: return CardZone::HAND;
+        case ListeningZone::DECK: return CardZone::DECK;
+        case ListeningZone::GRAVEYARD: return CardZone::GRAVEYARD;
+        case ListeningZone::ANY: return CardZone::UNKNOWN;
+        case ListeningZone::OATHZONE: return CardZone::OATHZONE;
+        default: throw std::runtime_error("Unhandled ListeningZone in GetZoneAsCardZone()");
+    }
+}

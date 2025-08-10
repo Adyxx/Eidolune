@@ -14,6 +14,15 @@ enum class CardZone { DECK, HAND, BOARD, GRAVEYARD, CONSUMABLE_BAG, OATHZONE, EX
 enum class Gender { MALE, FEMALE, NONBINARY, UNKNOWN };
 enum class CharacterClassType { SPECIALIST, SPELLWEAVER, BLOODBOUND, SHADE, MACHINIST, SOULFORGED, GAMBLER, OATHBOUND, UNKNOWN };
 
+enum class TargetingRule {
+    MANUAL,     // Player chooses one from the set
+    AOE,        // All valid targets
+    RANDOM,     // Random one valid target
+    WEAKEST,    // Lowest HP
+    STRONGEST,  // Highest Attack or HP
+    NONE        // For effects that don’t actually target
+};
+
 enum class AuxiliaryCardType {
     NONE,
     REAGENT,
@@ -34,8 +43,17 @@ enum class TriggerScope {
     ANY,                // All cards can respond
 };
 
+
+enum class CardStatus {
+    NONE            = 0,
+    HEXPROOF        = 1 << 0,
+    SILENCED        = 1 << 1,
+    SHROUDED        = 1 << 2,
+    INVULNERABLE    = 1 << 3,
+    // add more as needed
+};
 // LATER....
-enum class CardState { NORMAL, DISABLED, EXHAUSTED, FROZEN, SILENCED, STEALTH, INVISIBLE, ATTACKING, DEFENDING };
+//enum class CardStatus { NONE, DISABLED, EXHAUSTED, FROZEN, SILENCED, STEALTH, INVISIBLE };
 
 enum class DynamicValueType {
     STATIC_NUMBER,

@@ -195,6 +195,7 @@ namespace GameActions {
         std::cout << "🔋 Energy left: " << player->Energy << "\n";
 
         //std::cout << "Emitting event <card_played> " << "\n";
+
         observer->Emit("card_played", { {"source", card.get()},{"owner", player} });
 
     }
@@ -331,9 +332,10 @@ namespace GameActions {
                     Player* owner = targetCard->Owner;
                     targetCard->Zone = CardZone::GRAVEYARD;
 
+                    owner->Observer->Emit("card_died", { {"source", targetCard},{"owner", owner} });
 
                     if (owner) {
-                        owner->Graveyard.push_back(std::shared_ptr<GameCard>(targetCard));  // already shared_ptr
+                        owner->Graveyard.push_back(std::shared_ptr<GameCard>(targetCard));
                         owner->RemoveCardFromBoard(targetCard);
                         owner->RemoveAllAurasFromSource(targetCard->Id);
                     }

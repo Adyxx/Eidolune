@@ -1,8 +1,10 @@
 #include "GameCard.h"
 #include "Player.h"
-#include <iostream>
+#include "TriggerObserver.h"
 
+#include <iostream>
 #include <atomic>
+
 static std::atomic<int> GlobalGameCardId = 0;
 
 GameCard::GameCard(std::shared_ptr<Card> model)
@@ -110,3 +112,5 @@ if (DamageTaken < 0) DamageTaken = 0;
     std::cout << "🔻 Removed aura from " << GetName()
               << " (-" << aura.AttackBuff << "/-" << aura.HealthBuff << ")\n";
 }
+
+

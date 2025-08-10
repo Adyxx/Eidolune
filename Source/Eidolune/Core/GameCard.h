@@ -16,6 +16,18 @@ struct AuraEffect {
     int HealthBuff;
 };
 
+
+inline CardStatus operator|(CardStatus a, CardStatus b) {
+    return static_cast<CardStatus>(static_cast<int>(a) | static_cast<int>(b));
+}
+inline CardStatus operator&(CardStatus a, CardStatus b) {
+    return static_cast<CardStatus>(static_cast<int>(a) & static_cast<int>(b));
+}
+inline CardStatus& operator|=(CardStatus& a, CardStatus b) {
+    a = a | b;
+    return a;
+}
+
 class GameCard : public std::enable_shared_from_this<GameCard> {
 public:
     int Id;
@@ -27,7 +39,7 @@ public:
     int DamageTaken = 0;
     int TimeCounter = 0;
 
-    std::unordered_map<int, AuraEffect> ActiveAuras; // SourceCardID → Effect
+    std::unordered_map<int, AuraEffect> ActiveAuras;
 
     GameCard(std::shared_ptr<Card> model);
 
@@ -48,4 +60,40 @@ public:
     virtual ~GameCard() = default;
 
     std::string ToString() const;
+
+
+    ////////////////////
+    CardStatus StatusFlags = CardStatus::NONE;
+
+    bool HasStatus(CardStatus s) const {
+        return (StatusFlags & s) != CardStatus::NONE;
+    }
+
+    void AddStatus(CardStatus s) {
+        StatusFlags |= s;
+    }
+
+    void RemoveStatus(CardStatus s) {
+        StatusFlags = static_cast<CardStatus>(
+            static_cast<int>(StatusFlags) & ~static_cast<int>(s)
+        );
+    }
+
+    bool CanBeTargetedBy(const GameCard* source) const {
+        // Manual targeting protection
+        if (HasStatus(CardStatus::HEXPROOF) && source && source->Owner != this->Owner) {
+            return false;
+        }
+        return true;
+    }
+
+    bool CanBeAffectedBy(const GameCard* source) const {
+        // Used for immunities, invulnerability, etc.
+        if (HasStatus(CardStatus::INVULNERABLE)) {
+            return false;
+        }
+        return true;
+    }
+
+    ////////////////////
 };
