@@ -34,7 +34,14 @@ class Card(models.Model):
         choices=AuxiliaryCardType.choices,
         default=AuxiliaryCardType.NONE
     )
-    
+    '''
+    keywords = models.ManyToManyField(
+        "KeywordEffectTemplate",
+        blank=True,
+        related_name="cards_using_keyword",
+        help_text="Selecting a keyword will copy its bindings into this card's bindings on save."
+    )
+    '''
     def clean(self):
         if self.auxiliarytype != AuxiliaryCardType.TEMPLATE:
             if self.cost is None:

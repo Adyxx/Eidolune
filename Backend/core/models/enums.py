@@ -113,7 +113,6 @@ class DynamicValueType(str, Enum):
 
     @classmethod
     def choices(cls):
-        # For Django dropdown — include numeric values inline
         numeric_choices = [(str(i), str(i)) for i in range(0, 21)]
         enum_choices = [(v.value, v.name.replace("_", " ").title()) for v in cls if v != cls.STATIC_NUMBER]
         return numeric_choices + enum_choices

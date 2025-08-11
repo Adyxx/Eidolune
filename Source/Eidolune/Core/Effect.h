@@ -5,7 +5,6 @@
 #include <functional>
 
 #include "Types.h"
-//#include "Target.h"
 
 struct Target;
 class Card;

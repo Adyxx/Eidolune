@@ -1,13 +1,17 @@
-    #include "DeckValidator.h"
-    #include "../Registry/DeckRestrictionRegistry.h"
-    #include "../Core/CardEffectBinding.h"
-    #include "../Core/DeckCard.h"
-    #include "../Core/Card.h"
-    #include "../Core/Character.h"
+#include "DeckValidator.h"
+#include <unordered_map>
+#include <unordered_set>
+#include <iostream>
 
-    #include <unordered_map>
-    #include <unordered_set>
-    #include <iostream>
+#include "DeckRestrictionRegistry.h"
+#include "CardEffectBinding.h"
+#include "DeckCard.h"
+#include "Card.h"
+#include "Character.h"
+#include "Deck.h"
+#include "Trigger.h"
+#include "Effect.h"
+
 
     DeckValidationResult DeckValidator::Validate(std::shared_ptr<Deck> deck) {
         DeckValidationResult result;

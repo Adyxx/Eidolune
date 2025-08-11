@@ -40,6 +40,7 @@
 #include "../Loaders/DeckCardLoader.h"
 #include "../Loaders/UserDataLoader.h"
 #include "../Loaders/BannerLoader.h"
+#include "../Loaders/KeywordEffectTemplateLoader.h"
 
 #include <iostream>
 
@@ -82,6 +83,7 @@ namespace EidoluneInit {
         //DeckLoader::LoadAll();
         //DeckCardLoader::LoadAll();
         BannerLoader::LoadAll();
+        KeywordEffectTemplateLoader::LoadAll();
     }
 
     UserData LoadForUser(std::shared_ptr<User> user) {

@@ -14,6 +14,10 @@ from .models.users import User
 from .services.deck_service import get_deck_issues
 from .models.banner import Banner, BannerItem, BannerItemForm
 from .models.enums import AuxiliaryCardType
+from .models.keywordeffecttemplate import KeywordEffectTemplate
+from .forms import CardEffectBindingForm
+from django.http import JsonResponse
+from django.urls import path
 
 
 ### INLINE ADMIN CLASSES ###
@@ -22,24 +26,22 @@ class CardEffectBindingInline(admin.TabularInline):
     model = CardEffectBinding
     extra = 1
     fk_name = 'card'
+    #form = CardEffectBindingForm
+
+    class Media:
+        js = (
+            'admin/js/vendor/jquery/jquery.min.js',
+            'js/fill_keyword.js',
+        )
 
 class DeckCardInline(admin.TabularInline):
     model = DeckCard
     extra = 1
 
-
-### DECK ADMIN ###
-
-@admin.register(Deck)
-class DeckAdmin(admin.ModelAdmin):
-    inlines = [DeckCardInline]
-
-    def save_model(self, request, obj, form, change):
-        issues = get_deck_issues(obj)
-        if issues:
-            messages.warning(request, "Deck has issues:\n" + "\n".join(issues))
-        super().save_model(request, obj, form, change)
-
+@admin.register(KeywordEffectTemplate)
+class KeywordEffectTemplateAdmin(admin.ModelAdmin):
+    list_display = ("name", "trigger", "effect", "zone", "scope")
+    search_fields = ("name",)
 
 ### CARD ADMIN ###
 
@@ -50,6 +52,30 @@ class CardAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     inlines = [CardEffectBindingInline]
     filter_horizontal = ("subtypes",)
+    #filter_horizontal = ("subtypes", "keywords")
+    '''
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+
+        card = form.instance
+        for keyword in card.keywords.all():
+            if not CardEffectBinding.objects.filter(card=card, trigger=keyword.trigger, effect=keyword.effect).exists():
+                CardEffectBinding.objects.create(
+                    card=card,
+                    trigger=keyword.trigger,
+                    effect=keyword.effect,
+                    value=keyword.value,
+                    targeting=keyword.targeting,
+                    targeting_rule=keyword.targeting_rule,
+                    condition=keyword.condition,
+                    condition_value=keyword.condition_value,
+                    zone=keyword.zone,
+                    scope=keyword.scope,
+                    linked_card=keyword.linked_card
+                )
+    
+    '''
 
     def get_search_results(self, request, queryset, search_term):
         if request.GET.get('_banner_autocomplete'):

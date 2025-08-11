@@ -64,7 +64,7 @@ void SpecialistClass::UseClassAbility(Character* character, Player* player, std:
     }
 
     std::cout << "🧪 Using consumable: " << gameCard->GetName() << "\n";
-    GameActions::PlayCardDirect(gameCard, observer);
+    //GameActions::PlayCardDirect(gameCard, observer);
 
     if (--slot->item->UsesRemaining <= 0) {
         slot->item = nullptr;

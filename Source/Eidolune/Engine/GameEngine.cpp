@@ -1,27 +1,17 @@
 #include <iostream>
 #include <random>
 #include "GameEngine.h"
-
 #include "Init.h"
 #include "GameActions.h"
-//#include "TriggerObserver.h"
 #include "ConditionEvaluator.h"
-//#include "Trigger.h"
 #include "TriggerBuilder.h"
-//#include "Condition.h"
 #include "DeckValidator.h"
-
-#include "EffectDefinitions.h"
-//#include "../Core/Player.h"
-//#include "../Core/GameCard.h"   
+#include "EffectDefinitions.h" 
 #include "DeckCard.h"
 #include "CardEffectBinding.h"
-
 #include "UserRegistry.h"
 #include "DeckRegistry.h"
-
 #include "UserDataLoader.h"
-
 #include "CardUtils.h"
 #include "DeckBuilder.h"
 #include "CharacterCustomization.h"
@@ -126,7 +116,6 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
     p2->Observer = observer;
 
     for (auto& player : game.Players) {
-        // Build a fresh per-player DrawPile from the deck model (do NOT mutate the deck model)
         player->DrawPile.clear();
 
         for (auto& deckCard : player->DeckRef->DeckCards) {
@@ -135,16 +124,12 @@ void SetupGameState(GameState& game, std::shared_ptr<Player> p1, std::shared_ptr
                 card->Owner = player.get();
                 card->Zone = CardZone::DECK;
                 CardUtils::SubscribeCardTriggers(card, observer);
-
-                // Push directly into this player's draw pile — do NOT store it back into deckCard->GameCardCopies
                 player->DrawPile.push_back(card);
             }
         }
 
-        // Shuffle player's draw pile (each player gets their own shuffled pile)
         std::shuffle(player->DrawPile.begin(), player->DrawPile.end(), std::mt19937{ std::random_device{}() });
 
-        // Initial draw (3 cards in your code)
         for (int i = 0; i < 3; ++i) {
             DrawCard(nullptr, Target::FromPlayer(player.get()), 1);
         }
@@ -219,8 +204,7 @@ void GameEngine::Run() {
         std::cout << "1: Browse / Edit Decks\n";
         std::cout << "2: Character Customization\n";
         std::cout << "3: Gacha / Card Unlock\n";
-        std::cout << "4: Save / Load\n";
-        std::cout << "5: Exit\n";
+        std::cout << "4: Exit\n";
         std::cout << ">> Choose option: ";
 
         int choice;
@@ -232,8 +216,7 @@ void GameEngine::Run() {
             case 1: RunDeckEditor(); break;
             case 2: RunCharacterCustomization(); break;
             case 3: RunGacha(); break;
-            case 4: RunSaveLoad(); break;
-            case 5: std::cout << "👋 Goodbye!\n"; return;
+            case 4: std::cout << "👋 Goodbye!\n"; return;
             default: std::cout << "❓ Invalid option\n";
         }
     }
@@ -253,11 +236,6 @@ void GameEngine::RunCharacterCustomization() {
 void GameEngine::RunGacha() {
     std::cout << "\n🎁 Gacha System\n";
     Gacha::Run(currentUser, currentUserData);
-}
-
-void GameEngine::RunSaveLoad() {
-    std::cout << "\n💾 Save/Load Menu (WIP)\n";
-    // TODO: serialization, cloud sync, load/save slot
 }
 
 

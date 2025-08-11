@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from core.models import Card, Deck, Character, DeckCard, User, Effect, Condition, Trigger, CardEffectBinding, Subtype, Banner, BannerItem
+from core.models import Card, Deck, Character, DeckCard, User, Effect, Condition, Trigger, CardEffectBinding, Subtype, Banner, BannerItem, KeywordEffectTemplate
 
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,3 +86,9 @@ class BannerSerializer(serializers.ModelSerializer):
             'start_time', 'end_time', 'hard_pity', 'soft_pity_start',
             'featured_legendary', 'featured_legendary_id', 'items'
         ]
+
+
+class KeywordEffectTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KeywordEffectTemplate
+        fields = '__all__'

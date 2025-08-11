@@ -3,6 +3,9 @@ from rest_framework import viewsets
 from core.models import Card, Deck, Character, DeckCard, Effect, Condition, Trigger, CardEffectBinding, Subtype
 from .serializers import CardSerializer, DeckSerializer, CharacterSerializer, SubtypeSerializer, UserSerializer, DeckCardSerializer, TriggerSerializer, EffectSerializer, ConditionSerializer, CardEffectBindingSerializer
 from core.models import User
+from core.models import KeywordEffectTemplate
+from .serializers import KeywordEffectTemplateSerializer
+
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -90,3 +93,8 @@ class BannerViewSet(viewsets.ModelViewSet):
 class BannerItemViewSet(viewsets.ModelViewSet):
     queryset = BannerItem.objects.all()
     serializer_class = BannerItemSerializer
+
+
+class KeywordEffectTemplateViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = KeywordEffectTemplate.objects.all()
+    serializer_class = KeywordEffectTemplateSerializer

@@ -61,8 +61,6 @@ public:
 
     std::string ToString() const;
 
-
-    ////////////////////
     CardStatus StatusFlags = CardStatus::NONE;
 
     bool HasStatus(CardStatus s) const {
@@ -80,7 +78,6 @@ public:
     }
 
     bool CanBeTargetedBy(const GameCard* source) const {
-        // Manual targeting protection
         if (HasStatus(CardStatus::HEXPROOF) && source && source->Owner != this->Owner) {
             return false;
         }
@@ -88,12 +85,12 @@ public:
     }
 
     bool CanBeAffectedBy(const GameCard* source) const {
-        // Used for immunities, invulnerability, etc.
         if (HasStatus(CardStatus::INVULNERABLE)) {
             return false;
         }
         return true;
     }
 
-    ////////////////////
+    std::unordered_map<int, int> ActiveKeywordSubscriptions;
+    
 };

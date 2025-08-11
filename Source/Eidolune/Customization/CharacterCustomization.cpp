@@ -56,7 +56,7 @@ void CharacterCustomization::EquipSpecialistConsumable(std::shared_ptr<Character
         std::vector<std::shared_ptr<Card>> valid;
         const auto& allCards = CardRegistry::Instance().GetAll();
         for (const auto& [_, card] : allCards) {
-            if (card && card->IsConsumable()) {
+            if (card && (card->AuxiliaryType == AuxiliaryCardType::CONSUMABLE || card->AuxiliaryType == AuxiliaryCardType::REAGENT)) {
                 valid.push_back(card);
             }
         }
