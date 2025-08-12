@@ -1,7 +1,9 @@
 
 
 #include "CardEffectBinding.h"
+#include "Trigger.h"
 #include "Effect.h"
+#include "GameCard.h"
 
 CardEffectBinding::CardEffectBinding(std::shared_ptr<Card> card,
                                      std::shared_ptr<Trigger> trigger,
@@ -29,14 +31,12 @@ std::string CardEffectBinding::ToString() const {
     }
 }
 
-
 std::shared_ptr<GameCard> CardEffectBinding::GetEventGameCard() {
     if (auto ptr = EventGameCard.lock()) {
         return ptr;
     }
     throw std::runtime_error("EventGameCard not set");
 }
-
 
 CardZone CardEffectBinding::GetZoneAsCardZone() const {
     switch (Zone) {
@@ -49,3 +49,27 @@ CardZone CardEffectBinding::GetZoneAsCardZone() const {
         default: throw std::runtime_error("Unhandled ListeningZone in GetZoneAsCardZone()");
     }
 }
+
+    std::shared_ptr<Card> CardEffectBinding::GetLinkedCard() const { return LinkedCard; }
+    std::optional<int> CardEffectBinding::GetConditionValue() const { return ConditionValue; }
+    std::shared_ptr<Trigger> CardEffectBinding::GetTrigger() const { return BoundTrigger; }
+    std::shared_ptr<Card> CardEffectBinding::GetEventCard() const { return ParentCard; }
+    std::shared_ptr<Effect> CardEffectBinding::GetEffect() const { return BoundEffect; }
+    std::optional<int> CardEffectBinding::GetValue() const { return StaticValue; }
+    std::string CardEffectBinding::GetRawValue() const { return RawValue; }
+    DynamicValueType CardEffectBinding::GetValueType() const { return ValueType; }
+    std::optional<TargetSpec> CardEffectBinding::GetTargetSpec() const { return Targeting; }
+    std::shared_ptr<Condition> CardEffectBinding::GetCondition() const { return BoundCondition; }
+    std::shared_ptr<Card> CardEffectBinding::GetCard() const { return ParentCard; }
+    TriggerScope CardEffectBinding::GetScope() const { return Scope; }
+    ListeningZone CardEffectBinding::GetZone() const { return Zone; } 
+    TargetingRule CardEffectBinding::GetTargetingRule() const {return targetingRule; }
+
+    void CardEffectBinding::SetZone(ListeningZone z) { Zone = z; }
+    void CardEffectBinding::SetScope(TriggerScope s) { Scope = s; }
+    void CardEffectBinding::SetTargetingRule(TargetingRule tr) { targetingRule = tr; }
+    void CardEffectBinding::SetCondition(std::shared_ptr<Condition> condition) { BoundCondition = condition; }
+    void CardEffectBinding::SetConditionValue(int value) { ConditionValue = value; }
+    void CardEffectBinding::SetLinkedCard(std::shared_ptr<Card> linked) { LinkedCard = linked; }
+
+    bool CardEffectBinding::HasZone() const { return Zone != ListeningZone::ANY; }

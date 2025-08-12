@@ -8,10 +8,6 @@ Card::Card() {
 
 }
 
-void Card::Validate() const {
-
-}
-
 std::string Card::ToString() const {
     return Name;
 }

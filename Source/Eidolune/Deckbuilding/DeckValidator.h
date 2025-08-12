@@ -2,7 +2,8 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "../Core/Deck.h"
+
+class Deck;
 
 struct DeckValidationResult {
     bool IsPlayable = true;

@@ -4,14 +4,13 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include "GameCard.h"
 #include "Types.h"
 
 class Card;
 class Condition;
-
-#include "Trigger.h"
-#include "Effect.h"
+class Trigger;
+class Effect;
+class GameCard;
 
 class CardEffectBinding {
 public:
@@ -32,28 +31,31 @@ public:
     std::shared_ptr<Card> LinkedCard;
 
 
-    std::shared_ptr<Card> GetLinkedCard() const { return LinkedCard; }
-    std::optional<int> GetConditionValue() const { return ConditionValue; }
-    std::shared_ptr<Trigger> GetTrigger() const { return BoundTrigger; }
-    std::shared_ptr<Card> GetEventCard() const { return ParentCard; }
-    std::shared_ptr<Effect> GetEffect() const { return BoundEffect; }
-    std::optional<int> GetValue() const { return StaticValue; }
-    DynamicValueType GetValueType() const { return ValueType; }
-    std::optional<TargetSpec> GetTargetSpec() const { return Targeting; }
-    std::shared_ptr<Condition> GetCondition() const { return BoundCondition; }
-    std::shared_ptr<Card> GetCard() const { return ParentCard; }
-    TriggerScope GetScope() const { return Scope; }
-    ListeningZone GetZone() const { return Zone; } 
+    std::shared_ptr<Card> GetLinkedCard() const;
+    std::optional<int> GetConditionValue() const;
+    std::shared_ptr<Trigger> GetTrigger() const;
+    std::shared_ptr<Card> GetEventCard() const;
+    std::shared_ptr<Effect> GetEffect() const;
+    std::optional<int> GetValue() const;
+    DynamicValueType GetValueType() const;
+    std::optional<TargetSpec> GetTargetSpec() const;
+    std::shared_ptr<Condition> GetCondition() const;
+    TargetingRule GetTargetingRule() const;
+    std::shared_ptr<Card> GetCard() const;
+    TriggerScope GetScope() const;
+    ListeningZone GetZone() const;
     CardZone GetZoneAsCardZone() const;
+    std::string GetRawValue() const;
+    
+    
+    void SetZone(ListeningZone z);
+    void SetScope(TriggerScope s);
+    void SetTargetingRule(TargetingRule tr);
+    void SetCondition(std::shared_ptr<Condition> condition);
+    void SetConditionValue(int value);
+    void SetLinkedCard(std::shared_ptr<Card> linked);
 
-    void SetZone(ListeningZone z) { Zone = z; }
-    void SetScope(TriggerScope s) { Scope = s; }
-    void SetTargetingRule(TargetingRule tr) { targetingRule = tr; }
-    void SetCondition(std::shared_ptr<Condition> condition) { BoundCondition = condition; }
-    void SetConditionValue(int value) { ConditionValue = value; }
-    void SetLinkedCard(std::shared_ptr<Card> linked) { LinkedCard = linked; }
-
-    bool HasZone() const { return Zone != ListeningZone::ANY; }
+    bool HasZone() const;
 
     CardEffectBinding(std::shared_ptr<Card> card,
                     std::shared_ptr<Trigger> trigger,

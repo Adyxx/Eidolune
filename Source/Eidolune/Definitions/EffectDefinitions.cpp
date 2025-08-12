@@ -11,6 +11,10 @@
 #include "Card.h"
 #include "Subtype.h"
 #include "EffectHelpers.h"
+#include "KeywordEffectTemplate.h"
+#include "KeywordTemplateRegistry.h"
+#include "CardUtils.h"
+
 
 void DrawCard(void* source, Target target, std::optional<int> value) {
     if (target.type != Target::Type::PLAYER) {
@@ -52,11 +56,7 @@ void DrawCard(void* source, Target target, std::optional<int> value) {
     }
 }
 
-void ApplyHaste(void* source, Target  target, std::optional<int> value) {
-    auto* card = static_cast<GameCard*>(source);
-    card->SummoningSickness = false;
-    std::cout << "[Haste] triggered.\n";
-}
+
 
 void OverrideDeckLimit(void* source, Target  target, std::optional<int> value) {
     // this is on-deck-build effect and is implemented elsewhere.
@@ -67,25 +67,6 @@ void DealDamage(void* source, Target target, std::optional<int> value) {
     std::cout << "[Effect] DealDamage for " << damage << "\n";
 
     GameActions::ResolveDamage(source, target, damage, "effect");
-}
-
-void ExileSelf(void* source, Target, std::optional<int>) {
-    auto* card = static_cast<GameCard*>(source);
-    if (!card || !card->Owner) return;
-
-    auto& player = card->Owner;
-
-    bool moved = EffectHelpers::MoveCardToZone(card, player, player->Hand, player->ExileZone, "Hand", "Exile")
-              || EffectHelpers::MoveCardToZone(card, player, player->Board, player->ExileZone, "Board", "Exile")
-              || EffectHelpers::MoveCardToZone(card, player, player->Graveyard, player->ExileZone, "Graveyard", "Exile")
-              || EffectHelpers::MoveCardToZone(card, player, player->DrawPile, player->ExileZone, "DrawPile", "Exile")
-              || EffectHelpers::MoveCardToZone(card, player, player->OathZone, player->ExileZone, "OathZone", "Exile");
-
-    if (!moved) {
-        std::cout << "⚠️ Could not find card in any zone.\n";
-    }
-
-    card->Zone = CardZone::EXILE;
 }
 
 void Aura_OverallStatBoost(void* source, Target, std::optional<int> value) {
@@ -209,6 +190,7 @@ void ChooseBasedOnTimeCounter(void* source, Target target, std::optional<int>) {
 
 
 void SearchDeck(void* source, Target target, std::optional<int> value) {
+
     auto binding = GetEffectCallContext().CurrentBinding;
     if (!binding) return;
 
@@ -270,6 +252,25 @@ void SearchDeck(void* source, Target target, std::optional<int> value) {
     chosenCard->Zone = CardZone::HAND;
 
     std::cout << "🔍 Searched and added: " << chosenCard->GetName() << " to hand.\n";
+}
+
+void ExileSelf(void* source, Target, std::optional<int>) {
+    auto* card = static_cast<GameCard*>(source);
+    if (!card || !card->Owner) return;
+
+    auto& player = card->Owner;
+
+    bool moved = EffectHelpers::MoveCardToZone(card, player, player->Hand, player->ExileZone, "Hand", "Exile")
+              || EffectHelpers::MoveCardToZone(card, player, player->Board, player->ExileZone, "Board", "Exile")
+              || EffectHelpers::MoveCardToZone(card, player, player->Graveyard, player->ExileZone, "Graveyard", "Exile")
+              || EffectHelpers::MoveCardToZone(card, player, player->DrawPile, player->ExileZone, "DrawPile", "Exile")
+              || EffectHelpers::MoveCardToZone(card, player, player->OathZone, player->ExileZone, "OathZone", "Exile");
+
+    if (!moved) {
+        std::cout << "⚠️ Could not find card in any zone.\n";
+    }
+
+    card->Zone = CardZone::EXILE;
 }
 
 void DestroyTarget(void* source, Target target, std::optional<int>) {
@@ -343,6 +344,11 @@ void ReviveFromGraveyard(void* source, Target target, std::optional<int>) {
 }
 
 //////////////////////////////////////////
+void ApplyHaste(void* source, Target  target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    card->SummoningSickness = false;
+    std::cout << "[Haste] triggered.\n";
+}
 
 void ApplySilence(void* source, Target target, std::optional<int>) {
     auto* card = static_cast<GameCard*>(target.ptr);
@@ -359,13 +365,54 @@ void ApplyHexproof(void* source, Target target, std::optional<int>) {
     std::cout << "🛡️ " << card->GetName() << " gains hexproof.\n";
 }
 
-//////////////////////////////////////////
 
+void GrantKeyword(void* source, Target target, std::optional<int> value) {
+    if (!value.has_value()) return;
+
+    int keywordId = value.value();
+    auto keywordTemplate = KeywordEffectTemplateRegistry::Instance().Get(keywordId);
+    if (!keywordTemplate) {
+        std::cerr << "❌ GrantKeyword: Unknown keyword template ID " << keywordId << "\n";
+        return;
+    }
+
+    auto* targetCard = static_cast<GameCard*>(target.ptr);
+    if (!targetCard || !targetCard->Owner || !targetCard->Owner->Observer) return;
+
+    auto runtimeBinding = std::make_shared<CardEffectBinding>(
+        nullptr,
+        keywordTemplate->TriggerPtr,
+        keywordTemplate->EffectPtr,
+        keywordTemplate->ConditionPtr,
+        keywordTemplate->RawValue,
+        keywordTemplate->ValueType,
+        keywordTemplate->StaticValue,
+        keywordTemplate->Targeting
+    );
+
+    runtimeBinding->SetZone(keywordTemplate->Zone);
+    runtimeBinding->SetScope(keywordTemplate->Scope);
+    runtimeBinding->SetTargetingRule(keywordTemplate->TargetingRuleValue);
+
+    if (keywordTemplate->ConditionValue.has_value()) {
+        runtimeBinding->SetConditionValue(keywordTemplate->ConditionValue.value());
+    }
+
+    //targetCard->Model->EffectBindings.push_back(runtimeBinding);
+    targetCard->RuntimeEffectBindings.push_back(runtimeBinding);
+
+    CardUtils::SubscribeCardTriggers(targetCard->shared_from_this(), targetCard->Owner->Observer);
+
+    std::cout << "✅ Granted keyword [" << keywordTemplate->Name << "] to " << targetCard->GetName() << "\n";
+}
+
+
+//////////////////////////////////////////
 
 void RegisterEffectFunctions() {
     std::cout << "📦 Registering core effect functions...\n";
     EffectRegistry::Instance().Register("draw_card", DrawCard);
-    EffectRegistry::Instance().Register("apply_haste", ApplyHaste);
+    
     EffectRegistry::Instance().Register("override_deck_limit", OverrideDeckLimit);
     EffectRegistry::Instance().Register("deal_damage", DealDamage);
     EffectRegistry::Instance().Register("Aura_OverallStatBoost", Aura_OverallStatBoost);
@@ -378,14 +425,17 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("remove_time_counter", RemoveTimeCounter);
     EffectRegistry::Instance().Register("choose_on_time_counter", ChooseBasedOnTimeCounter);
 
-    // 
     EffectRegistry::Instance().Register("destroy_target", DestroyTarget);
     EffectRegistry::Instance().Register("return_to_hand", ReturnToHand);
     EffectRegistry::Instance().Register("revive_from_graveyard", ReviveFromGraveyard);
 
-    EffectRegistry::Instance().Register("apply_silence", ApplySilence);   // does not work
-    EffectRegistry::Instance().Register("apply_hexproof", ApplyHexproof); // kinda works... but negates aoe too... incorrect..
+    /////////////////////////////////////
+    EffectRegistry::Instance().Register("apply_silence", ApplySilence);
+    EffectRegistry::Instance().Register("apply_hexproof", ApplyHexproof);
+    EffectRegistry::Instance().Register("apply_haste", ApplyHaste);
+    /////////////////////////////////////
 
+    EffectRegistry::Instance().Register("grant_keyword", GrantKeyword);
 
     std::cout << "✅ Core effect functions registered.\n";
 }

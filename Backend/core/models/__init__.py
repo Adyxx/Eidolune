@@ -11,3 +11,5 @@ from .faction import *
 from .subtype import *
 from .users import *
 from .banner import *
+from .keywordeffecttemplate import *
+

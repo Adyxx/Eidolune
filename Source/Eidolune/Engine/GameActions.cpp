@@ -5,6 +5,7 @@
 #include "Character.h"
 #include "Deck.h"
 #include "Position.h"
+#include "CharacterClass.h"
 
 namespace GameActions {
 
@@ -40,12 +41,12 @@ namespace GameActions {
 
 
     void ShowPlayerState(Player* player) {
-    std::cout << "\n🧝 Player: " << player->GetName()
-              << " | ❤️ Health: " << player->Health
-              << " | 🔋 Energy: " << player->Energy << "\n";
+        std::cout << "\n🧝 Player: " << player->GetName()
+                << " | ❤️ Health: " << player->Health
+                << " | 🔋 Energy: " << player->Energy << "\n";
 
-    ShowHand(player);
-    ShowBoard(player);
+        ShowHand(player);
+        ShowBoard(player);
     }
 
     std::vector<Target> GetTargets(Player* player, Player* opponent, TargetSpec spec) {
@@ -198,49 +199,6 @@ namespace GameActions {
 
         observer->Emit("card_played", { {"source", card.get()},{"owner", player} });
 
-    }
-
-    void PlayCardDirect(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-        Player* player = card->Owner;
-
-        if (!player) {
-            std::cerr << "❌ Cannot play card — no owner assigned.\n";
-            return;
-        }
-
-        if (player->Energy < card->GetCost()) {
-            std::cout << "🚫 Not enough energy to play " << card->GetName() << "\n";
-            return;
-        }
-
-        if (card->Model->Type == CardType::SPELL) {
-            std::cout << "✨ " << player->GetName() << " casts " << card->GetName() << "\n";
-            card->Zone = CardZone::GRAVEYARD;
-            player->Graveyard.push_back(card);
-        } else {
-            card->Zone = CardZone::BOARD;
-            bool placed = false;
-            for (int row = 0; row < Player::BoardHeight && !placed; ++row) {
-                for (int col = 0; col < Player::BoardWidth; ++col) {
-                    if (!player->GridBoard[row][col]) {
-                        player->GridBoard[row][col] = card;
-                        placed = true;
-                        break;
-                    }
-                }
-            }
-            if (!placed) {
-                std::cout << "🚫 No empty slot on board!\n";
-                return;
-            }
-
-            std::cout << "▶️ " << player->GetName() << " plays " << card->GetName() << " to the board\n";
-        }
-
-        player->Energy -= card->GetCost();
-        std::cout << "🔋 Energy left: " << player->Energy << "\n";
-
-        observer->Emit("card_played", { {"source", card.get()}, {"owner", player} });
     }
 
     void Attack(Player* attacker, Player* defender) {

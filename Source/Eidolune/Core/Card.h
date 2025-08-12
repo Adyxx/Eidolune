@@ -37,20 +37,7 @@ public:
     AuxiliaryCardType AuxiliaryType = AuxiliaryCardType::NONE;
 
     Card();
-    void Validate() const;
     std::string ToString() const;
     bool HasSubtype(const std::string& targetSubtype) const;
-    
-    inline bool IsConsumable() const {
-        return AuxiliaryType == AuxiliaryCardType::CONSUMABLE || AuxiliaryType == AuxiliaryCardType::REAGENT;
-    }
-
-    bool IsPullable() const {
-        if (AuxiliaryType != AuxiliaryCardType::NONE) return false;
-        if (CardRarity == Rarity::COMMON && Name == "Basic potion") return false;
-        // Add any other disqualifying logic
-        return true;
-    }
-
 
 };
