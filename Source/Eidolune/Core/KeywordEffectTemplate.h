@@ -15,12 +15,13 @@ public:
     std::shared_ptr<Trigger> TriggerPtr;
     std::shared_ptr<Effect> EffectPtr;
 
+    
     std::string RawValue;           // raw string value ("PIERCE", "3", etc)
     DynamicValueType ValueType;
 
     std::shared_ptr<Condition> ConditionPtr;
     std::optional<int> ConditionValue;
-    
+    std::optional<int> StaticValue;
     TargetSpec Targeting;
     TargetingRule TargetingRuleValue;
 
@@ -42,22 +43,36 @@ public:
         TargetingRule targetingRule_,
         ListeningZone zone_,
         TriggerScope scope_,
-        std::shared_ptr<Card> linkedCard_
+        std::shared_ptr<Card> linkedCard_,
+        std::optional<int> staticValue_ = std::nullopt
     )
         : Id(id),
-        Name(std::move(name)),
-        TriggerPtr(std::move(trigger_)),
-        EffectPtr(std::move(effect_)),
-        RawValue(std::move(rawValue_)),
-        ValueType(valueType_),
-        ConditionPtr(std::move(condition_)),
-        ConditionValue(conditionValue_),
-        Targeting(targeting_),
-        TargetingRuleValue(targetingRule_),
-        Zone(zone_),
-        Scope(scope_),
-        LinkedCard(std::move(linkedCard_))
+          Name(std::move(name)),
+          TriggerPtr(std::move(trigger_)),
+          EffectPtr(std::move(effect_)),
+          RawValue(std::move(rawValue_)),
+          ValueType(valueType_),
+          ConditionPtr(std::move(condition_)),
+          ConditionValue(conditionValue_),
+          StaticValue(staticValue_),
+          Targeting(targeting_),
+          TargetingRuleValue(targetingRule_),
+          Zone(zone_),
+          Scope(scope_),
+          LinkedCard(std::move(linkedCard_))
     {}
 
 
+    std::shared_ptr<Card> GetLinkedCard() const;
+    std::optional<int> GetConditionValue() const;
+    std::shared_ptr<Trigger> GetTrigger() const;
+    std::shared_ptr<Effect> GetEffect() const;
+    std::optional<int> GetValue() const;
+    DynamicValueType GetValueType() const;
+    std::optional<TargetSpec> GetTargetSpec() const;
+    std::shared_ptr<Condition> GetCondition() const;
+    TriggerScope GetScope() const;
+    ListeningZone GetZone() const;
+    CardZone GetZoneAsCardZone() const;
+    std::string GetRawValue() const;
 };

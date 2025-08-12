@@ -63,6 +63,7 @@ CardZone CardEffectBinding::GetZoneAsCardZone() const {
     std::shared_ptr<Card> CardEffectBinding::GetCard() const { return ParentCard; }
     TriggerScope CardEffectBinding::GetScope() const { return Scope; }
     ListeningZone CardEffectBinding::GetZone() const { return Zone; } 
+    TargetingRule CardEffectBinding::GetTargetingRule() const {return targetingRule; }
 
     void CardEffectBinding::SetZone(ListeningZone z) { Zone = z; }
     void CardEffectBinding::SetScope(TriggerScope s) { Scope = s; }

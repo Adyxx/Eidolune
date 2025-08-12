@@ -10,6 +10,7 @@
 #include "Types.h"
 
 class Player;
+class CardEffectBinding;
 
 struct AuraEffect {
     int AttackBuff;
@@ -91,6 +92,7 @@ public:
         return true;
     }
 
-    std::unordered_map<int, int> ActiveKeywordSubscriptions;
+    std::vector<std::shared_ptr<CardEffectBinding>> RuntimeEffectBindings;
+
     
 };

@@ -40,6 +40,7 @@ public:
     DynamicValueType GetValueType() const;
     std::optional<TargetSpec> GetTargetSpec() const;
     std::shared_ptr<Condition> GetCondition() const;
+    TargetingRule GetTargetingRule() const;
     std::shared_ptr<Card> GetCard() const;
     TriggerScope GetScope() const;
     ListeningZone GetZone() const;

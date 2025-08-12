@@ -13,6 +13,8 @@
 #include "EffectHelpers.h"
 #include "KeywordEffectTemplate.h"
 #include "KeywordTemplateRegistry.h"
+#include "CardUtils.h"
+
 
 void DrawCard(void* source, Target target, std::optional<int> value) {
     if (target.type != Target::Type::PLAYER) {
@@ -188,6 +190,7 @@ void ChooseBasedOnTimeCounter(void* source, Target target, std::optional<int>) {
 
 
 void SearchDeck(void* source, Target target, std::optional<int> value) {
+
     auto binding = GetEffectCallContext().CurrentBinding;
     if (!binding) return;
 
@@ -362,7 +365,6 @@ void ApplyHexproof(void* source, Target target, std::optional<int>) {
     std::cout << "🛡️ " << card->GetName() << " gains hexproof.\n";
 }
 
-//////////////////////////////////////////
 
 void GrantKeyword(void* source, Target target, std::optional<int> value) {
     if (!value.has_value()) return;
@@ -377,52 +379,31 @@ void GrantKeyword(void* source, Target target, std::optional<int> value) {
     auto* targetCard = static_cast<GameCard*>(target.ptr);
     if (!targetCard || !targetCard->Owner || !targetCard->Owner->Observer) return;
 
-    auto observer = targetCard->Owner->Observer;
-
-    // Store subscription ID so we can remove later
-    int subId = observer->Subscribe(
-        keywordTemplate->TriggerPtr->Event,
-        [effect = keywordTemplate->EffectPtr, targetCard](const std::unordered_map<std::string, void*>& data) {
-            auto exec = effect->GetExecutable();
-            if (exec) {
-                exec((void*)targetCard, Target::FromCard(targetCard), std::nullopt);
-            } else {
-                std::cerr << "❌ Effect executable missing for " << effect->ScriptReference << "\n";
-            }
-        },
-        targetCard
+    auto runtimeBinding = std::make_shared<CardEffectBinding>(
+        nullptr,
+        keywordTemplate->TriggerPtr,
+        keywordTemplate->EffectPtr,
+        keywordTemplate->ConditionPtr,
+        keywordTemplate->RawValue,
+        keywordTemplate->ValueType,
+        keywordTemplate->StaticValue,
+        keywordTemplate->Targeting
     );
 
+    runtimeBinding->SetZone(keywordTemplate->Zone);
+    runtimeBinding->SetScope(keywordTemplate->Scope);
+    runtimeBinding->SetTargetingRule(keywordTemplate->TargetingRuleValue);
 
-    // Save it so RemoveKeyword can access later
-    targetCard->ActiveKeywordSubscriptions[keywordId] = subId;
-
-    std::cout << "✅ Granted keyword [" << keywordTemplate->Name
-              << "] to " << targetCard->GetName() << "\n";
-}
-
-
-void RemoveKeyword(void* source, Target target, std::optional<int> value) {
-    if (!value.has_value()) return;
-
-    int keywordId = value.value();
-    auto keywordTemplate = KeywordEffectTemplateRegistry::Instance().Get(keywordId);
-    if (!keywordTemplate) {
-        std::cerr << "❌ RemoveKeyword: Unknown keyword template ID " << keywordId << "\n";
-        return;
+    if (keywordTemplate->ConditionValue.has_value()) {
+        runtimeBinding->SetConditionValue(keywordTemplate->ConditionValue.value());
     }
 
-    auto* targetCard = static_cast<GameCard*>(target.ptr);
-    if (!targetCard || !targetCard->Owner || !targetCard->Owner->Observer) return;
+    //targetCard->Model->EffectBindings.push_back(runtimeBinding);
+    targetCard->RuntimeEffectBindings.push_back(runtimeBinding);
 
-    auto it = targetCard->ActiveKeywordSubscriptions.find(keywordId);
-    if (it != targetCard->ActiveKeywordSubscriptions.end()) {
-        targetCard->Owner->Observer->UnsubscribeById(it->second);
-        targetCard->ActiveKeywordSubscriptions.erase(it);
+    CardUtils::SubscribeCardTriggers(targetCard->shared_from_this(), targetCard->Owner->Observer);
 
-        std::cout << "❎ Removed keyword [" << keywordTemplate->Name
-                  << "] from " << targetCard->GetName() << "\n";
-    }
+    std::cout << "✅ Granted keyword [" << keywordTemplate->Name << "] to " << targetCard->GetName() << "\n";
 }
 
 
@@ -453,14 +434,8 @@ void RegisterEffectFunctions() {
     EffectRegistry::Instance().Register("apply_hexproof", ApplyHexproof);
     EffectRegistry::Instance().Register("apply_haste", ApplyHaste);
     /////////////////////////////////////
-    EffectRegistry::Instance().Register("grant_keyword", GrantKeyword);
-    EffectRegistry::Instance().Register("remove_keyword", RemoveKeyword);
 
+    EffectRegistry::Instance().Register("grant_keyword", GrantKeyword);
 
     std::cout << "✅ Core effect functions registered.\n";
 }
-
-
-///basics works, but 
-
-// deal_damage..wrong value..used default1 .... ... draw_card ..invalid player

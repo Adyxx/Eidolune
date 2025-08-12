@@ -3,10 +3,8 @@
 #include "Player.h"
 
 namespace CardUtils {
-
+/*
 void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-    
-
     if (card->Model->EffectBindings.empty()) {
         return;
     }
@@ -58,6 +56,74 @@ void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<Trigg
         observer->Subscribe(eventName, effectToRegister);
     }
 
+}
+*/
+
+void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
+    // Nothing to do if there are no static or runtime bindings
+    if (card->Model->EffectBindings.empty() && card->RuntimeEffectBindings.empty()) {
+        return;
+    }
+
+    // Helper lambda to subscribe a list of bindings
+    auto subscribeBindings = [&](const std::vector<std::shared_ptr<CardEffectBinding>>& bindings) {
+        for (const auto& originalBinding : bindings) {
+
+            if (!originalBinding) {
+                std::cout << "❌ Skipping null binding.\n";
+                continue;
+            }
+
+            // Copy so we don't mutate the original
+            auto binding = std::make_shared<CardEffectBinding>(*originalBinding);
+            if (!binding) {
+                std::cout << "❌ Failed to copy original binding.\n";
+                continue;
+            }
+
+            auto triggerPtr = binding->GetTrigger();
+            if (!triggerPtr) {
+                std::cout << "⚠️ Skipping binding: no trigger found.\n";
+                continue;
+            }
+
+            std::string triggerCode = triggerPtr->ScriptReference;
+            auto* triggerMeta = TriggerRegistry::Instance().GetInfo(triggerCode);
+            if (!triggerMeta) {
+                std::cout << "❌ No trigger metadata found for code: " << triggerCode << "\n";
+                continue;
+            }
+
+            std::string eventName = triggerMeta->Event;
+
+            // Store reference to the actual GameCard instance
+            binding->EventGameCard = card;
+
+            // Build effect executor
+            auto builder = TriggerBuilder::Build(binding);
+
+            // Optional condition check
+            std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
+            if (auto conditionPtr = binding->GetCondition()) {
+                std::string conditionCode = conditionPtr->ToString();
+                effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
+                    if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetConditionValue().value_or(0))) {
+                        builder(ctx);
+                    }
+                };
+            } else {
+                effectToRegister = builder;
+            }
+
+            observer->Subscribe(eventName, effectToRegister);
+        }
+    };
+
+    // Subscribe static model bindings
+    subscribeBindings(card->Model->EffectBindings);
+
+    // Subscribe runtime (temporary) bindings
+    subscribeBindings(card->RuntimeEffectBindings);
 }
 
 
