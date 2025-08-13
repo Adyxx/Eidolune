@@ -23,7 +23,7 @@
 // Definitions
 #include "../Definitions/ConditionDefinitions.h"
 #include "../Definitions/DeckRestrictionDefinitions.h"
-#include "../Definitions/EffectDefinitions.h"
+//#include "../Definitions/Effects/EffectDefinitions.h"
 #include "../Definitions/TriggerDefinitions.h"
 
 
@@ -44,16 +44,31 @@
 
 #include <iostream>
 
+#include "../Definitions/Effects/EffectCardGeneration.h"
+#include "../Definitions/Effects/EffectCardMovement.h"
+#include "../Definitions/Effects/EffectDeck.h"
+#include "../Definitions/Effects/EffectKeywords.h"
+#include "../Definitions/Effects/EffectStatAndStatus.h"
+
 namespace EidoluneInit {
 
     void RegisterAll() {
         std::cout << "🔧 Registering all logic systems...\n";
 
         RegisterConditionFunctions();
-        RegisterEffectFunctions();
+        //RegisterEffectFunctions();
+        
+        RegisterEffectFunctions_Deck();
+        RegisterEffectFunctions_Keywords();
+        RegisterEffectFunctions_CardMovement();
+        RegisterEffectFunctions_CardGeneration();
+        RegisterEffectFunctions_StatAndStatus();
+        //RegisterEffectFunctions_Player();
+            
+        
         RegisterDeckRestrictions();
 
-        RegisterGenericAbilities();
+        //RegisterGenericAbilities();
         RegisterPartnerAbilities();
         RegisterSoloBonus();
 

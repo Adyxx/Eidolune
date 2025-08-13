@@ -25,5 +25,6 @@ void OathboundClass::OnTurnStart(Player* player) {
 
         auto options = CardUtils::SelectRandomOptions(available, 2);
         player->PromptAuxCardChoice(AuxiliaryCardType::OATH, options);
+
     }
 }

@@ -3,61 +3,6 @@
 #include "Player.h"
 
 namespace CardUtils {
-/*
-void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
-    if (card->Model->EffectBindings.empty()) {
-        return;
-    }
-
-    for (const auto& originalBinding : card->Model->EffectBindings) {
-
-        auto binding = std::make_shared<CardEffectBinding>(*originalBinding);
-
-        if (!binding) {
-            std::cout << "❌ Failed to copy original binding.\n";
-            continue;
-        }
-
-        auto triggerPtr = binding->GetTrigger();
-        if (!triggerPtr) {
-            std::cout << "⚠️ Skipping binding: no trigger found.\n";
-            continue;
-        }
-
-        std::string triggerCode = triggerPtr->ScriptReference;
-
-        auto* triggerMeta = TriggerRegistry::Instance().GetInfo(triggerCode);
-        if (!triggerMeta) {
-            std::cout << "❌ No trigger metadata found for code: " << triggerCode << "\n";
-            continue;
-        }
-
-        std::string eventName = triggerMeta->Event;
-
-        binding->EventGameCard = card;
-
-        std::function<void(const std::unordered_map<std::string, void*>)> effectToRegister;
-        auto builder = TriggerBuilder::Build(binding);
-
-        auto conditionPtr = binding->GetCondition();
-        if (conditionPtr) {
-            std::string conditionCode = conditionPtr->ToString();
-
-            effectToRegister = [=](const std::unordered_map<std::string, void*>& ctx) {
-                if (ConditionEvaluator::Evaluate(conditionCode, card, binding->GetConditionValue().value_or(0))) {
-
-                    builder(ctx);
-                } 
-            };
-        } else {
-            effectToRegister = builder;
-        }
-        //std::cout << card->ToString() << "  " << eventName << "\n";
-        observer->Subscribe(eventName, effectToRegister);
-    }
-
-}
-*/
 
 void SubscribeCardTriggers(std::shared_ptr<GameCard> card, std::shared_ptr<TriggerObserver> observer) {
     // Nothing to do if there are no static or runtime bindings

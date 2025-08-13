@@ -6,7 +6,9 @@
 #include "ConditionEvaluator.h"
 #include "TriggerBuilder.h"
 #include "DeckValidator.h"
-#include "EffectDefinitions.h" 
+//#include "../Definitions/Effects/EffectDefinitions.h"
+#include "../Definitions/Effects/EffectDeck.h"
+
 #include "DeckCard.h"
 #include "CardEffectBinding.h"
 #include "UserRegistry.h"

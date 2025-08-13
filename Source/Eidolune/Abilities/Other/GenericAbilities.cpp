@@ -1,8 +1,8 @@
-
+/*
 #include "GenericAbilities.h"
 #include "../Registry/CharacterAbilityRegistry.h"
 #include "Target.h"
-#include "EffectDefinitions.h"
+#include "../Definitions/Effects/EffectDefinitions.h"
 #include "Character.h"
 #include "Deck.h"
 
@@ -33,6 +33,6 @@ void RegisterGenericAbilities() {
     });
 }
 
-
+*/
 
 // Whenever you play a card of a *new* type this turn, gain +1 energy (max once per type per turn).

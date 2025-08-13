@@ -100,4 +100,6 @@ public:
     bool RemoveCardFromBoard(GameCard* card);
     void RemoveAllAurasFromSource(int sourceId);
     std::optional<Position> GetRandomFreeBoardSlot() const;
+
+    std::vector<std::shared_ptr<GameCard>> ActiveEvents;
 };

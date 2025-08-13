@@ -22,10 +22,4 @@ bool MoveCardToZone(GameCard* rawCard, Player* player,
     return false;
 }
 
-
-int PromptChoice(Player* player, const std::vector<std::string>& options) {
-    if (options.size() == 1) return 0;
-    return player->PromptChooseOption(options);
-}
-
 } 
