@@ -90,7 +90,6 @@ void ReviveFromGraveyard(void* source, Target target, std::optional<int>) {
     player->GridBoard[pos.row][pos.col] = chosenCard;
     chosenCard->Zone = CardZone::BOARD;
 
-    // Remove from graveyard
     player->Graveyard.erase(player->Graveyard.begin() + choiceIndex);
 
     std::cout << "❤️‍🩹 Revived '" << chosenCard->GetName() << "' at ("

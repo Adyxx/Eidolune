@@ -50,6 +50,7 @@ enum class CardStatus {
     SILENCED        = 1 << 1,
     SHROUDED        = 1 << 2,
     INVULNERABLE    = 1 << 3,
+    MERGED          = 1 << 4
     // add more as needed
 };
 // LATER....

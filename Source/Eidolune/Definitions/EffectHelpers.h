@@ -15,7 +15,4 @@ bool MoveCardToZone(GameCard* card,
                     const std::string& fromName,
                     const std::string& toName);
 
-
-int PromptChoice(Player* player, const std::vector<std::string>& options);
-
 }

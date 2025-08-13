@@ -70,6 +70,8 @@ void Player::AddChosenAuxCard(std::shared_ptr<Card> card) {
 
     if (card->AuxiliaryType == AuxiliaryCardType::OATH) {
         auto gameCard = CardUtils::RegisterCardMidGame(card, this, CardZone::OATHZONE, GetTriggerObserver());
+    } else if (card->AuxiliaryType == AuxiliaryCardType::FRAGMENT) {
+        auto gameCard = CardUtils::RegisterCardMidGame(card, this, CardZone::HAND, GetTriggerObserver());
     }
 }
 
