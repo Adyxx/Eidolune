@@ -1,6 +1,8 @@
 #include "Player.h"
 #include <iostream>
-#include "EffectDefinitions.h"
+//#include "../Definitions/Effects/EffectDefinitions.h"
+#include "../Definitions/Effects/EffectDeck.h"
+
 #include "Target.h"
 #include "CardUtils.h"
 #include "Card.h"
@@ -68,20 +70,17 @@ void Player::AddChosenAuxCard(std::shared_ptr<Card> card) {
 
     if (card->AuxiliaryType == AuxiliaryCardType::OATH) {
         auto gameCard = CardUtils::RegisterCardMidGame(card, this, CardZone::OATHZONE, GetTriggerObserver());
-        //OathZone.push_back(gameCard);
-        //std::cout << "🛡️ Oath card '" << card->Name << "' added to OathZone.\n";
     }
 }
 
 int Player::PromptChooseOption(const std::vector<std::string>& options) {
-    // std::cout << "Player " << player->UserName << ", choose one:\n";
     std::cout << "--PICK FROM OPTIONS--" << "\n";
     for (size_t i = 0; i < options.size(); ++i) {
         std::cout << "  [" << i << "] " << options[i] << "\n";
     }
 
     int choice = -1;
-    std::cin >> choice; // Replace with proper UI/input method
+    std::cin >> choice;
     return choice;
 }
 
