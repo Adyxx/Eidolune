@@ -82,6 +82,14 @@ namespace GameActions {
                 targets.push_back(Target::FromPlayer(player));
                 break;
 
+            case TargetSpec::SELF_EQUIPPED_UNIT:
+                /*
+                if (card->AttachedTo) {
+                    return TargetResult{ card->AttachedTo.lock(), nullptr };
+                }
+                */
+                break;
+            
             case TargetSpec::ANY:
                 addBoardCards(player);
                 addBoardCards(opponent);
@@ -153,52 +161,122 @@ namespace GameActions {
         }
 
         auto card = player->Hand[index];
+        int cost = card->GetCost();
 
-        if (player->Energy < card->GetCost()) {
+        if (player->Energy < cost) {
             std::cout << "🚫 Not enough energy to play " << card->GetName() << "\n";
             return;
         }
 
+        // Remove from hand and set ownership
         player->Hand.erase(player->Hand.begin() + index);
         card->Owner = player;
 
-        if (card->Model->Type == CardType::SPELL) {
-            std::cout << "✨ " << player->GetName() << " casts " << card->GetName() << "\n";
-            card->Zone = CardZone::GRAVEYARD;
-            player->Graveyard.push_back(card);
-        } else {
-            std::cout << "Enter position to place unit (1–14): ";
-            int posID;
-            std::cin >> posID;
-            std::cin.ignore();
-
-            if (posID < 1 || posID > 14) {
-                std::cout << "🚫 Invalid position.\n";
-                return;
+        switch (card->Model->Type) {
+            case CardType::SPELL: {
+                std::cout << "✨ " << player->GetName() << " casts " << card->GetName() << "\n";
+                card->Zone = CardZone::GRAVEYARD;
+                player->Graveyard.push_back(card);
+                break;
             }
 
-            auto pos = FromID(posID);
-            auto& slot = player->GridBoard[pos.row][pos.col];
+            case CardType::UNIT: {
+                std::cout << "Enter position to place unit (1–14): ";
+                int posID;
+                std::cin >> posID;
+                std::cin.ignore();
 
-            if (slot) {
-                std::cout << "🚫 That tile is already occupied.\n";
-                return;
+                if (posID < 1 || posID > 14) {
+                    std::cout << "🚫 Invalid position.\n";
+                    return;
+                }
+
+                auto pos = FromID(posID);
+                auto& slot = player->GridBoard[pos.row][pos.col];
+                if (slot) {
+                    std::cout << "🚫 That tile is already occupied.\n";
+                    return;
+                }
+
+                card->Zone = CardZone::BOARD;
+                slot = card;
+                std::cout << "▶️ " << player->GetName() << " plays " << card->GetName()
+                        << " to position " << posID << "\n";
+                break;
             }
 
-            card->Zone = CardZone::BOARD;
-            slot = card;
-            std::cout << "▶️ " << player->GetName() << " plays " << card->GetName()
-                    << " to position " << posID << "\n";
+            case CardType::ASSET: {
+                std::cout << "Enter position of unit to attach asset (1–14): ";
+                int posID;
+                std::cin >> posID;
+                std::cin.ignore();
 
+                if (posID < 1 || posID > 14) {
+                    std::cout << "🚫 Invalid position.\n";
+                    return;
+                }
+
+                auto pos = FromID(posID);
+                auto& targetSlot = player->GridBoard[pos.row][pos.col];
+                if (!targetSlot || targetSlot->Model->Type != CardType::UNIT) {
+                    std::cout << "🚫 No valid unit in that position to attach asset.\n";
+                    return;
+                }
+
+                targetSlot->Attachments.push_back(card);
+                card->AttachedTo = targetSlot;
+                card->Zone = CardZone::BOARD; // or CardZone::ATTACHED if you track separately
+
+                std::cout << "🔗 " << player->GetName() << " attaches " << card->GetName()
+                        << " to " << targetSlot->GetName() << "\n";
+                break;
+            }
+
+            case CardType::RITE: {
+                // Rites occupy the board but do not attack
+                std::cout << "Enter position to place rite (1–14): ";
+                int posID;
+                std::cin >> posID;
+                std::cin.ignore();
+
+                if (posID < 1 || posID > 14) {
+                    std::cout << "🚫 Invalid position.\n";
+                    return;
+                }
+
+                auto pos = FromID(posID);
+                auto& slot = player->GridBoard[pos.row][pos.col];
+                if (slot) {
+                    std::cout << "🚫 That tile is already occupied.\n";
+                    return;
+                }
+
+                card->Zone = CardZone::BOARD;
+                slot = card;
+                std::cout << "📜 " << player->GetName() << " plays rite " << card->GetName()
+                        << " to position " << posID << "\n";
+                break;
+            }
+
+            case CardType::EVENT: {
+                // Events don't go to board — register effects and track duration
+                std::cout << "📢 " << player->GetName() << " plays event " << card->GetName() << "\n";
+                card->Zone = CardZone::GRAVEYARD; // or EVENT_ZONE if you track them
+                player->ActiveEvents.push_back(card); // custom container
+                break;
+            }
+
+            default:
+                std::cout << "🚫 Unknown card type.\n";
+                return;
         }
 
-        player->Energy -= card->GetCost();
+        // Deduct energy
+        player->Energy -= cost;
         std::cout << "🔋 Energy left: " << player->Energy << "\n";
 
-        //std::cout << "Emitting event <card_played> " << "\n";
-
-        observer->Emit("card_played", { {"source", card.get()},{"owner", player} });
-
+        // Emit card_played trigger
+        observer->Emit("card_played", { {"source", card.get()}, {"owner", player} });
     }
 
     void Attack(Player* attacker, Player* defender) {
@@ -207,7 +285,7 @@ namespace GameActions {
         for (int row = 0; row < Player::BoardHeight; ++row)
             for (int col = 0; col < Player::BoardWidth; ++col) {
                 auto& card = attacker->GridBoard[row][col];
-                if (card && !card->SummoningSickness && !card->Tapped && card->GetPower().value_or(0) > 0)
+                if (card && !card->SummoningSickness && !card->Tapped && card->GetPower().value_or(0) > 0 && card->Model->Type == CardType::UNIT)
                     validAttackers.push_back(card);
             }
 

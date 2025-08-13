@@ -41,6 +41,7 @@ public:
     int TimeCounter = 0;
 
     std::unordered_map<int, AuraEffect> ActiveAuras;
+    std::unordered_map<int, int> ActiveCostModifiers;
 
     GameCard(std::shared_ptr<Card> model);
 
@@ -94,5 +95,38 @@ public:
 
     std::vector<std::shared_ptr<CardEffectBinding>> RuntimeEffectBindings;
 
-    
+    void ApplyCostModifier(int sourceId, int delta) {
+        ActiveCostModifiers[sourceId] = delta;
+    }
+
+    void RemoveCostModifier(int sourceId) {
+        ActiveCostModifiers.erase(sourceId);
+    }
+
+    int CurrentCost() const {
+        int baseCost = Model->Cost; 
+        int modSum = 0;
+        for (auto& [_, delta] : ActiveCostModifiers) {
+            modSum += delta;
+        }
+        return std::max(0, baseCost + modSum);
+    }
+
+
+    std::weak_ptr<GameCard> AttachedTo; // If this card is attached to another
+    std::vector<std::shared_ptr<GameCard>> Attachments; // If this card has assets attached
+
+    // Optional helper to check if card is attached
+    bool IsAttached() const {
+        return !AttachedTo.expired();
+    }
+
+    // Optional helper to detach cleanly
+    void Detach() {
+        if (auto host = AttachedTo.lock()) {
+            auto& vec = host->Attachments;
+            vec.erase(std::remove(vec.begin(), vec.end(), shared_from_this()), vec.end());
+        }
+        AttachedTo.reset();
+    }    
 };

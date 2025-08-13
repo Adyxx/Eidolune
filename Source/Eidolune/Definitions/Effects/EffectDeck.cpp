@@ -11,6 +11,7 @@
 #include "EffectRegistry.h"
 
 void DrawCard(void* source, Target target, std::optional<int> value) {
+    std::cout << "Hello from DrawCard func\n";
     auto* player = static_cast<Player*>(target.ptr);
 
     if (!player) {

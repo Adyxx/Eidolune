@@ -116,41 +116,53 @@ void SpellweaverClass::TryMergeFragments(Player* player) {
         return;
     }
 
-    // 4) Copy bindings from donors
+    // Track cost sum
+    int totalBaseCost = base->Model->Cost;
+    totalBaseCost += donors.front()->Model->Cost; // only one donor for this merge
+
+    // 4) Copy bindings from the first donor
+    auto donor = donors.front();
+    std::cout << "  + Donor fragment: " << donor->GetName()
+              << " (" << donor->Model->EffectBindings.size() << " bindings)\n";
+
     size_t added = 0;
-    for (auto& donor : donors) {
-        std::cout << "  + Donor fragment: " << donor->GetName()
-                  << " (" << donor->Model->EffectBindings.size() << " bindings)\n";
+    for (auto& binding : donor->Model->EffectBindings) {
+        if (!binding || !binding->BoundEffect) continue;
 
-        for (auto& binding : donor->Model->EffectBindings) {
-            if (!binding || !binding->BoundEffect) continue;
-
-            if (binding->BoundEffect->Name == "MergeFragments") {
-                std::cout << "    - Skipping MergeFragments effect from donor.\n";
-                continue;
-            }
-
-            auto runtimeCopy = std::make_shared<CardEffectBinding>(*binding);
-            runtimeCopy->ParentCard = base->Model;
-
-            base->RuntimeEffectBindings.push_back(runtimeCopy);
-            SubscribeOneBinding(base, runtimeCopy, player->Observer);
-            ++added;
-
-            std::cout << "    - Added runtime effect: " << binding->ToString() << "\n";
+        if (binding->BoundEffect->Name == "MergeFragments") {
+            std::cout << "    - Skipping MergeFragments effect from donor.\n";
+            continue;
         }
+
+        auto runtimeCopy = std::make_shared<CardEffectBinding>(*binding);
+        runtimeCopy->ParentCard = base->Model;
+
+        base->RuntimeEffectBindings.push_back(runtimeCopy);
+        SubscribeOneBinding(base, runtimeCopy, player->Observer);
+        ++added;
+
+        std::cout << "    - Added runtime effect: " << binding->ToString() << "\n";
     }
 
-    // 5) Exile donors
-    for (auto& donor : donors) {
-        std::cout << "  ⟶ Exiling donor: " << donor->GetName() << "\n";
-        EffectHelpers::MoveCardToZone(donor.get(), player, player->Hand, player->ExileZone, "Hand", "Exile");
+    // 5) Exile the donor
+    std::cout << "  ⟶ Exiling donor: " << donor->GetName() << "\n";
+    EffectHelpers::MoveCardToZone(donor.get(), player, player->Hand, player->ExileZone, "Hand", "Exile");
+
+    // 6) Apply cost adjustment
+    int delta = totalBaseCost - base->Model->Cost;
+    if (delta != 0) {
+        // use a stable ID for this merge adjustment so it can be replaced/removed if needed
+        constexpr int MERGE_COST_MODIFIER_ID = 9999; 
+        base->ApplyCostModifier(MERGE_COST_MODIFIER_ID, delta);
+        std::cout << "[Spellweaver] Adjusted cost by " << delta 
+                  << ". New cost: " << base->CurrentCost() << "\n";
     }
 
-    // 6) Mark base as merged
+    // 7) Mark base as merged
     std::cout << "[Spellweaver] Merge complete. Base '" << base->GetName()
               << "' gained " << added << " runtime binding(s). Now has "
               << base->RuntimeEffectBindings.size() << " runtime binding(s).\n";
 
     base->AddStatus(CardStatus::MERGED);
 }
+

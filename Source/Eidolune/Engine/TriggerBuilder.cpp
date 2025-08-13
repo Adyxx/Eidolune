@@ -13,6 +13,10 @@
 
 
 bool TriggerBuilder::IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerCard, TriggerScope scope) {
+    std::cout << "hello from IsTriggerScopeMatch\n";
+    std::cout << eventCard->ToString() << "   -    "  << triggerCard->ToString() << "\n";
+    std::cout << "TriggerScope: " << static_cast<int>(scope) << "\n";
+
         switch (scope) {
             case TriggerScope::GLOBAL:
                 return true;
@@ -32,6 +36,16 @@ bool TriggerBuilder::IsTriggerScopeMatch(GameCard* eventCard, GameCard* triggerC
                     eventCard->Owner != triggerCard->Owner;
             case TriggerScope::ANY_OTHER:
                 return triggerCard && eventCard && eventCard != triggerCard;
+            case TriggerScope::EQUIPPED_UNIT: {
+                std::cout << "\n\n hello from case TriggerScope::EQUIPPED_UNIT \n\n ";
+                if (!triggerCard || !eventCard) return false;
+                std::cout << "aaaa\n";
+                auto attached = eventCard->AttachedTo.lock();
+                
+                // return true if either card is attached to the other
+                return (attached && attached.get() == triggerCard) || 
+                    (triggerCard->AttachedTo.lock().get() == eventCard);
+            }
             case TriggerScope::ANY:
                 return true;
             default:
@@ -180,9 +194,17 @@ TriggerBuilder::Build(std::shared_ptr<CardEffectBinding> binding) {
         auto* triggerCard = ctx.count("source") ? static_cast<GameCard*>(ctx["source"]) : nullptr;
         auto* triggerOwner = ctx.count("owner") ? static_cast<Player*>(ctx["owner"]) : nullptr;
 
+        if (eventCard->AttachedTo.lock())
+            std::cout << "Attached to: " << eventCard->AttachedTo.lock()->ToString() << "\n";
+        else
+            std::cout << "Not attached to anything\n";
+
+        
         if (!IsTriggerScopeMatch(eventCard, triggerCard, binding->GetScope())) return;
 
+        std::cout << "SCOPE OKKKKK\n";
         if (binding->HasZone() && eventCard->Zone != binding->GetZoneAsCardZone()) return;
+        std::cout << "ZONE OKKKKK\n";
 
         auto effect = binding->GetEffect();
         if (!effect || !effect->GetExecutable()) return;
