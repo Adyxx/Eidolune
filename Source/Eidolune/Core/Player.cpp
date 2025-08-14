@@ -6,9 +6,19 @@
 #include "Target.h"
 #include "CardUtils.h"
 #include "Card.h"
+#include "Deck.h"
+#include "Character.h"
 
 Player::Player(std::shared_ptr<Deck> deck, int index)
-    : DeckRef(deck), PlayerIndex(index) {}
+    : DeckRef(deck), PlayerIndex(index) {
+
+        HasClassBloodbound = (DeckRef->MainCharacter->Class == CharacterClassType::BLOODBOUND);
+        
+        if (HasClassBloodbound) {
+            BloodboundData = std::make_unique<BloodboundState>();
+        }
+        
+    }
 
 std::string Player::GetName() const {
     return "Player " + std::to_string(PlayerIndex + 1);

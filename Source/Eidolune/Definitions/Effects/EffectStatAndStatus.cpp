@@ -125,6 +125,70 @@ void ChooseBasedOnTimeCounter(void* source, Target target, std::optional<int>) {
     });
 }
 
+
+
+
+void ModifyAttack(void* source, Target target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    if (!card || !value) return;
+
+    int delta = value.value();
+    // Use a special source ID for direct stat changes if needed
+    int sourceId = 0; 
+    card->ApplyAura(sourceId, delta, 0);
+
+    std::cout << "🗡️ " << card->GetName() << " attack modified by "
+              << delta << " → " << card->CurrentAttack() << "\n";
+}
+
+void ModifyMaxHealth(void* source, Target target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    if (!card || !value) return;
+
+    int delta = value.value();
+    int sourceId = 0;
+    card->ApplyAura(sourceId, 0, delta);
+
+    // Clamp DamageTaken if max health decreased
+    if (delta < 0 && card->CurrentHealth() < card->DamageTaken) {
+        card->DamageTaken = card->CurrentHealth() - 1;
+    }
+
+    std::cout << "❤️ " << card->GetName() << " max health modified by "
+              << delta << " → " << card->MaxHealth() << "\n";
+}
+
+void ModifyCost(void* source, Target target, std::optional<int> value) {
+    auto* card = static_cast<GameCard*>(source);
+    if (!card || !value) return;
+
+    int delta = value.value();
+    int sourceId = 0;
+    card->ApplyCostModifier(sourceId, delta);
+
+    std::cout << "💰 " << card->GetName() << " cost modified by "
+              << delta << " → " << card->CurrentCost() << "\n";
+}
+
+void HealHero(void* source, Target target, std::optional<int> value) {
+    if (target.type != Target::Type::PLAYER || !value) return;
+
+    auto* player = static_cast<Player*>(target.ptr);
+    int amount = value.value();
+
+    player->Health = std::min(player->MaxHealth, player->Health + amount);
+
+    //at least for now, it is here
+    if (player->HasClassBloodbound) {
+        player->BloodboundData->BloodEcho += amount; // gained HP
+    }
+    //////////////
+    
+    std::cout << "💖 " << player->GetName() << " healed " << amount
+              << " → " << player->Health << "/" << player->MaxHealth << "\n";
+}
+
+
 void RegisterEffectFunctions_StatAndStatus() {
     std::cout << "📦 Registering StatAndStatus effects...\n";
 
@@ -133,5 +197,12 @@ void RegisterEffectFunctions_StatAndStatus() {
     EffectRegistry::Instance().Register("get_time_counter", GetTimeCounter);
     EffectRegistry::Instance().Register("remove_time_counter", RemoveTimeCounter);
     EffectRegistry::Instance().Register("choose_on_time_counter", ChooseBasedOnTimeCounter);
+
+
+
+    EffectRegistry::Instance().Register("modify_attack", ModifyAttack);
+    EffectRegistry::Instance().Register("modify_maxhealth", ModifyMaxHealth);
+    EffectRegistry::Instance().Register("modify_cost", ModifyCost);
+    EffectRegistry::Instance().Register("heal_hero", HealHero);
 
 }

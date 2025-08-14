@@ -9,6 +9,7 @@
 #include "CardEffectBinding.h"
 #include "Subtype.h"
 #include "EffectRegistry.h"
+#include "TriggerObserver.h"
 
 void DrawCard(void* source, Target target, std::optional<int> value) {
     std::cout << "Hello from DrawCard func\n";
@@ -42,7 +43,13 @@ void DrawCard(void* source, Target target, std::optional<int> value) {
 
         std::cout << "🃏 Drew card: " << card->GetName() << "\n";
 
-        //trigger_observer->Emit("card_drawn", player, card);
+        player->Observer->Emit("card_drawn", {
+            {"player", player},
+            {"card", card.get()},
+            {"source", source}
+        });
+
+
     }
 }
 
