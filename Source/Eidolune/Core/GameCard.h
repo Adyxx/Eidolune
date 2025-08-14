@@ -116,17 +116,4 @@ public:
     std::weak_ptr<GameCard> AttachedTo; // If this card is attached to another
     std::vector<std::shared_ptr<GameCard>> Attachments; // If this card has assets attached
 
-    // Optional helper to check if card is attached
-    bool IsAttached() const {
-        return !AttachedTo.expired();
-    }
-
-    // Optional helper to detach cleanly
-    void Detach() {
-        if (auto host = AttachedTo.lock()) {
-            auto& vec = host->Attachments;
-            vec.erase(std::remove(vec.begin(), vec.end(), shared_from_this()), vec.end());
-        }
-        AttachedTo.reset();
-    }    
 };

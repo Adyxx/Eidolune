@@ -57,19 +57,19 @@ void RegisterTriggerDefinitions() {
     auto onDamageReceivedTrigger = std::make_shared<Trigger>("damage_received");
     registry.RegisterShared("on_damage_received", onDamageReceivedTrigger);
 
-    TriggerInfo onEnterBoard;
-    onEnterBoard.Name = "onEnterBoard";
-    onEnterBoard.Description = "When card enters board.";
-    onEnterBoard.Event = "card_entered";
-    auto onEnterBoardTrigger = std::make_shared<Trigger>("card_entered");
-    registry.RegisterShared("on_enter_board", onEnterBoardTrigger);
+    TriggerInfo onDamageDealt;
+    onDamageDealt.Name = "onDamageDealt";
+    onDamageDealt.Description = "When card deals damage.";
+    onDamageDealt.Event = "damage_dealt";
+    auto onDamageDealtTrigger = std::make_shared<Trigger>("damage_dealt");
+    registry.RegisterShared("on_damage_dealt", onDamageDealtTrigger);
 
     TriggerInfo onCardDrawn;
     onCardDrawn.Name = "onCardDrawn";
     onCardDrawn.Description = "When card is drawn.";
     onCardDrawn.Event = "card_drawn";
     auto onCardDrawnTrigger = std::make_shared<Trigger>("card_drawn");
-    registry.RegisterShared("on_card_drawn", onCardDrawnTrigger);
+    registry.RegisterShared("on_card_draw", onCardDrawnTrigger);
 
 
 

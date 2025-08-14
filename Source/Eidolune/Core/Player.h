@@ -8,6 +8,7 @@
 #include "Types.h"
 #include "Position.h"
 #include <optional>
+#include <unordered_set>
 
 class Card;
 class Deck;
@@ -19,6 +20,14 @@ class TriggerObserver;
 using BoardSlot = std::shared_ptr<GameCard>;
 using BoardRow = std::vector<BoardSlot>;
 
+struct BloodboundState {
+    int BloodEcho = 0;
+    int RegenPerTurn = 0;
+    std::unordered_set<int> UnlockedNodes;
+    std::unordered_map<std::string, int> CostReduction;
+    bool HasSanguineFury = false;
+    bool CanActivateBloodSigils = false;
+};
 
 class Player {
 public:
@@ -68,6 +77,10 @@ public:
 
     int CardsPlayedThisTurn = 0;
     
+    //int BloodEcho = 0;
+    bool HasClassBloodbound = false;
+    std::unique_ptr<BloodboundState> BloodboundData;
+
     int GetTurnNumber() const {
         return TurnCount;
     }

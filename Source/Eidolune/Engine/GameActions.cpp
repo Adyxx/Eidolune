@@ -43,7 +43,13 @@ namespace GameActions {
     void ShowPlayerState(Player* player) {
         std::cout << "\n🧝 Player: " << player->GetName()
                 << " | ❤️ Health: " << player->Health
-                << " | 🔋 Energy: " << player->Energy << "\n";
+                << " | 🔋 Energy: " << player->Energy;
+                
+        if (player->HasClassBloodbound) {
+            std::cout << " | 🩸 BloodEcho: " << player->BloodboundData->BloodEcho;
+        }        
+                
+        std::cout << "\n";
 
         ShowHand(player);
         ShowBoard(player);
@@ -362,22 +368,40 @@ namespace GameActions {
 
                 targetCard->DamageTaken += amount;
 
-                // Death Check
+                // Emit "on_damage_received" for target
+                if (targetCard->Owner) {
+                    targetCard->Owner->Observer->Emit("damage_received", {
+                        {"target", targetCard},
+                        {"amount", &amount},
+                        {"source", source}
+                    });
+                }
+
+                // Emit "on_damage_dealt" for source
+                if (source) {
+                    if (auto* sourceCard = static_cast<GameCard*>(source)) {
+                        if (sourceCard->Owner) {
+                            sourceCard->Owner->Observer->Emit("damage_dealt", {
+                                {"source", sourceCard},
+                                {"amount", &amount},
+                                {"target", targetCard}
+                            });
+                        }
+                    }
+                }
+
+                // Death check
                 if (targetCard->CurrentHealth() <= 0) {
                     std::cout << "💀 " << targetCard->GetName() << " is destroyed!\n";
                     Player* owner = targetCard->Owner;
                     targetCard->Zone = CardZone::GRAVEYARD;
 
-                    owner->Observer->Emit("card_died", { {"source", targetCard},{"owner", owner} });
-
                     if (owner) {
+                        owner->Observer->Emit("card_died", { {"source", targetCard}, {"owner", owner} });
                         owner->Graveyard.push_back(std::shared_ptr<GameCard>(targetCard));
                         owner->RemoveCardFromBoard(targetCard);
                         owner->RemoveAllAurasFromSource(targetCard->Id);
                     }
-
-
-
                 }
                 break;
             }
@@ -386,10 +410,28 @@ namespace GameActions {
                 auto* player = static_cast<Player*>(target.ptr);
                 std::cout << "🟥 Dealing " << amount << " to player: " << player->GetName() << "\n";
 
+                // Emit "on_damage_received" for player
+                if (player) {
+                    player->Observer->Emit("damage_received", {
+                        {"target", player},
+                        {"amount", &amount},
+                        {"source", source}
+                    });
+                }
+
+                if (player->HasClassBloodbound) {
+                    player->BloodboundData->BloodEcho += amount; // lost HP
+                }
+
+                // Emit "on_damage_dealt" for source
                 if (source) {
                     if (auto* sourceCard = static_cast<GameCard*>(source)) {
                         if (sourceCard->Owner) {
-                            sourceCard->Owner->DealtDamageToEnemyHeroThisTurn = true;
+                            sourceCard->Owner->Observer->Emit("damage_dealt", {
+                                {"source", sourceCard},
+                                {"amount", &amount},
+                                {"target", player}
+                            });
                         }
                     }
                 }
@@ -415,7 +457,13 @@ namespace GameActions {
         }
     }
 
-        
+    void ResolveHeal(void* source, Target target, int amount, const std::string& type) {
+        /*
+            FOR LATER... for now just healHero func
+
+                
+        */
+    }
 
     void UseAbility(Player* player, Player* opponent) {
         std::cout << "❌ Ability system not yet implemented.\n";

@@ -50,6 +50,9 @@
 #include "../Definitions/Effects/EffectKeywords.h"
 #include "../Definitions/Effects/EffectStatAndStatus.h"
 
+
+#include "BloodboundClass.h"
+
 namespace EidoluneInit {
 
     void RegisterAll() {
@@ -72,7 +75,9 @@ namespace EidoluneInit {
         RegisterPartnerAbilities();
         RegisterSoloBonus();
 
-        RegisterBloodboundAbilities();
+        //RegisterBloodboundAbilities();
+
+
         RegisterGamblerAbilities();
         RegisterMachinistAbilities();
         RegisterOathboundAbilities();
