@@ -59,5 +59,3 @@ target_include_directories(MainExe PRIVATE
     Source/Eidolune/Deckbuilding
     Source/Eidolune/Uploaders
 )
-
-# cmake -S . -B build -G "Visual Studio 17 2022" -T ClangCL,host=x86 -A win32 -DCMAKE_TOOLCHAIN_FILE=C:/Users/Doma/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows
